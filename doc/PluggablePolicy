@@ -1,0 +1,232 @@
+Pluggable Policy
+================
+
+Until more formal documentation is written, this file will have to
+substitute for documentation for pluggable policy.
+
+
+Pluggable policy means separating distribution-specific policy
+from conary mechanism, so that the policy can be specific to the
+distribution (or even operating system) being built.  The separate
+policy is "plugged into Conary" when building packages.  For testing
+and development purposes, the same mechanism allows overrides as
+well; they essentially come along "for free".
+
+There is internal conary mechanism that happens to use the "policy"
+objects.  This internal "policy" is now separated from the true
+external policy that can be modified.
+
+Conary internal "policy" will continue to live inside conary proper;
+external policy has moved to the new conary-policy package, which
+is separately versioned from conary, lives in its own tarball, and is
+maintained in its own conary-policy:source package.  Policy files will
+be .py files and can have corresponding .pyc/.pyo files.
+
+Conary will load policy in this order:
+    /usr/lib/conary/policy/* (conary-policy)
+    /etc/conary/policy/* (system overrides)
+    ~/.conary/policy/* (user overrides)
+    internal policy
+Policy loaded later will override policy loaded earlier.  The
+overrides will be by the name of the policy class, not the name
+of the file, which will allow fine-grained overrides.
+
+Policy will be loaded as modules.  A single policy module may include
+multiple policies.  All classes that start with an upper-case
+letter and which descend from policy.Policy will be instantiated
+as policy objects.
+
+WARNING:
+Interface versioning is unimplemented at this time.  It is
+important to be able to add more capabilities to policy.py, but
+to use those capabilities in conary-policy, there needs to be some
+way of declaring the new interfaces.  Policies may have to declare
+new features they want beyond baseline, and have some sort of error
+handling that bails out if the required features are not there.
+
+Conary will record the version string of the conary-policy package
+used to build, and will note if any overrides existed, in order to
+make standard builds reproducible, and to flag non-reproducible
+builds.  Conary will not read policy overrides for repository builds.
+
+
+
+Policy is sorted first by "bucket".  This means that most policy
+is insulated from conary internals, and generally cuts down on the
+number of explicit dependencies that have to be listed for any
+single policy.  Some buckets will be only for internal policy,
+others will be for external policy.
+
+Each policy has a "bucket" data element which is initialized to an
+enumeration element from policy.  External buckets, while they can
+use the enumeration mechanism, should instead use subclasses of of
+the policy.Policy class.  policy.py does not export subclasses for
+internal policies, to help avoid them being accidentally used in
+external policy.
+
+policy buckets, in order run:
+    test suite creation (conary internal only):
+        policy.TESTSUITE
+    destdir preparation (conary internal only):
+        policy.DESTDIR_PREPARATION
+    destdir modification:
+        policy.DestdirPolicy, policy.DESTDIR_MODIFICATION
+    packaging (conary internal only):
+        policy.PACKAGE_CREATION
+    packaging modification:
+        policy.PackagePolicy, policy.PACKAGE_MODIFICATION
+    enforcement:
+        policy.EnforcementPolicy, policy.ENFORCEMENT
+    error reporting (conary internal only):
+        policy.ERROR_REPORTING
+
+
+
+dependency types
+policy Y may declare a dependency on policy X, with semantics:
+    policy X must exist (absolute):
+        no ordering constraints between policies Y and X
+        policy Y must run before policy X
+        policy Y must run after policy X
+    if policy X exists (conditional):
+        policy Y must run before policy X
+        policy Y must run after policy X
+
+dependency constraints:
+    if any dependency ordering loop exists, it is an error
+    no policy can depend on running after a policy in a previous bucket
+
+Note that if Y requires X, and X is in an earlier bucket, there
+is an implicit statement that Y must run after X.  However, policy
+dependencies should not be written to implicitly depend on bucket
+order.  Instead, any actual ordering depenedencies should be
+explicitly stated.
+
+
+    requires = (
+        ("OtherPolicyName1", policy.REQUIRED),
+            # OtherPolicyName1 SHALL exist; no ordering constraints
+        ("OtherPolicyName2", policy.REQUIRED_PRIOR),
+            # OtherPolicyName2 SHALL be run BEFORE this policy
+        ("OtherPolicyName3", policy.REQUIRED_SUBSEQUENT),
+            # OtherPolicyName3 SHALL be run AFTER this policy
+        ("OtherPolicyName4", policy.CONDITIONAL_PRIOR),
+            # OtherPolicyName4 SHALL be run BEFORE this policy if it exists
+        ("OtherPolicyName5", policy.CONDITIONAL_SUBSEQUENT),
+            # OtherPolicyName5 SHALL be run AFTER this policy if it exists
+    )
+
+    REQUIRED = 1 << 0
+    ORDERED  = 1 << 1
+    PRIOR    = 1 << 2
+
+
+Ordering:
+    Stable ordering is important for reproducibility and log comparison
+    policy will be sorted first into buckets
+        within buckets, policies will be sorted using a total ordering
+            dependencies must be satisfied
+            within those constraints, alphabetical order by name
+        any constraint failures will be an unrecoverable error
+
+
+test suite creation
+    TestSuiteLinks
+    TestSuiteFiles
+Note that these do not work well with --resume policy, so they
+are not included when using --resume.  Test suite inclusion is
+primarily important when building into a repository anyway, and we
+can't --resume repository builds, so this is not a failure.
+
+destdir preparation
+    FixDirModes
+
+destdir modification
+    AutoDoc
+    RemoveNonPackageFiles
+    FixupMultilibPaths
+    ExecutableLibraries
+    ReadableDocs
+    Strip
+    NormalizeLibrarySymlinks
+    NormalizeCompression
+    NormalizeManPages
+    NormalizeInfoPages
+    NormalizeInitscriptLocation
+    NormalizeAppDefaults
+    NormalizeInterpreterPaths
+    NormalizePamConfig
+    RelativeSymlinks
+
+
+packaging policy (related to dealing with specific Conary features):
+    Config
+    ComponentSpec
+    PackageSpec
+    InitialContents
+    Transient
+    TagDescription
+    TagHandler
+    TagSpec
+    MakeDevices
+    AddModes (changed to addModes because it is for internal use only)
+    LinkType
+    LinkCount
+    ExcludeDirectories
+    ByDefault
+    Ownership
+    UtilizeUser
+    UtilizeGroup
+    ComponentRequires
+    ComponentProvides
+    Provides
+    Requires
+    Flavor
+
+Note that this includes enforcement of things that conary requires,
+which sometimes involves mucking about in packaging internals.
+
+packaging modification policy:
+    SharedLibrary
+    ParseManifest
+
+enforcement policy (some need converted from destdir enf)
+    EnforceConfigLogBuildRequirements
+    NonBinariesInBindirs
+    FilesInMandir
+    BadInterpreterPaths
+    BadFilenames
+    NonUTF8Filenames
+    NonMultilibComponent
+    NonMultilibDirectories
+    ImproperlyShared
+    CheckDesktopFiles
+    CheckSonames
+    RequireChkconfig
+    CheckDestDir
+    DanglingSymlinks
+    WarnWriteable
+    WorldWriteableExecutables
+    FilesForDirectories
+    ObsoletePaths
+    IgnoredSetuid
+    EnforceSonameBuildRequirements
+    EnforcePythonBuildRequirements
+    EnforceJavaBuildRequirements
+    EnforceCILBuildRequirements
+    EnforcePerlBuildRequirements
+
+Most enforcing policy should change from being destdir enforcement to
+packaging enforcement by setting filetree = policy.PACKAGE
+
+For convenience, this bucket also includes all needed stubs:
+    InstallBucket
+    User
+    Group
+    SupplementalGroup
+    EtcConfig
+That way, the stubs can be changed from warnings to errors in
+development trees while remaining warnings in stable trees.
+
+error reporting (conary internal only)
+    reportErrors (initial lower because it is for internal use only)
