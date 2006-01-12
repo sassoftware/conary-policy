@@ -70,7 +70,7 @@ class DanglingSymlinks(policy.PackagePolicy):
 	for targetitem, requirement in self.targetexceptions:
 	    filterargs = self.filterExpression(targetitem)
 	    self.targetFilters.append((filter.Filter(*filterargs), requirement))
-	policy.EnforcementPolicy.doProcess(self, recipe)
+	policy.PackagePolicy.doProcess(self, recipe)
 
     def doFile(self, path):
 	d = self.macros.destdir
