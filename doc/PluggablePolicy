@@ -16,7 +16,7 @@ There is internal conary mechanism that happens to use the "policy"
 objects.  This internal "policy" is now separated from the true
 external policy that can be modified.
 
-Conary internal "policy" will continue to live inside conary proper;
+Conary internal "policy" continues to live inside conary proper;
 external policy has moved to the new conary-policy package, which
 is separately versioned from conary, lives in its own tarball, and is
 maintained in its own conary-policy:source package.  Policy files will
@@ -47,8 +47,8 @@ handling that bails out if the required features are not there.
 Conary will record the version string of the conary-policy package
 used to build, and will note if any overrides existed, in order to
 make standard builds reproducible, and to flag non-reproducible
-builds.  Conary will not read policy overrides for repository builds.
-
+builds.  Conary will not build into the repository if it loads
+any policy modules that aren't in the Conary database.
 
 
 Policy is sorted first by "bucket".  This means that most policy
@@ -116,10 +116,6 @@ explicitly stated.
             # OtherPolicyName5 SHALL be run AFTER this policy if it exists
     )
 
-    REQUIRED = 1 << 0
-    ORDERED  = 1 << 1
-    PRIOR    = 1 << 2
-
 
 Ordering:
     Stable ordering is important for reproducibility and log comparison
@@ -169,7 +165,7 @@ packaging policy (related to dealing with specific Conary features):
     TagHandler
     TagSpec
     MakeDevices
-    AddModes (changed to addModes because it is for internal use only)
+    AddModes (changed to setModes because it is for internal use only)
     LinkType
     LinkCount
     ExcludeDirectories
@@ -216,8 +212,9 @@ enforcement policy (some need converted from destdir enf)
     EnforceCILBuildRequirements
     EnforcePerlBuildRequirements
 
-Most enforcing policy should change from being destdir enforcement to
-packaging enforcement by setting filetree = policy.PACKAGE
+Many enforcing policies should change from being destdir enforcement to
+packaging enforcement by setting filetree = policy.PACKAGE; there are
+still policies that should be converted.
 
 For convenience, this bucket also includes all needed stubs:
     InstallBucket
