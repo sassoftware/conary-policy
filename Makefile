@@ -17,6 +17,8 @@ NAMEVER=conary-policy-$(VERSION)
 DESTDIR=/
 POLICYDIR=/usr/lib/conary/policy/
 
+all:
+
 install:
 	mkdir -p $(DESTDIR)$(POLICYDIR)
 	install -m 644 policy/*.py $(DESTDIR)$(POLICYDIR)
