@@ -1,5 +1,7 @@
-Changes in 0.90 (initial version):
-  o Split policy out from Conary
-  o Note that conary-policy versions do not necessarily track Conary versions
+Changes in 0.90.1:
   o Added NormalizeInitscriptContents policy to fix bad paths in
     initscripts and add necessary dependencies on initscripts:runtime
+
+Changes in 0.90.0 (initial version):
+  o Split policy out from Conary
+  o Note that conary-policy versions do not necessarily track Conary versions
