@@ -296,6 +296,35 @@ class NormalizeInitscriptLocation(policy.DestdirPolicy):
                     self.macros['destdir'] + target)
 
 
+class NormalizeInitscriptContents(policy.DestdirPolicy):
+    """
+    Fixes common errors within init scripts, and adds some dependencies
+    if needed.
+    """
+    requires = (
+        # for invariantsubtree to be sufficient
+        ('NormalizeInitscriptLocation', policy.REQUIRED_PRIOR),
+        # for adding requirements
+        ('Requires', policy.REQUIRED_SUBSEQUENT),
+    )
+    invariantsubtrees = [ '%(initdir)s' ]
+
+    def doFile(self, path):
+        m = self.recipe.macros
+        fullpath = '/'.join((m.destdir, path))
+        contents = file(fullpath).read()
+        modified = False
+        if '/etc/rc.d/init.d' in contents:
+            contents = contents.replace('/etc/rc.d/init.d', m.initdir)
+            modified = True
+
+        if '%(initdir)s/functions' %m in contents:
+            self.recipe.Requires('initscripts:runtime', util.literalRegex(path))
+
+        if modified:
+            file(fullpath, 'w').write(contents)
+
+
 class NormalizeAppDefaults(policy.DestdirPolicy):
     """
     There is some disagreement about where to put X app-defaults
