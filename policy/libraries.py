@@ -83,7 +83,7 @@ class SharedLibrary(policy.PackagePolicy):
 	if os.path.isfile(fullpath) and util.isregular(fullpath):
 	    m = self.recipe.magic[filename]
 	    if m and m.name == 'ELF' and 'soname' in m.contents:
-                self.dbg(filename)
+                self.info(filename)
 		self.recipe.autopkg.pathMap[filename].tags.set("shlib")
 
 
@@ -271,7 +271,7 @@ class CheckSonames(policy.EnforcementPolicy):
 
 	if m and m.name == 'ELF' and 'soname' in m.contents:
 	    if so == linkpath:
-                self.dbg('%s is final path, soname is %s;'
+                self.info('%s is final path, soname is %s;'
                     ' soname usually is symlink to specific implementation',
                     linkpath, m.contents['soname'])
 	    soname = util.normpath(util.joinPaths(

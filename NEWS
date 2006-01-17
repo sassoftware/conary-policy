@@ -1,6 +1,7 @@
 Changes in 0.90.1:
   o Added NormalizeInitscriptContents policy to fix bad paths in
     initscripts and add necessary dependencies on initscripts:runtime
+  o Changed from debug to info level logging
 
 Changes in 0.90.0 (initial version):
   o Split policy out from Conary

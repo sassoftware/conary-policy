@@ -99,11 +99,11 @@ class DanglingSymlinks(policy.PackagePolicy):
 		for targetFilter, requirement in self.targetFilters:
 		    if targetFilter.match(abscontents):
 			# contents are an exception
-                        self.dbg('allowing special dangling symlink %s -> %s',
-                                 path, contents)
+                        self.info('allowing special dangling symlink %s -> %s',
+                                  path, contents)
                         if requirement:
-                            self.dbg('automatically adding requirement'
-                                     ' %s for symlink %s', requirement, path)
+                            self.info('automatically adding requirement'
+                                      ' %s for symlink %s', requirement, path)
                             # Requires has already run, touch this up
                             ap = self.recipe.autopkg
                             pkg = ap.componentMap[path]

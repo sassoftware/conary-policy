@@ -166,9 +166,9 @@ class NormalizeManPages(policy.DestdirPolicy):
                             targetpath = os.sep.join((dirname, matchlist[l-1]))
                             if (os.path.exists(targetpath) and
                                 os.path.isfile(targetpath)):
-                                self.dbg('replacing %s (%s) with symlink %s',
-                                         name, match.group(0),
-                                         os.path.basename(match.group(1)))
+                                self.info('replacing %s (%s) with symlink %s',
+                                          name, match.group(0),
+                                          os.path.basename(match.group(1)))
                                 os.remove(path)
                                 os.symlink(os.path.basename(match.group(1)),
                                            path)
@@ -181,7 +181,7 @@ class NormalizeManPages(policy.DestdirPolicy):
                                                   matchlist[l-1])
                             targetpath = os.sep.join((dirname, target))
                             if os.path.exists(targetpath):
-                                self.dbg('replacing %s (%s) with symlink %s',
+                                self.info('replacing %s (%s) with symlink %s',
                                           name, match.group(0), target)
                                 os.remove(path)
                                 os.symlink(target, path)
