@@ -99,14 +99,16 @@ class IgnoredSetuid(policy.EnforcementPolicy):
     be packaged without setuid/setgid bits set.  This might be
     a bug, so flag it with a warning.
     """
-    def doFile(self, file):
-	fullpath = self.macros.destdir + file
+    def doFile(self, path):
+	fullpath = self.macros.destdir + path
 	mode = os.lstat(fullpath)[stat.ST_MODE]
-	if mode & 06000 and \
-	   not self.recipe.autopkg.pathMap[file].inode.perms() & 06000:
+        pathMap = self.recipe.autopkg.pathMap
+        if path not in pathMap:
+            return
+	if mode & 06000 and not pathMap[path].inode.perms() & 06000:
 	    if stat.S_ISDIR(mode):
 		type = "directory"
 	    else:
 		type = "file"
             self.warn('%s %s has unpackaged set{u,g}id mode 0%o in filesystem',
-                      type, file, mode&06777)
+                      type, path, mode&06777)

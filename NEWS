@@ -1,3 +1,7 @@
+Changes in 0.90.2:
+  o Made the IgnoredSetuid policy work after ExcludeDirectories has
+    been run.
+
 Changes in 0.90.1:
   o Added NormalizeInitscriptContents policy to fix bad paths in
     initscripts and add necessary dependencies on initscripts:runtime
