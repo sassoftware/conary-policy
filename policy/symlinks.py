@@ -86,15 +86,28 @@ class DanglingSymlinks(policy.PackagePolicy):
 	    abscontents = util.joinPaths(os.path.dirname(path), contents)
             # now resolve any intermediate symlinks
             abscontents = os.path.realpath(d+abscontents)[l:]
-	    if abscontents in recipe.autopkg.pathMap:
-		componentMap = recipe.autopkg.componentMap
+            ap = recipe.autopkg
+	    if abscontents in ap.pathMap:
+		componentMap = ap.componentMap
 		if componentMap[abscontents] != componentMap[path] and \
 		   not path.endswith('.so') and \
 		   not componentMap[path].getName().endswith(':test'):
 		    # warn about suspicious cross-component symlink
-                    self.warn('symlink %s points from package %s to %s',
-                              path, componentMap[path].getName(),
-                              componentMap[abscontents].getName())
+                    fromPkg = ap.componentMap[path]
+                    targetPkg = ap.componentMap[abscontents]
+
+                    found = False
+                    for depClass, dep in fromPkg.requires.iterDeps():
+                        d = deps.DependencySet()
+                        d.addDep(depClass, dep)
+                        if targetPkg.provides.satisfies(d):
+                            found = True
+                            break
+
+                    if not found:
+                        self.warn('symlink %s points from package %s to %s',
+                                  path, componentMap[path].getName(),
+                                  componentMap[abscontents].getName())
 	    else:
 		for targetFilter, requirement in self.targetFilters:
 		    if targetFilter.match(abscontents):
@@ -105,7 +118,6 @@ class DanglingSymlinks(policy.PackagePolicy):
                             self.info('automatically adding requirement'
                                       ' %s for symlink %s', requirement, path)
                             # Requires has already run, touch this up
-                            ap = self.recipe.autopkg
                             pkg = ap.componentMap[path]
                             if path not in pkg.requiresMap:
                                 pkg.requiresMap[path] = deps.DependencySet()

@@ -1,6 +1,8 @@
 Changes in 0.90.2:
   o Made the IgnoredSetuid policy work after ExcludeDirectories has
     been run.
+  o DanglingSymlinks no longer complains if you add a symlink between 
+    components where the source component requires the target
 
 Changes in 0.90.1:
   o Added NormalizeInitscriptContents policy to fix bad paths in
