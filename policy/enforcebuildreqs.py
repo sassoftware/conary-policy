@@ -250,7 +250,7 @@ class EnforceConfigLogBuildRequirements(policy.EnforcementPolicy):
     or with
     C{r.EnforceConfigLogBuildRequirements(exceptions='I{pkg}:I{comp}')}.
     """
-    rootdir = '%(builddir)s'
+    filetree = policy.BUILDDIR
     invariantinclusions = [ (r'.*/config\.log', 0400, stat.S_IFDIR), ]
     # list of regular expressions (using macros) that cause an
     # entry to be ignored unless a related strings is found in
@@ -324,6 +324,8 @@ class EnforceConfigLogBuildRequirements(policy.EnforcementPolicy):
         self.foundPaths.update(foundPaths)
 
     def postProcess(self):
+        if not self.foundPaths:
+            return
         # first, get all the trove names in the transitive buildRequires
         # runtime dependency closure
         db = database.Database(self.recipe.cfg.root, self.recipe.cfg.dbPath)

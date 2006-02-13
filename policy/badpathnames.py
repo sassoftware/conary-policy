@@ -231,3 +231,19 @@ class ObsoletePaths(policy.EnforcementPolicy):
                 # the filesystem only log a warning.
                 self.error('Path %s should not exist, use %s instead',
                            path, self.candidates[path])
+
+
+class PythonEggs(policy.EnforcementPolicy):
+    """
+    Python .egg files clash with package management; they should
+    be built with the C{--single-version-externally-managed} command
+    line argument, in which case the .egg files will not be created.
+    """
+    invariantinclusions = [
+        '.*/python[^/]*/site-packages/.*\.egg',
+    ]
+
+    def doFile(self, path):
+        self.error('Python .egg %s exists; use'
+                   ' --single-version-externally-managed argument'
+                   ' to setup.py or use r.PythonSetup()', path)
