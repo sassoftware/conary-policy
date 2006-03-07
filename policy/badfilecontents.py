@@ -126,17 +126,18 @@ class CheckDesktopFiles(policy.EnforcementPolicy):
     example) an icon is provided somehow, directly or indirectly, by a
     runtime requirement of this package.
 
-    C{CheckDesktopFiles} looks for icon files in C{%(destdir)s/%(datadir)s}
-    and C{%(datadir)s/icons}; you can add additional directories (which
-    will be searched both within C{%(destdir)s} and relative to C{/})
-    with C{CheckDesktopFiles(iconDirs='I{/path/to/dir}')} or
-    C{CheckDesktopFiles(iconDirs=('I{/path/to/dir1}', 'I{/path/to/dir2}'))}
+    C{CheckDesktopFiles} looks for icon files in C{%(destdir)s/%(datadir)s},
+    C{%(datadir)s/icons}, and C{%(datadir)s/pixmaps}; you can add additional
+    directories (which will be searched both within C{%(destdir)s} and 
+    relative to C{/}) with C{CheckDesktopFiles(iconDirs='I{/path/to/dir}')} 
+    or C{CheckDesktopFiles(iconDirs=('I{/path/to/dir1}', 
+    'I{/path/to/dir2}'))}
     """
     invariantsubtrees = [ '%(datadir)s/applications/' ]
     invariantinclusions = [ r'.*\.desktop' ]
 
     def __init__(self, *args, **keywords):
-        self.iconDirs = [ '%(datadir)s/icons/' ]
+        self.iconDirs = [ '%(datadir)s/icons/', '%(datadir)s/pixmaps/' ]
 	policy.EnforcementPolicy.__init__(self, *args, **keywords)
 
     def updateArgs(self, *args, **keywords):
