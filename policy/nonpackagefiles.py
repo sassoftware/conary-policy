@@ -18,9 +18,28 @@ from conary.build import policy
 
 class RemoveNonPackageFiles(policy.DestdirPolicy):
     """
-    Remove classes of files that normally should not be packaged;
-    C{r.RemoveNonPackageFiles(exceptions=I{filterexpression})}
-    allows one of these files to be included in a package.
+    NAME
+    ====
+
+    B{C{r.RemoveNonPackageFiles()}} - Remove classes of files that should not
+    be packaged
+
+    SYNOPSIS
+    ========
+
+    C{r.RemoveNonPackageFiles([I{filterexp}] I{exceptions=filterexp}])}
+
+    DESCRIPTION
+    ===========
+
+    The pluggable policy class C{r.RemoveNonPackageFiles()} is typically
+    called from within a Conary recipe to remove classes of files that 
+    normally should not be packaged
+
+    EXAMPLES
+    ========
+    
+    FIXME NEED EXAMPLE
     """
     invariantinclusions = [
         r'\.la$',

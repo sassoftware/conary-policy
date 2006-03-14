@@ -21,9 +21,32 @@ from conary.build import policy
 
 class NonBinariesInBindirs(policy.EnforcementPolicy):
     """
-    Directories that are specifically for binaries should have only
-    files that have some executable bit set:
-    C{r.NonBinariesInBindirs(exceptions=I{filterexp})}
+    NAME
+    ====
+
+    B{C{r.NonBinariesInBindirs()}} - Enforces executable bits on files in
+    binary directories
+    
+    SYNOPSIS
+    ========
+
+    C{r.NonBinariesInBindirs([I{filterexp}] || [I{exceptions=filterexp}])}
+
+    DESCRIPTION
+    ===========
+
+    The pluggable policy class C{r.NonBinariesInBindirs()} is typically called
+    from within a Conary recipe to ensure files residing in directories which
+    are explicitly for binary files have some executable bit set.
+    
+    EXAMPLES
+    ========
+
+    C{r.NonBinariesInBindirs(exceptions='.*')}
+    
+    The above example uses C{r.NonBinariesInBindirs} to except all files in
+    the destination directory from the requirement to have executable bits set on
+    them.
     """
     invariantexceptions = [ ('.*', stat.S_IFDIR) ]
     invariantsubtrees = [
@@ -56,9 +79,31 @@ class NonBinariesInBindirs(policy.EnforcementPolicy):
 
 class FilesInMandir(policy.EnforcementPolicy):
     """
-    The C{%(mandir)s} directory should normally have only files in it;
-    the main cause of files in C{%(mandir)s} is confusion in packages
-    about whether "mandir" means /usr/share/man or /usr/share/man/man<n>.
+    NAME
+    ====
+
+    B{C{r.FilesInMandir()}} - Enforces executable bits on files in
+    binary directories
+    
+    SYNOPSIS
+    ========
+
+    C{r.FilesInMandir([I{filterexp}] || [I{exceptions=filterexp}])}
+
+    DESCRIPTION
+    ===========
+
+    The pluggable policy class C{r.FilesInMandir()} is typically called
+    from within a Conary recipe to ensure system manual pages directories 
+    contain only other directories, and not files.
+    
+    The main cause of files in C{%(mandir)s} is confusion in packages
+    about whether C{%(mandir)s} means /usr/share/man or /usr/share/man/man.
+    
+    EXAMPLES
+    ========
+
+    FIXME NEED EXAMPLE
     """
     invariantsubtrees = [
         '%(mandir)s',
@@ -76,8 +121,29 @@ class FilesInMandir(policy.EnforcementPolicy):
 
 class BadInterpreterPaths(policy.EnforcementPolicy):
     """
-    Interpreters must not use relative paths.  There should be no
-    exceptions outside of %(thisdocdir)s.
+    NAME
+    ====
+
+    B{C{r.BadInterpreterPaths()}} - Enforces absolute interpreter paths
+    
+    SYNOPSIS
+    ========
+
+    C{r.BadInterpreterPaths([I{filterexp}] || [I{exceptions=filterexp}])}
+
+    DESCRIPTION
+    ===========
+
+    The pluggable policy class C{r.BadInterpreterPaths()} is typically called
+    from within a Conary recipe to ensure all paths referring to an
+    interpreter instance are not relative, but are instead, absolute paths.
+    
+    No exceptions to this policy should occur outside of C{%(thisdocdir)s}.
+    
+    EXAMPLES
+    ========
+
+    FIXME NEED EXAMPLE
     """
     invariantexceptions = [ '%(thisdocdir.literalRegex)s/', ]
 
@@ -102,9 +168,34 @@ class BadInterpreterPaths(policy.EnforcementPolicy):
 
 class ImproperlyShared(policy.EnforcementPolicy):
     """
-    The C{%(datadir)s} directory (normally /usr/share) is intended for
-    data that can be shared between architectures; therefore, no
-    ELF files should be there.
+    NAME
+    ====
+
+    B{C{r.ImproperlyShared()}} - Enforces shared data directory content
+    
+    SYNOPSIS
+    ========
+
+    C{r.ImproperlyShared([I{filterexp}] || [I{exceptions=filterexp}])}
+
+    DESCRIPTION
+    ===========
+
+    The pluggable policy class C{r.ImproperlyShared()} is typically called
+    from within a Conary recipe to ensure the C{%(datadir)s} directory,
+    which is normally C{/usr/share} contains data that can be shared between
+    architectures.
+    
+    Files which are architecture-specific, such as ELF files, should not 
+    reside in C{%(datadir)s}..
+    
+    EXAMPLES
+    ========
+
+    C{r.ImproperlyShared(exceptions='%(datadir)s/.*')}
+
+    The above example excepts the contents of C{%(datadir)s} from the policy,
+    allowing it to contain architecture-dependent data.
     """
     invariantsubtrees = [ '/usr/share/' ]
 
@@ -121,17 +212,40 @@ class ImproperlyShared(policy.EnforcementPolicy):
 
 class CheckDesktopFiles(policy.EnforcementPolicy):
     """
-    Warns about possible errors in desktop files, such as missing icon
-    files; C{r.CheckDesktopFiles(exceptions=I{filterexp}} if (for
-    example) an icon is provided somehow, directly or indirectly, by a
-    runtime requirement of this package.
+    NAME
+    ====
 
-    C{CheckDesktopFiles} looks for icon files in C{%(destdir)s/%(datadir)s},
-    C{%(datadir)s/icons}, and C{%(datadir)s/pixmaps}; you can add additional
-    directories (which will be searched both within C{%(destdir)s} and 
-    relative to C{/}) with C{CheckDesktopFiles(iconDirs='I{/path/to/dir}')} 
-    or C{CheckDesktopFiles(iconDirs=('I{/path/to/dir1}', 
-    'I{/path/to/dir2}'))}
+    B{C{r.CheckDesktopFiles()}} - Warns about possible errors in desktop files
+    
+    SYNOPSIS
+    ========
+
+    C{r.CheckDesktopFiles([I{filterexp}] || [I{exceptions=filterexp}])}
+
+    DESCRIPTION
+    ===========
+
+    The pluggable policy class C{r.CheckDesktopFiles()} is typically called
+    from within a Conary recipe to warn about possible errors in desktop
+    files, such as missing icon files.
+    
+    
+    Use C{r.CheckDesktopFiles} to search for desktop icon files in the
+    directories C{%(destdir)s/%(datadir)s} and C{%(datadir)s/icons}.
+    
+    You can add additional directories (which will be searched both within
+    C{%(destdir)s} and relative to C{/}) with
+    C{CheckDesktopFiles(iconDirs='I{/path/to/dir}')} or
+    C{CheckDesktopFiles(iconDirs=('I{/path/to/dir1}', 'I{/path/to/dir2}'))}
+    
+    EXAMPLES
+    ========
+
+    C{r.CheckDesktopFiles(exceptions='%(datadir)s/applications/')}
+    
+    The example usage of C{r.CheckDesktopFiles} above specifies that an
+    element of the package provides an icon in some way through the directory
+    named in the exceptions filter expression (C{%(datadir)s/applications}).
     """
     invariantsubtrees = [ '%(datadir)s/applications/' ]
     invariantinclusions = [ r'.*\.desktop' ]
@@ -189,9 +303,33 @@ class CheckDesktopFiles(policy.EnforcementPolicy):
 
 class RequireChkconfig(policy.EnforcementPolicy):
     """
-    Require that all initscripts provide chkconfig information; the only
-    exceptions should be core initscripts like reboot:
-    C{r.RequireChkconfig(exceptions=I{filterexp})}
+    NAME
+    ====
+
+    B{C{r.RequireChkconfig()}} - Require all initscripts provide chkconfig 
+    information
+    
+    SYNOPSIS
+    ========
+
+    C{r.RequireChkconfig([I{filterexp}] || [I{exceptions=filterexp}])}
+
+    DESCRIPTION
+    ===========
+
+    The pluggable policy class C{r.RequireChkconfig()} is typically called
+    from within a Conary recipe to require that all initscripts provide
+    chkconfig information.
+    
+    The only exceptions should be core initscripts, such as reboot
+    
+    EXAMPLES
+    ========
+
+    C{r.RequireChkconfig(exceptions='%(initdir)s/halt')}
+    
+    The above example invocation of C{r.RequireChkconfig()} specifies a core
+    initiscript, C{%(initdir)s/halt} as an exception to the policy.
     """
     invariantsubtrees = [ '%(initdir)s' ]
     def doFile(self, path):

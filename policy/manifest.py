@@ -20,19 +20,45 @@ from conary.build import policy
 
 class ParseManifest(policy.PackagePolicy):
     """
-    Parses a file containing a manifest intended for RPM:
-    C{r.ParseManifest(I{filename})}
+    NAME
+    ====
+
+    B{C{r.ParseManifest()}} - Parses a file containing a manifest intended for
+    RPM
+
+    SYNOPSIS
+    ========
+
+    C{r.ParseManifest([I{filterexp}] I{exceptions=filterexp}])}
+
+    DESCRIPTION
+    ===========
+
+    The pluggable policy class C{r.ParseManifest()} is typically
+    called from within a Conary recipe to parse a file containing a manifest
+    intended for RPM
     
-    In the manifest, it finds the information that can't be represented by
-    pure filesystem status with a non-root built: device files (C{%dev})
-    and permissions (C{%attr}); it ignores directory ownership (C{%dir})
-    because Conary handled directories very differently from RPM,
-    and C{%defattr} because Conary's default ownership is root:root
-    and because permissions (except for setuid and setgid files) are
-    collected from the filesystem.  It translates each manifest line
-    which it handles into the related Conary construct.
+    In the manifest, C{r.r.ParseManifest()} finds the information that cannot
+    be represented by pure filesystem status with non-root built device files,
+    (C{%dev}) and permissions (C{%attr}).
+    
+    It ignores directory ownership (C{%dir}) because Conary handles 
+    directories very differently from RPM.
+    
+    The class C{r.ParseManifest) also ignores C{%defattr} because Conary's 
+    default ownership is C{root:root}, and because permissions
+    (except for setuid and setgid files) are collected from the filesystem.
+    
+    C{r.ParseManifest} translates each parsed manifest line, into the related
+    Conary construct.
 
     Warning: tested only with MAKEDEV output so far.
+
+
+    EXAMPLES
+    ========
+    
+    FIXME NEED EXAMPLE
     """
 
     requires = (

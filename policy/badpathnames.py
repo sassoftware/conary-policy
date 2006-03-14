@@ -22,8 +22,30 @@ from conary.build import policy
 
 class BadFilenames(policy.EnforcementPolicy):
     """
-    Filenames must not contain newlines because filenames are separated
-    by newlines in several conary protocols.  No exceptions are allowed.
+    NAME
+    ====
+
+    B{C{r.BadFilenames()}} - Require absence of newlines in filenames
+    information
+    
+    SYNOPSIS
+    ========
+
+    C{r.BadFilenames([I{filterexp}])}
+
+    DESCRIPTION
+    ===========
+
+    The pluggable policy class C{r.BadFilenames()} is typically called
+    from within a Conary recipe to require filenames must not contain newlines
+    as filenames are separated by newlines in several conary protocols.
+    
+    No exceptions are allowed.
+    
+    EXAMPLES
+    ========
+    
+    FIXME NEED EXAMPLE
     """
     def test(self):
         assert(not self.exceptions)
@@ -35,8 +57,28 @@ class BadFilenames(policy.EnforcementPolicy):
 
 class NonUTF8Filenames(policy.EnforcementPolicy):
     """
-    Filenames should be UTF-8 encoded because that is the standard system
-    encoding.
+    NAME
+    ====
+
+    B{C{r.NonUTF8Filenames()}} - Require absence of newlines in filenames
+    information
+    
+    SYNOPSIS
+    ========
+
+    C{r.NonUTF8Filenames([I{filterexp}])}
+
+    DESCRIPTION
+    ===========
+
+    The pluggable policy class C{r.NonUTF8Filenames()} is typically called
+    from within a Conary recipe to require filenames be encoded as UTF-8 as
+    that is the standard filename encoding system.
+    
+    EXAMPLES
+    ========
+    
+    FIXME NEED EXAMPLE
     """
     def doFile(self, path):
         try:
@@ -47,11 +89,32 @@ class NonUTF8Filenames(policy.EnforcementPolicy):
 
 class NonMultilibComponent(policy.EnforcementPolicy):
     """
-    Python and Perl components should generally be under /usr/lib, unless
+    NAME
+    ====
+
+    B{C{r.NonMultilibComponent()}} - Enforces multilib support
+    information
+    
+    SYNOPSIS
+    ========
+
+    C{r.NonMultilibComponent([I{filterexp}])}
+
+    DESCRIPTION
+    ===========
+
+    The pluggable policy class C{r.NonMultilibComponent()} is typically called
+    from within a Conary recipe to enforce multilib support so that both
+    32-bit, and 64-bit components may be installed for Python, and Perl.
+    
+    Python and Perl components should generally be under C{/usr/lib}, unless
     they have binaries and are built on a 64-bit platform, in which case
-    they should have no files under /usr/lib, so that both the 32-bit abd
-    64-bit components can be installed at the same time (that is, they
-    should have multilib support).
+    they should have no files under C{/usr/lib}.
+    
+    EXAMPLES
+    ========
+    
+    FIXME NEED EXAMPLE
     """
     invariantsubtrees = [
         '%(libdir)s/',
@@ -100,8 +163,31 @@ class NonMultilibComponent(policy.EnforcementPolicy):
 
 class NonMultilibDirectories(policy.EnforcementPolicy):
     """
-    Troves for 32-bit platforms should not normally contain
-    directories named "lib64".
+    NAME
+    ====
+
+    B{C{r.NonMultilibDirectories()}} - Enforces appropriate platform directory
+    names
+    
+    SYNOPSIS
+    ========
+
+    C{r.NonMultilibDirectories([I{filterexp}])}
+
+    DESCRIPTION
+    ===========
+
+    The pluggable policy class C{r.NonMultilibDirectories()} is typically called
+    from within a Conary recipe to enforce proper directories, relavent to
+    platform. 
+    
+    Troves for 32-bit platforms should not normally contain directories named
+    "C{lib64}".
+    
+    EXAMPLES
+    ========
+    
+    FIXME NEED EXAMPLE
     """
     invariantinclusions = [ ( '.*/lib64', stat.S_IFDIR ), ]
 
@@ -118,9 +204,34 @@ class NonMultilibDirectories(policy.EnforcementPolicy):
 
 class CheckDestDir(policy.EnforcementPolicy):
     """
-    Look for the C{%(destdir)s} path in file paths and symlink contents;
-    it should not be there.  Does not check the contents of files, though
-    files also should not contain C{%(destdir)s}.
+    NAME
+    ====
+
+    B{C{r.CheckDestDir()}} - Searches for destination directory in file paths
+    and symbolic links contents
+    
+    SYNOPSIS
+    ========
+
+    C{r.CheckDestDir([I{filterexp}])}
+
+    DESCRIPTION
+    ===========
+
+    The pluggable policy class C{r.CheckDestDir()} is typically called
+    from within a Conary recipe to search for the C{%(destdir)s} path in file
+    paths and symbolic link contents. 
+    
+    The C{%(destdir)s} should not be contained within file paths and symbolic
+    link contents.
+    
+    Though files should also not contain C{%(destdir)s}, C{r.CheckDestDir}
+    does not search inside files.
+    
+    EXAMPLES
+    ========
+    
+    FIXME NEED EXAMPLE
     """
     def doFile(self, file):
 	d = self.macros.destdir
@@ -152,8 +263,32 @@ class CheckDestDir(policy.EnforcementPolicy):
 
 class FilesForDirectories(policy.EnforcementPolicy):
     """
-    Warn about files where we expect directories, commonly caused
-    by bad C{r.Install()} invocations.  Does not honor exceptions!
+    NAME
+    ====
+
+    B{C{r.FilesForDirectories()}} - Warn about files where directories are
+    expected
+    
+    SYNOPSIS
+    ========
+
+    C{r.FilesForDirectories([I{filterexp}])}
+
+    DESCRIPTION
+    ===========
+
+    The pluggable policy class C{r.FilesForDirectories()} is typically called
+    from within a Conary recipe to warn about files where directories are
+    expected.
+    
+    This condition is normally caused by bad C{r.Install()} invocations.
+    
+    This policy does not honor exceptions.
+    
+    EXAMPLES
+    ========
+    
+    FIXME NEED EXAMPLE
     """
     # This list represents an attempt to pick the most likely directories
     # to make these mistakes with: directories potentially inhabited by
@@ -207,8 +342,29 @@ class FilesForDirectories(policy.EnforcementPolicy):
 
 class ObsoletePaths(policy.EnforcementPolicy):
     """
-    Warn about paths that used to be considered correct, but now are
-    obsolete.  Does not honor exceptions!
+    NAME
+    ====
+
+    B{C{r.ObsoletePaths()}} - Warn about paths considered obsolete
+    
+    SYNOPSIS
+    ========
+
+    C{r.ObsoletePaths([I{filterexp}])}
+
+    DESCRIPTION
+    ===========
+
+    The pluggable policy class C{r.ObsoletePaths()} is typically called
+    from within a Conary recipe to warn about paths which were at one time
+    considered correct, but are now considered obsolete.
+    
+    Note: this policy class does not honor exceptions.
+    
+    EXAMPLES
+    ========
+    
+    FIXME NEED EXAMPLE
     """
 
     requires = (
@@ -235,9 +391,31 @@ class ObsoletePaths(policy.EnforcementPolicy):
 
 class PythonEggs(policy.EnforcementPolicy):
     """
-    Python .egg files clash with package management; they should
-    be built with the C{--single-version-externally-managed} command
-    line argument, in which case the .egg files will not be created.
+    NAME
+    ====
+
+    B{C{r.PythonEggs()}} - Enforce absence of Python .egg files
+    
+    SYNOPSIS
+    ========
+
+    C{r.PythonEggs([I{filterexp}])}
+
+    DESCRIPTION
+    ===========
+
+    The pluggable policy class C{r.PythonEggs()} is typically called
+    from within a Conary recipe to enforce the absence of Python C{.egg}
+    files, which are incompatible with package management.
+    
+    Python  packages should be built with the
+    C{--single-version-externally-managed} command line argument, in which
+    case the C{.egg} files will not be created.
+    
+    EXAMPLES
+    ========
+    
+    FIXME NEED EXAMPLE
     """
     invariantinclusions = [
         '.*/python[^/]*/site-packages/.*\.egg',

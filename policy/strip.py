@@ -23,9 +23,31 @@ from conary.build import macros, policy
 
 class Strip(policy.DestdirPolicy):
     """
-    Strips executables and libraries of debugging information.
-    May (depending on configuration) save the debugging information
-    for future use.
+    NAME
+    ====
+
+    B{C{r.Strip()}} - Strip debugging information from executables and
+    libraries
+
+    SYNOPSIS
+    ========
+
+    C{r.Strip([I{filterexp}] I{exceptions=filterexp}])}
+
+    DESCRIPTION
+    ===========
+
+    The pluggable policy class C{r.Strip()} is typically called from within a
+    Conary recipe to strip executables, and libraries of debugging
+    information.
+    
+    Depending upon configuration, C{r.Strip} may save the debugging
+    information for future use.
+    
+    EXAMPLES
+    ========
+
+    FIXME NEED EXAMPLE
     """
     invariantinclusions = [
         ('%(bindir)s/', None, stat.S_IFDIR),
