@@ -159,6 +159,9 @@ class CheckDesktopFiles(policy.EnforcementPolicy):
                      for x in file(fullname).readlines()
                      if x.startswith('Icon=')]
         for iconfilename in iconfiles:
+            # if the .desktop file says "Icon=", ignore it
+            if not iconfilename:
+                continue
             if iconfilename.startswith('/'):
                 fulliconfilename = self.macros.destdir + '/' + iconfilename
                 if (not os.path.exists(fulliconfilename) and

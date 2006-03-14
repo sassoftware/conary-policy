@@ -2,7 +2,8 @@ Changes in 0.90.3:
   o Added the new PythonEggs policy which prevents packaging python
     .egg files and explains how to fix the problem.
   o Sped up EnforceConfigLogBuildRequirements for the case where there
-    are no config.log files
+    are no config.log files.
+  o "Icon=" lines are now ignored in .desktop files.
 
 Changes in 0.90.2:
   o Made the IgnoredSetuid policy work after ExcludeDirectories has
