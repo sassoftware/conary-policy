@@ -1,4 +1,4 @@
-Changes in 0.90.3:
+Changes in 1.0:
   o Added the new PythonEggs policy which prevents packaging python
     .egg files and explains how to fix the problem.
   o Sped up EnforceConfigLogBuildRequirements for the case where there
