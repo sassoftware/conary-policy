@@ -166,7 +166,7 @@ class CheckDesktopFiles(policy.EnforcementPolicy):
                 fulliconfilename = self.macros.destdir + '/' + iconfilename
                 if (not os.path.exists(fulliconfilename) and
                     not os.path.exists(iconfilename)):
-                    self.error('%s says Icon=%s must exist, but is missing',
+                    self.warn('%s says Icon=%s must exist, but is missing',
                                filename, iconfilename)
             elif '/' in iconfilename:
                 self.error('Illegal relative path Icon=%s in %s',
@@ -184,7 +184,7 @@ class CheckDesktopFiles(policy.EnforcementPolicy):
                                  if x.startswith(iconfilename+'.') ]:
                                 return
                 # didn't find anything
-                self.error('%s says Icon=%s must exist, but it does not exist'
+                self.warn('%s says Icon=%s must exist, but it does not exist'
                            ' anywhere in: %s',
                            filename, iconfilename,
                            " ".join([ self.macros.datadir ] + self.iconDirs))
