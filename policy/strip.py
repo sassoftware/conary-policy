@@ -37,13 +37,12 @@ class Strip(policy.DestdirPolicy):
     DESCRIPTION
     ===========
 
-    The pluggable policy class C{r.Strip()} is typically called from within a
-    Conary recipe to strip executables, and libraries of debugging
-    information.
-    
+    The C{r.Strip()} class is called from within a Conary recipe to strip
+    executables, and libraries of debugging information.
+
     Depending upon configuration, C{r.Strip} may save the debugging
     information for future use.
-    
+
     EXAMPLES
     ========
 
@@ -139,7 +138,7 @@ class Strip(policy.DestdirPolicy):
             else:
                 if m.name == 'ar' or path.endswith('.o'):
                     # just in case strip is eu-strip, which segfaults
-                    # whenever it touches an ar archive, and seems to 
+                    # whenever it touches an ar archive, and seems to
                     # break some .o files
                     util.execute('%(strip_archive)s ' %self.dm +fullpath)
                 else:

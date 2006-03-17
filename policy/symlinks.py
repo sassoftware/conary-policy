@@ -25,7 +25,7 @@ class RelativeSymlinks(policy.DestdirPolicy):
     ====
 
     B{C{r.RelativeSymlinks()}} - Create relative symbolic links
-    
+
     SYNOPSIS
     ========
 
@@ -34,18 +34,18 @@ class RelativeSymlinks(policy.DestdirPolicy):
     DESCRIPTION
     ===========
 
-    The policy class C{r.RelativeSymlinks()} is called from within a Conary
+    The C{r.RelativeSymlinks()} class is called from within a Conary
     recipe to make symbolic links relative.
-    
+
     Create absolute symbolic links in your recipes, and C{r.RelativeSymlinks}
     will create minimal relative symbolic links from them
-    
+
     PARAMETERS
     ==========
-    
+
     EXAMPLES
     ========
-    
+
     FIXME NEED EXAMPLE
     """
     def doFile(self, path):
@@ -74,7 +74,7 @@ class DanglingSymlinks(policy.PackagePolicy):
     ====
 
     B{C{r.DanglingSymlinks()}} - Disallow dangling symbolic links
-    
+
     SYNOPSIS
     ========
 
@@ -83,20 +83,20 @@ class DanglingSymlinks(policy.PackagePolicy):
     DESCRIPTION
     ===========
 
-    The policy class C{r.DanglingSymlinks()} is called from within a Conary
+    The C{r.DanglingSymlinks()} class is called from within a Conary
     recipe to enforce the absence of dangling symbolic links, that is,
     symbolic links point to targets which no longer exist.
-    
+
     If you know that a dangling symbolic link created by your package
     is fulfilled by another package on which your package depends,
     you may set up an exception for that file.
-    
+
     PARAMETERS
     ==========
-    
+
     EXAMPLES
     ========
-    
+
     FIXME NEED EXAMPLE
     """
     invariantexceptions = (

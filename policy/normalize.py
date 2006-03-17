@@ -36,19 +36,18 @@ class NormalizeCompression(policy.DestdirPolicy):
     DESCRIPTION
     ===========
 
-    The pluggable policy class C{r.NormalizeCompression()} is typically
-    called from within a Conary recipe to compress files with maximum
-    compression, and without data which may change from invocation, to
-    invocation.
-    
+    The C{r.NormalizeCompression()} class is called from within a Conary
+    recipe to compress files with maximum compression, and without data which
+    may change from invocation, to invocation.
+
     Recompresses .gz files with -9 -n, and .bz2 files with -9, to get maximum
     compression and avoid meaningless changes overpopulating the database.
     Ignores man/info pages, as they are encountered separately while making other
     changes to man/info pages later.
-    
+
     EXAMPLES
     ========
-    
+
     FIXME NEED EXAMPLE
     """
     invariantexceptions = [
@@ -107,16 +106,15 @@ class NormalizeManPages(policy.DestdirPolicy):
     DESCRIPTION
     ===========
 
-    The pluggable policy class C{r.RemoveNonPackageFiles()} is typically
-    called from within a Conary recipe to make all system manual pages follow
-    sane system policy
+    The C{r.RemoveNonPackageFiles()} class is called from within a Conary
+    recipe to make all system manual pages follow sane system policy
 
     Note: This policy class is not called directly from recipes, and does not
     honor exceptions.
-    
+
     Some of the following tasks are performed against system manual pages via
     C{r.NormalizeManPages}:
-    
+
     - Fix all man pages' contents:
     - remove instances of C{/?%(destdir)s} from all man pages
     - C{.so foo.n} becomes a symlink to foo.n
@@ -285,17 +283,16 @@ class NormalizeInfoPages(policy.DestdirPolicy):
     DESCRIPTION
     ===========
 
-    The pluggable policy class C{r.NormalizeInfoPages()} is typically
-    called from within a Conary recipe to properly compress info files, and
-    remove the info directory file.
+    The C{r.NormalizeInfoPages()} class is called from within a Conary recipe
+    to properly compress info files, and remove the info directory file.
 
     The only recipe invocation possible for C{r.NormalizeInfoPages} is
     C{r.NormalizeInfoPages(r.macros.infodir+'/dir')} in the recipe that
     should own the info directory file.
-    
+
     EXAMPLES
     ========
-    
+
     FIXME NEED EXAMPLE
     """
     def do(self):
@@ -343,9 +340,9 @@ class NormalizeInitscriptLocation(policy.DestdirPolicy):
     DESCRIPTION
     ===========
 
-    The pluggable policy class C{r.NormalizeInitscriptLocation()} is typically
-    called from within a Conary recipe to put initscripts in their proper
-    location, resolving ambiguity about their proper location.
+    The C{r.NormalizeInitscriptLocation()} class is called from within a
+    Conary recipe to put initscripts in their proper location, resolving
+    ambiguity about their proper location.
 
     Moves all initscripts from /etc/rc.d/init.d/ to their official location.
 
@@ -390,10 +387,10 @@ class NormalizeInitscriptContents(policy.DestdirPolicy):
     DESCRIPTION
     ===========
 
-    The pluggable policy class C{r.NormalizeInitscriptContents()} is typically
-    called from within a Conary recipe to fix common errors within init
-    scripts, and adds some dependencies if needed.
-    
+    The C{r.NormalizeInitscriptContents()} class is called from within a
+    Conary recipe to fix common errors within init scripts, and adds some
+    dependencies if needed.
+
     EXAMPLES
     ========
 
@@ -438,11 +435,11 @@ class NormalizeAppDefaults(policy.DestdirPolicy):
     DESCRIPTION
     ===========
 
-    The pluggable policy class C{r.NormalizeAppDefaults()} is typically
-    called from within a Conary recipe to locate X application defaults files.
-    
+    The C{r.NormalizeAppDefaults()} class is called from within a Conary
+    recipe to locate X application defaults files.
+
     No exceptions to this policy are recommended.
-    
+
     EXAMPLES
     ========
 
@@ -480,14 +477,14 @@ class NormalizeInterpreterPaths(policy.DestdirPolicy):
     DESCRIPTION
     ===========
 
-    The pluggable policy class C{r.NormalizeInterpreterPaths()} is typically
-    called from within a Conary recipe to re-write the paths, in particular
-    changing indirect calls through env to direct calls.
-    
-    Exceptions to this policy should only be made when they are part of the 
+    The C{r.NormalizeInterpreterPaths()} class is called from within a Conary
+    recipe to re-write the paths, in particular changing indirect calls
+    through env to direct calls.
+
+    Exceptions to this policy should only be made when they are part of the
     explicit calling convention of a script where the location of the final
     interpreter depend on the user's C{PATH}.
-    
+
     EXAMPLES
     ========
 
@@ -523,7 +520,7 @@ class NormalizeInterpreterPaths(policy.DestdirPolicy):
                 if fullintpath == None:
                     self.error("Interpreter %s for file %s not found, could not convert from /usr/bin/env syntax", wordlist[0], path)
                     return
-                
+
                 wordlist[0] = fullintpath
                 l.insert(0, '#!'+" ".join(wordlist)+'\n')
                 f.seek(0)
@@ -553,14 +550,13 @@ class NormalizePamConfig(policy.DestdirPolicy):
     DESCRIPTION
     ===========
 
-    The pluggable policy class C{r.NormalizePamConfig()} is typically
-    called from within a Conary recipe to adjust PAM configuration files, and
-    remove references to older module paths such as:
-    C{/lib/security/$ISA} as there is no need for such paths in modern PAM
-    libraries.
+    The C{r.NormalizePamConfig()} class is called from within a Conary recipe
+    to adjust PAM configuration files, and remove references to older module
+    paths such as: C{/lib/security/$ISA} as there is no need for such paths in
+    modern PAM libraries.
 
     Exceptions to this policy should never be required.
-    
+
     EXAMPLES
     ========
 

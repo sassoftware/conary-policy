@@ -34,10 +34,9 @@ class ReadableDocs(policy.DestdirPolicy):
     DESCRIPTION
     ===========
 
-    The pluggable policy class C{r.NormalizePamConfig()} is typically
-    called from within a Conary recipe to set documentation file modes to
-    world-readable.
-    
+    C{r.NormalizePamConfig()} class is called from within a Conary recipe to
+    set documentation file modes to world-readable.
+
     EXAMPLES
     ========
 
@@ -78,13 +77,12 @@ class WarnWriteable(policy.EnforcementPolicy):
     DESCRIPTION
     ===========
 
-    The pluggable policy class C{r.WarnWriteable()} is typically
-    called from within a Conary recipe to warn about unexpected group- or 
-    other-writeable files. 
-    
+    The C{r.WarnWriteable()} class is called from within a Conary recipe to
+    warn about unexpected group- or other-writeable files.
+
     Rather than set exceptions to this policy, use C{r.SetModes} so that the
     open permissions are explicit and expected.
-    
+
     EXAMPLES
     ========
 
@@ -128,12 +126,11 @@ class WorldWriteableExecutables(policy.EnforcementPolicy):
     DESCRIPTION
     ===========
 
-    The pluggable policy class C{r.WorldWriteableExecutables()} is typically
-    called from within a Conary recipe to warn about world-writeable
-    executable files
-    
+    The C{r.WorldWriteableExecutables()} class is called from within a Conary
+    recipe to warn about world-writeable executable files
+
     Exceptions to this policy should not be required.
-    
+
     EXAMPLES
     ========
 
@@ -166,12 +163,12 @@ class IgnoredSetuid(policy.EnforcementPolicy):
     DESCRIPTION
     ===========
 
-    The pluggable policy class C{r.IgnoredSetuid()} is typically called from
-    within a Conary recipe to warn about files with setuid/setgid bits in the
-    filesystem which differ from those explicitly set in the reciped.
-    
+    The C{r.IgnoredSetuid()} class is called from within a Conary recipe to
+    warn about files with setuid/setgid bits in the filesystem which differ
+    from those explicitly set in the reciped.
+
     Such files will be packaged with no setuid/setid bits set.
-    
+
     EXAMPLES
     ========
 

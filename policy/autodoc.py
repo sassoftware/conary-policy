@@ -26,7 +26,7 @@ class AutoDoc(policy.DestdirPolicy):
     ====
 
     B{C{r.AutoDoc()}} - Adds likely documentation not otherwise installed
-    
+
     SYNOPSIS
     ========
 
@@ -35,24 +35,23 @@ class AutoDoc(policy.DestdirPolicy):
     DESCRIPTION
     ===========
 
-    The pluggable policy class C{r.AutoDoc()} is typically called from
-    within a Conary recipe to automatically add likely documentation not 
-    otherwise installed. Exceptions to the pplicy are passed in via 
-    C{r.AutoDoc(I{exceptions=filterexpression})}, and  are evaluated 
-    relative to the build directory, and not the destination directory.
-    
+    The C{r.AutoDoc()} class called from within a Conary recipe to
+    automatically add likely documentation not  otherwise installed.
+    Exceptions to the pplicy are passed in via
+    C{r.AutoDoc(I{exceptions=filterexpression})}, and  are evaluated relative
+    to the build directory, and not the destination directory.
+
     EXAMPLES
     ========
 
     C{r.AutoDoc('COPYRIGHT.PATENT', 'GPL_LICENSE.txt')}
-    
-    The above example adds the documentation files C{COPYRIGHT.PATENT}, and
-    C{GPL_LICENSE.txt}.
-    
+
+    Adds the documentation files C{COPYRIGHT.PATENT}, and C{GPL_LICENSE.txt}.
+
     C{r.AutoDoc(exceptions='/')}
-    
-    The second example, above, insructs C{r.AutoDoc} to except any
-    documentation files in the path C{/} from being automatically added.
+
+    Insructs C{r.AutoDoc} to except any documentation files in the path C{/}
+    from being automatically added.
     """
 
     rootdir = '%(builddir)s'

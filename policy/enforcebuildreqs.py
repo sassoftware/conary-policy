@@ -164,7 +164,7 @@ class EnforceSonameBuildRequirements(_enforceBuildRequirements):
 
     B{C{r.EnforceSonameBuildRequirements()}} - Ensure package requires
     dependencies match elements in r.buildRequires list
-    
+
     SYNOPSIS
     ========
 
@@ -173,17 +173,16 @@ class EnforceSonameBuildRequirements(_enforceBuildRequirements):
     DESCRIPTION
     ===========
 
-    The pluggable policy class C{r.EnforceSonameBuildRequirements()} is
-    typically called from within a Conary recipe to ensure that each requires
-    dependency in the package is matched by a suitable element in the
-    C{buildRequires} list
-    
+    The C{r.EnforceSonameBuildRequirements()} class is called from within a
+    Conary recipe to ensure that each requires dependency in the package is
+    matched by a suitable element in the C{buildRequires} list
+
     Any trove names wrongly suggested can be eliminated from the
     list with C{r.EnforceSonameBuildRequirements(exceptions='I{pkg}:I{comp}')}
-    
+
     EXAMPLES
     ========
-    
+
     FIXME NEED EXAMPLE
     """
 
@@ -209,7 +208,7 @@ class EnforcePythonBuildRequirements(_enforceBuildRequirements):
 
     B{C{r.EnforcePythonBuildRequirements()}} - Ensure package meets Python
     runtime requirments
-    
+
     SYNOPSIS
     ========
 
@@ -218,17 +217,16 @@ class EnforcePythonBuildRequirements(_enforceBuildRequirements):
     DESCRIPTION
     ===========
 
-    The pluggable policy class C{r.EnforcePythonBuildRequirements()} is
-    typically called from within a Conary recipe to ensure that Python runtime
-    requirements are met by the package, or by components listed in the
-    C{buildRequires} list.
-    
+    The C{r.EnforcePythonBuildRequirements()} class is called from within a
+    Conary recipe to ensure that Python runtime requirements are met by the
+    package, or by components listed in the C{buildRequires} list.
+
     Any trove names wrongly suggested can be eliminated from the
     list with C{r.EnforcePythonBuildRequirements(exceptions='I{pkg}:I{comp}')}.
-    
+
     EXAMPLES
     ========
-    
+
     FIXME NEED EXAMPLE.
     """
 
@@ -247,7 +245,7 @@ class EnforceJavaBuildRequirements(_enforceBuildRequirements):
 
     B{C{r.EnforceJavaBuildRequirements()}} - Ensure package meets Java
     runtime requirements
-    
+
     SYNOPSIS
     ========
 
@@ -256,17 +254,16 @@ class EnforceJavaBuildRequirements(_enforceBuildRequirements):
     DESCRIPTION
     ===========
 
-    The pluggable policy class C{r.EnforceJavaBuildRequirements()} is
-    typically called from within a Conary recipe to ensure that Java runtime
-    requirements are met by the package, or by components listed in the
-    C{buildRequires} list.
-    
+    The C{r.EnforceJavaBuildRequirements()} class is called from within a
+    Conary recipe to ensure that Java runtime requirements are met by the
+    package, or by components listed in the C{buildRequires} list.
+
     Any trove names wrongly suggested can be eliminated from the
     list with C{r.EnforceJavaBuildRequirements(exceptions='I{pkg}:I{comp}')}.
-    
+
     EXAMPLES
     ========
-    
+
     FIXME NEED EXAMPLE
     """
 
@@ -285,7 +282,7 @@ class EnforceCILBuildRequirements(_enforceBuildRequirements):
 
     B{C{r.EnforceCILBuildRequirements()}} - Ensure package meets CIL
     runtime requirements
-    
+
     SYNOPSIS
     ========
 
@@ -294,17 +291,16 @@ class EnforceCILBuildRequirements(_enforceBuildRequirements):
     DESCRIPTION
     ===========
 
-    The pluggable policy class C{r.EnforceCILBuildRequirements()} is
-    typically called from within a Conary recipe to ensure that CIL runtime
-    requirements are met by the package, or by components listed in the
-    C{buildRequires} list.
-    
+    The C{r.EnforceCILBuildRequirements()} class is called from within a
+    Conary recipe to ensure that CIL runtime requirements are met by the
+    package, or by components listed in the C{buildRequires} list.
+
     Any trove names wrongly suggested can be eliminated from the
     list with C{r.EnforceJavaBuildRequirements(exceptions='I{pkg}:I{comp}')}.
-    
+
     EXAMPLES
     ========
-    
+
     FIXME NEED EXAMPLE
     """
 
@@ -319,7 +315,7 @@ class EnforcePerlBuildRequirements(_enforceBuildRequirements):
 
     B{C{r.EnforcePerlBuildRequirements()}} - Ensure package meets Perl
     runtime requirements
-    
+
     SYNOPSIS
     ========
 
@@ -328,17 +324,16 @@ class EnforcePerlBuildRequirements(_enforceBuildRequirements):
     DESCRIPTION
     ===========
 
-    The pluggable policy class C{r.EnforcePerlBuildRequirements()} is
-    typically called from within a Conary recipe to ensure that Perl runtime
-    requirements are met by the package, or by components listed in the
-    C{buildRequires} list.
-    
+    The C{r.EnforcePerlBuildRequirements()} class is called from within a
+    Conary recipe to ensure that Perl runtime requirements are met by the
+    package, or by components listed in the C{buildRequires} list.
+
     Any trove names wrongly suggested can be eliminated from the
     list with C{r.EnforceJavaBuildRequirements(exceptions='I{pkg}:I{comp}')}.
-    
+
     EXAMPLES
     ========
-    
+
     FIXME NEED EXAMPLE
     """
 
@@ -357,7 +352,7 @@ class EnforceConfigLogBuildRequirements(policy.EnforcementPolicy):
 
     B{C{r.EnforcePerlBuildRequirements()}} - Ensures components mentioned in
     config.log files are list as build requirements
-    
+
     SYNOPSIS
     ========
 
@@ -366,13 +361,13 @@ class EnforceConfigLogBuildRequirements(policy.EnforcementPolicy):
     DESCRIPTION
     ===========
 
-    The pluggable policy class C{r.EnforcePerlBuildRequirements()} is
-    typically called from within a Conary recipe to ensure components containing
-    files mentioned in config.log files are listed as build requirements.
-    
+    The C{r.EnforcePerlBuildRequirements()} class is called from within a
+    Conary recipe to ensure components containing files mentioned in
+    C{config.log} files are listed as build requirements.
+
     EXAMPLES
     ========
-    
+
     FIXME NEED EXAMPLE
     """
     filetree = policy.BUILDDIR
@@ -427,7 +422,7 @@ class EnforceConfigLogBuildRequirements(policy.EnforcementPolicy):
         fullpath = self.macros.builddir + path
         # iterator to avoid reading in the whole file at once;
         # nested iterators to avoid matching regexp twice
-        foundPaths = set(path for path in 
+        foundPaths = set(path for path in
            (self.foundPath(line) for line in file(fullpath))
            if path and path not in self.pathExceptions)
 

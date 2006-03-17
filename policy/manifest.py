@@ -34,21 +34,20 @@ class ParseManifest(policy.PackagePolicy):
     DESCRIPTION
     ===========
 
-    The pluggable policy class C{r.ParseManifest()} is typically
-    called from within a Conary recipe to parse a file containing a manifest
-    intended for RPM
-    
+    The C{r.ParseManifest()} class is called from within a Conary recipe to
+    parse a file containing a manifest intended for RPM
+
     In the manifest, C{r.r.ParseManifest()} finds the information that cannot
     be represented by pure filesystem status with non-root built device files,
     (C{%dev}) and permissions (C{%attr}).
-    
-    It ignores directory ownership (C{%dir}) because Conary handles 
+
+    It ignores directory ownership (C{%dir}) because Conary handles
     directories very differently from RPM.
-    
-    The class C{r.ParseManifest) also ignores C{%defattr} because Conary's 
+
+    The class C{r.ParseManifest) also ignores C{%defattr} because Conary's
     default ownership is C{root:root}, and because permissions
     (except for setuid and setgid files) are collected from the filesystem.
-    
+
     C{r.ParseManifest} translates each parsed manifest line, into the related
     Conary construct.
 
@@ -57,7 +56,7 @@ class ParseManifest(policy.PackagePolicy):
 
     EXAMPLES
     ========
-    
+
     FIXME NEED EXAMPLE
     """
 

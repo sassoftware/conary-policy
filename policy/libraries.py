@@ -41,7 +41,7 @@ class SharedLibrary(policy.PackagePolicy):
     ====
 
     B{C{r.SharedLibrary()}} - Mark system shared libraries
-    
+
     SYNOPSIS
     ========
 
@@ -50,20 +50,19 @@ class SharedLibrary(policy.PackagePolicy):
     DESCRIPTION
     ===========
 
-    The pluggable policy class C{r.SharedLibrary()} is typically called from
-    within a Conary recipe to Mark system shared libraries such that ldconfig
-    will be run.
-    
+    The C{r.SharedLibrary()} class is called from within a Conary recipe to
+    Mark system shared libraries such that C{ldconfig} will be run.
+
     C{r.SharedLibrary(subtrees=I{path})} to mark a path as containing
     shared libraries; C{r.SharedLibrary(I{filterexp})} to mark a file.
 
     C{r.SharedLibrary} does B{not} walk entire directory trees.  Every
     directory that you want to add must be passed in using the
     C{subtrees} keyword.
-    
+
     EXAMPLES
     ========
-    
+
     FIXME NEED EXAMPLE
     """
     requires = (
@@ -114,7 +113,7 @@ class FixupMultilibPaths(policy.DestdirPolicy):
     ====
 
     B{C{r.FixupMultilibPaths()}} - Fix up and warn about multilib paths
-    
+
     SYNOPSIS
     ========
 
@@ -123,14 +122,14 @@ class FixupMultilibPaths(policy.DestdirPolicy):
     DESCRIPTION
     ===========
 
-    The pluggable policy class C{r.FixupMultilibPaths()} is typically called
-    from within a Conary recipe to fix up and warn about programs which do not
-    know about C{%(lib)s}, and attempt to install to C{lib} when they should
-    be installing to C{lib64} instead.
-    
+    The C{r.FixupMultilibPaths()} class is called from within a Conary recipe
+    to fix up and warn about programs which do not know about C{%(lib)s}, and
+    attempt to install to C{lib} when they should be installing to C{lib64}
+    instead.
+
     EXAMPLES
     ========
-    
+
     FIXME NEED EXAMPLE
     """
     requires = (
@@ -169,7 +168,7 @@ class FixupMultilibPaths(policy.DestdirPolicy):
         currentsubtree = self.currentsubtree % self.macros
         targetdir = self.dirmap[currentsubtree]
         # we want to append whatever path came after the currentsubtree -
-        # e.g. if the original path is /usr/lib/subdir/libfoo.a, 
+        # e.g. if the original path is /usr/lib/subdir/libfoo.a,
         # we still need to add the /subdir/
         targetdir += os.path.dirname(path[len(currentsubtree):])
         target = util.joinPaths(targetdir, basename)
@@ -181,7 +180,7 @@ class FixupMultilibPaths(policy.DestdirPolicy):
                 # one or both might be symlinks, in which case we do
                 # not want to touch this
                 return
-            if ('abi' in m.contents and 'abi' in tm.contents 
+            if ('abi' in m.contents and 'abi' in tm.contents
                 and m.contents['abi'] != tm.contents['abi']):
                 # path and target both exist and are of different abis.
                 # This means that this is actually a multilib package
@@ -243,7 +242,7 @@ class ExecutableLibraries(policy.DestdirPolicy):
     ====
 
     B{C{r.ExecutableLibraries()}} - Set executable bits on library files
-    
+
     SYNOPSIS
     ========
 
@@ -252,17 +251,17 @@ class ExecutableLibraries(policy.DestdirPolicy):
     DESCRIPTION
     ===========
 
-    The pluggable policy class C{r.ExecutableLibraries()} is typically called
-    from within a Conary recipe to change the mode on library files, and warn
-    that it has done so to prevent issues with C{ldconfig}, which expects
-    library files to have their executable bits set..
+    The C{r.ExecutableLibraries()} class is called from within a Conary recipe
+    to change the mode on library files, and warn that it has done so to
+    prevent issues with C{ldconfig}, which expects library files to have their
+    executable bits set..
 
     Note: Do not invoke C{r.ExecutableLibraries()} directly from recipes.
     Invoke C{r.SharedLibrary(subtrees='/path/to/libraries/')} instead.
 
     EXAMPLES
     ========
-    
+
     FIXME NEED EXAMPLE
     """
     requires = (
@@ -292,7 +291,7 @@ class CheckSonames(policy.EnforcementPolicy):
     ====
 
     B{C{r.CheckSonames()}} - Warns about shared library packaging errors
-    
+
     SYNOPSIS
     ========
 
@@ -301,17 +300,16 @@ class CheckSonames(policy.EnforcementPolicy):
     DESCRIPTION
     ===========
 
-    The pluggable policy class C{r.CheckSonames()} is typically called
-    from within a Conary recipe to warn about various possible shared library
-    packaging errors.
+    The C{r.CheckSonames()} class is called from within a Conary recipe to
+    warn about various possible shared library packaging errors.
 
     Use C{r.CheckSonames(exceptions=I{filterexp})} for things like directories
     full of plugins.
 
-    
+
     EXAMPLES
     ========
-    
+
     FIXME NEED EXAMPLE
     """
     requires = (
@@ -377,7 +375,7 @@ class NormalizeLibrarySymlinks(policy.DestdirPolicy):
 
     B{C{r.NormalizeLibrarySymlinks()}} - Executes ldconfig in each system
     library directory
-    
+
     SYNOPSIS
     ========
 
@@ -386,10 +384,9 @@ class NormalizeLibrarySymlinks(policy.DestdirPolicy):
     DESCRIPTION
     ===========
 
-    The pluggable policy class C{r.NormalizeLibrarySymlinks()} is typically
-    called from within a Conary recipe to run the C{ldconfig} program in each
-    system library directory.  
-    
+    The C{r.NormalizeLibrarySymlinks()} is called from within a Conary recipe
+    to run the C{ldconfig} program in each system library directory.
+
     Without use of this policy class, unowned symlinks may be created when
     C{ldconfig} is run from the shlib tag handler which may then be packaged,
     and cause problems with updating due to newly-packaged files already
@@ -397,7 +394,7 @@ class NormalizeLibrarySymlinks(policy.DestdirPolicy):
 
     EXAMPLES
     ========
-    
+
     FIXME NEED EXAMPLE
     """
     requires = (

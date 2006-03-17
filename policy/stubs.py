@@ -34,8 +34,8 @@ class EtcConfig(policy.EnforcementPolicy):
     DESCRIPTION
     ===========
 
-    The pluggable policy class C{r.EtcConfig()} is a deprecated class,
-    included only for backwards compatibility.  Use C{r.Config} instead.
+    The C{r.EtcConfig()} class is a deprecated class, included only for
+    backwards compatibility.  Use C{r.Config} instead.
     """
     def updateArgs(self, *args, **keywords):
         self.warn('EtcConfig deprecated, please use Config instead')
@@ -50,7 +50,7 @@ class InstallBucket(policy.EnforcementPolicy):
     ====
 
     B{C{r.InstallBucket()}} - STUB CLASS
-    
+
     SYNOPSIS
     ========
 
@@ -59,9 +59,8 @@ class InstallBucket(policy.EnforcementPolicy):
     DESCRIPTION
     ===========
 
-    The pluggable policy class C{r.InstallBucket()} is a stub class,
-    included only for backwards compatibility, and should be removed from use
-    in recipes.
+    The C{r.InstallBucket()} class is a stub class,included only for backwards
+    compatibility, and should be removed from use in recipes.
     """
     def updateArgs(self, *args, **keywords):
         self.warn('Install buckets are deprecated')
@@ -76,7 +75,7 @@ class User(policy.EnforcementPolicy):
     ====
 
     B{C{r.User()}} - STUB CLASS
-    
+
     SYNOPSIS
     ========
 
@@ -85,9 +84,8 @@ class User(policy.EnforcementPolicy):
     DESCRIPTION
     ===========
 
-    The pluggable policy class C{r.User()} is a stub class,
-    included only for backwards compatibility, and should be removed from use
-    in recipes.
+    The C{r.User()} class is a stub class, included only for backwards
+    compatibility, and should be removed from use in recipes.
     """
     def updateArgs(self, *args, **keywords):
         self.warn('User policy is deprecated, create a separate UserInfoRecipe instead')
@@ -102,7 +100,7 @@ class SupplementalGroup(policy.EnforcementPolicy):
     ====
 
     B{C{r.User()}} - STUB CLASS
-    
+
     SYNOPSIS
     ========
 
@@ -111,9 +109,8 @@ class SupplementalGroup(policy.EnforcementPolicy):
     DESCRIPTION
     ===========
 
-    The pluggable policy class C{r.SupplementalGroup()} is a stub class,
-    included only for backwards compatibility, and should be removed from use
-    in recipes.
+    The C{r.SupplementalGroup()} class is a stub class,included only for
+    backwards compatibility, and should be removed from use in recipes.
     """
     def updateArgs(self, *args, **keywords):
         self.warn('SupplementalGroup policy is deprecated, create a separate GroupInfoRecipe instead')
@@ -128,7 +125,7 @@ class Group(policy.EnforcementPolicy):
     ====
 
     B{C{r.Group()}} - STUB CLASS
-    
+
     SYNOPSIS
     ========
 
@@ -137,9 +134,8 @@ class Group(policy.EnforcementPolicy):
     DESCRIPTION
     ===========
 
-    The pluggable policy class C{r.Group()} is a stub class,
-    included only for backwards compatibility, and should be removed from use
-    in recipes.
+    The C{r.Group()} class is a stub class, included only for backwards
+    compatibility, and should be removed from use in recipes.
     """
     def updateArgs(self, *args, **keywords):
         self.warn('Group policy is deprecated, create a separate GroupInfoRecipe instead')
