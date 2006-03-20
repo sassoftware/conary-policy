@@ -59,7 +59,7 @@ class InstallBucket(policy.EnforcementPolicy):
     DESCRIPTION
     ===========
 
-    The C{r.InstallBucket()} class is a stub class,included only for backwards
+    The C{r.InstallBucket()} policy is a stub, included only for backwards
     compatibility, and should be removed from use in recipes.
     """
     def updateArgs(self, *args, **keywords):
@@ -84,7 +84,7 @@ class User(policy.EnforcementPolicy):
     DESCRIPTION
     ===========
 
-    The C{r.User()} class is a stub class, included only for backwards
+    The C{r.User()} policy is a stub, included only for backwards
     compatibility, and should be removed from use in recipes.
     """
     def updateArgs(self, *args, **keywords):
@@ -109,7 +109,7 @@ class SupplementalGroup(policy.EnforcementPolicy):
     DESCRIPTION
     ===========
 
-    The C{r.SupplementalGroup()} class is a stub class,included only for
+    The C{r.SupplementalGroup()} policy is a stub, included only for
     backwards compatibility, and should be removed from use in recipes.
     """
     def updateArgs(self, *args, **keywords):
@@ -134,7 +134,7 @@ class Group(policy.EnforcementPolicy):
     DESCRIPTION
     ===========
 
-    The C{r.Group()} class is a stub class, included only for backwards
+    The C{r.Group()} policy is a stub, included only for backwards
     compatibility, and should be removed from use in recipes.
     """
     def updateArgs(self, *args, **keywords):

@@ -35,11 +35,11 @@ class AutoDoc(policy.DestdirPolicy):
     DESCRIPTION
     ===========
 
-    The C{r.AutoDoc()} class called from within a Conary recipe to
-    automatically add likely documentation not  otherwise installed.
-    Exceptions to the pplicy are passed in via
-    C{r.AutoDoc(I{exceptions=filterexpression})}, and  are evaluated relative
-    to the build directory, and not the destination directory.
+    The C{r.AutoDoc()} policy is called to automatically add likely
+    documentation not  otherwise installed. Exceptions to the pplicy are
+    passed in via C{r.AutoDoc(I{exceptions=filterexpression})}, and  are
+    evaluated relative to the build directory, and not the destination
+    directory.
 
     EXAMPLES
     ========

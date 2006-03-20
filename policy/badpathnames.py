@@ -36,9 +36,9 @@ class BadFilenames(policy.EnforcementPolicy):
     DESCRIPTION
     ===========
 
-    The C{r.BadFilenames()} class is called from within a Conary recipe to
-    impose the requirement that  filenames must not contain newlines as
-    filenames are separated by newlines in several conary protocols.
+    The C{r.BadFilenames()} policy is called to impose the requirement that
+    filenames must not contain newlines as filenames are separated by
+    newlines in several conary protocols.
 
     No exceptions are allowed.
 
@@ -70,9 +70,8 @@ class NonUTF8Filenames(policy.EnforcementPolicy):
     DESCRIPTION
     ===========
 
-    The C{r.NonUTF8Filenames()} class is called from within a Conary recipe to
-    require filenames be encoded as UTF-8, as that is the standard filename
-    encoding system.
+    The C{r.NonUTF8Filenames()} policy is called to require filenames be
+    encoded as UTF-8, as that is the standard filename encoding system.
 
     EXAMPLES
     ========
@@ -101,9 +100,9 @@ class NonMultilibComponent(policy.EnforcementPolicy):
     DESCRIPTION
     ===========
 
-    The C{r.NonMultilibComponent()} is called from within a Conary recipe to
-    enforce multilib support so that both 32-bit, and 64-bit components may be
-    installed for Python, and Perl.
+    The C{r.NonMultilibComponent()} policy is called to enforce multilib
+    support so that both 32-bit, and 64-bit components may be installed for
+    Python, and Perl.
 
     Python and Perl components should generally be under C{/usr/lib}, unless
     they have binaries and are built on a 64-bit platform, in which case
@@ -175,11 +174,9 @@ class NonMultilibDirectories(policy.EnforcementPolicy):
     DESCRIPTION
     ===========
 
-    The C{r.NonMultilibDirectories()} class is called from within a Conary
-    recipe to enforce proper directories, relavent to platform.
-
-    Troves for 32-bit platforms should not normally contain directories named
-    "C{lib64}".
+    The C{r.NonMultilibDirectories()} policy is called to enforce proper
+    directories, relavent to platform. Troves for 32-bit platforms should not
+    normally contain directories named "C{lib64}".
 
     EXAMPLES
     ========
@@ -215,9 +212,8 @@ class CheckDestDir(policy.EnforcementPolicy):
     DESCRIPTION
     ===========
 
-    The C{r.CheckDestDir()} class is called from within a Conary recipe to
-    search for the C{%(destdir)s} path in file paths and symbolic link
-    contents.
+    The C{r.CheckDestDir()} policy is called to search for the C{%(destdir)s}
+    path in file paths and symbolic link contents.
 
     The C{%(destdir)s} should not be contained within file paths and symbolic
     link contents.
@@ -274,10 +270,9 @@ class FilesForDirectories(policy.EnforcementPolicy):
     DESCRIPTION
     ===========
 
-    The C{r.FilesForDirectories()} class is called from within a Conary
-    recipe to warn about files where directories are expected.
-
-    This condition is normally caused by bad C{r.Install()} invocations.
+    The C{r.FilesForDirectories()} policy is called to warn about files where
+    directories are expected. This condition is normally caused by bad
+    C{r.Install()} invocations.
 
     This policy does not honor exceptions.
 
@@ -351,9 +346,8 @@ class ObsoletePaths(policy.EnforcementPolicy):
     DESCRIPTION
     ===========
 
-    The C{r.ObsoletePaths()} class is called from within a Conary recipe to
-    warn about paths which were at one time considered correct, but are now
-    considered obsolete.
+    The C{r.ObsoletePaths()} policy is called to warn about paths which were
+    at one time considered correct, but are now considered obsolete.
 
     Note: this policy class does not honor exceptions.
 
@@ -400,9 +394,8 @@ class PythonEggs(policy.EnforcementPolicy):
     DESCRIPTION
     ===========
 
-    The C{r.PythonEggs()} class is called from within a Conary recipe to
-    enforce the absence of Python C{.egg} files, which are incompatible with
-    package management.
+    The C{r.PythonEggs()} policy is called to enforce the absence of Python
+    C{.egg} files, which are incompatible with package management.
 
     Python  packages should be built with the
     C{--single-version-externally-managed} command line argument, in which

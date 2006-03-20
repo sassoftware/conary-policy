@@ -32,8 +32,8 @@ class RemoveNonPackageFiles(policy.DestdirPolicy):
     DESCRIPTION
     ===========
 
-    The C{r.RemoveNonPackageFiles()} class is  called from within a Conary
-    recipe to remove classes of files that  normally should not be packaged
+    The C{r.RemoveNonPackageFiles()} policy is called to remove classes of
+    files that  normally should not be packaged
 
     EXAMPLES
     ========

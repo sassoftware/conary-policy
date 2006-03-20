@@ -36,9 +36,9 @@ class NormalizeCompression(policy.DestdirPolicy):
     DESCRIPTION
     ===========
 
-    The C{r.NormalizeCompression()} class is called from within a Conary
-    recipe to compress files with maximum compression, and without data which
-    may change from invocation, to invocation.
+    The C{r.NormalizeCompression()} policy is called to compress files with
+    maximum compression, and without data which may change from invocation,
+    to invocation.
 
     Recompresses .gz files with -9 -n, and .bz2 files with -9, to get maximum
     compression and avoid meaningless changes overpopulating the database.
@@ -106,8 +106,8 @@ class NormalizeManPages(policy.DestdirPolicy):
     DESCRIPTION
     ===========
 
-    The C{r.RemoveNonPackageFiles()} class is called from within a Conary
-    recipe to make all system manual pages follow sane system policy
+    The C{r.RemoveNonPackageFiles()} policy is called to make all system
+    manual pages follow sane system policy
 
     Note: This policy class is not called directly from recipes, and does not
     honor exceptions.
@@ -283,8 +283,8 @@ class NormalizeInfoPages(policy.DestdirPolicy):
     DESCRIPTION
     ===========
 
-    The C{r.NormalizeInfoPages()} class is called from within a Conary recipe
-    to properly compress info files, and remove the info directory file.
+    The C{r.NormalizeInfoPages()} policy is called to properly compress
+    info files, and remove the info directory file.
 
     The only recipe invocation possible for C{r.NormalizeInfoPages} is
     C{r.NormalizeInfoPages(r.macros.infodir+'/dir')} in the recipe that
@@ -340,9 +340,9 @@ class NormalizeInitscriptLocation(policy.DestdirPolicy):
     DESCRIPTION
     ===========
 
-    The C{r.NormalizeInitscriptLocation()} class is called from within a
-    Conary recipe to put initscripts in their proper location, resolving
-    ambiguity about their proper location.
+    The C{r.NormalizeInitscriptLocation()} polcy is called to put
+    initscripts in their proper location, resolving ambiguity about their
+    proper location.
 
     Moves all initscripts from /etc/rc.d/init.d/ to their official location.
 
@@ -387,9 +387,8 @@ class NormalizeInitscriptContents(policy.DestdirPolicy):
     DESCRIPTION
     ===========
 
-    The C{r.NormalizeInitscriptContents()} class is called from within a
-    Conary recipe to fix common errors within init scripts, and adds some
-    dependencies if needed.
+    The C{r.NormalizeInitscriptContents()} policy is called to fix common
+    errors within init scripts, and adds some dependencies if needed.
 
     EXAMPLES
     ========
@@ -435,8 +434,8 @@ class NormalizeAppDefaults(policy.DestdirPolicy):
     DESCRIPTION
     ===========
 
-    The C{r.NormalizeAppDefaults()} class is called from within a Conary
-    recipe to locate X application defaults files.
+    The C{r.NormalizeAppDefaults()} policy is called to locate X
+    application defaults files.
 
     No exceptions to this policy are recommended.
 
@@ -477,9 +476,8 @@ class NormalizeInterpreterPaths(policy.DestdirPolicy):
     DESCRIPTION
     ===========
 
-    The C{r.NormalizeInterpreterPaths()} class is called from within a Conary
-    recipe to re-write the paths, in particular changing indirect calls
-    through env to direct calls.
+    The C{r.NormalizeInterpreterPaths()} policy is called to re-write the
+    paths, in particular changing indirect calls through env to direct calls.
 
     Exceptions to this policy should only be made when they are part of the
     explicit calling convention of a script where the location of the final
@@ -550,10 +548,10 @@ class NormalizePamConfig(policy.DestdirPolicy):
     DESCRIPTION
     ===========
 
-    The C{r.NormalizePamConfig()} class is called from within a Conary recipe
-    to adjust PAM configuration files, and remove references to older module
-    paths such as: C{/lib/security/$ISA} as there is no need for such paths in
-    modern PAM libraries.
+    The C{r.NormalizePamConfig()} policy is called to adjust PAM configuration
+    files, and remove references to older module paths such as:
+    C{/lib/security/$ISA} as there is no need for such paths in modern PAM
+    libraries.
 
     Exceptions to this policy should never be required.
 

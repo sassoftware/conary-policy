@@ -34,8 +34,8 @@ class RelativeSymlinks(policy.DestdirPolicy):
     DESCRIPTION
     ===========
 
-    The C{r.RelativeSymlinks()} class is called from within a Conary
-    recipe to make symbolic links relative.
+    The C{r.RelativeSymlinks()} policy is called to make symbolic links
+    relative.
 
     Create absolute symbolic links in your recipes, and C{r.RelativeSymlinks}
     will create minimal relative symbolic links from them
@@ -83,9 +83,9 @@ class DanglingSymlinks(policy.PackagePolicy):
     DESCRIPTION
     ===========
 
-    The C{r.DanglingSymlinks()} class is called from within a Conary
-    recipe to enforce the absence of dangling symbolic links, that is,
-    symbolic links point to targets which no longer exist.
+    The C{r.DanglingSymlinks()} policy is called to enforce the absence
+    of dangling symbolic links, that is, symbolic links point to targets
+    which no longer exist.
 
     If you know that a dangling symbolic link created by your package
     is fulfilled by another package on which your package depends,
