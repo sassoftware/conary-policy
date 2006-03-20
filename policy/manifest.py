@@ -34,8 +34,8 @@ class ParseManifest(policy.PackagePolicy):
     DESCRIPTION
     ===========
 
-    The C{r.ParseManifest()} policy is called to parse a file containing a
-    manifest intended for RPM
+    The C{r.ParseManifest()} policy parses a file containing a manifest
+    intended for RPM
 
     In the manifest, C{r.r.ParseManifest()} finds the information that cannot
     be represented by pure filesystem status with non-root built device files,

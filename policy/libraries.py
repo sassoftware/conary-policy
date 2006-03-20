@@ -50,8 +50,8 @@ class SharedLibrary(policy.PackagePolicy):
     DESCRIPTION
     ===========
 
-    The C{r.SharedLibrary()} policy is called to mark system shared libraries
-    such that C{ldconfig} will be run.
+    The C{r.SharedLibrary()} policy marks system shared libraries such
+    that C{ldconfig} will be run.
 
     C{r.SharedLibrary(subtrees=I{path})} to mark a path as containing
     shared libraries; C{r.SharedLibrary(I{filterexp})} to mark a file.
@@ -122,9 +122,9 @@ class FixupMultilibPaths(policy.DestdirPolicy):
     DESCRIPTION
     ===========
 
-    The C{r.FixupMultilibPaths()} policy is called to fix up and warn about
-    programs which do not know about C{%(lib)s}, and attempt to install to
-    C{lib} when they should be installing to C{lib64} instead.
+    The C{r.FixupMultilibPaths()} policy fixes up and warns about programs
+    which do not know about C{%(lib)s}, and attempt to install to C{lib}
+    when they should be installing to C{lib64} instead.
 
     EXAMPLES
     ========
@@ -250,10 +250,9 @@ class ExecutableLibraries(policy.DestdirPolicy):
     DESCRIPTION
     ===========
 
-    The C{r.ExecutableLibraries()} policy is called to change the mode on
-    library files, and warn that it has done so to prevent issues with
-    C{ldconfig}, which expects library files to have their executable bits
-    set.
+    The C{r.ExecutableLibraries()} policy changes the mode on library files,
+    and warn that it has done so to prevent issues with C{ldconfig}, which
+    expects library files to have their executable bits set.
 
     Note: Do not invoke C{r.ExecutableLibraries()} directly from recipes.
     Invoke C{r.SharedLibrary(subtrees='/path/to/libraries/')} instead.
@@ -299,8 +298,8 @@ class CheckSonames(policy.EnforcementPolicy):
     DESCRIPTION
     ===========
 
-    The C{r.CheckSonames()} policy is called to warn about various possible
-    shared library packaging errors.
+    The C{r.CheckSonames()} policy warns about various possible shared
+    library packaging errors.
 
     Use C{r.CheckSonames(exceptions=I{filterexp})} for things like directories
     full of plugins.
@@ -383,8 +382,8 @@ class NormalizeLibrarySymlinks(policy.DestdirPolicy):
     DESCRIPTION
     ===========
 
-    The C{r.NormalizeLibrarySymlinks()} policy is called to run the
-    C{ldconfig} program in each system library directory.
+    The C{r.NormalizeLibrarySymlinks()} policy runs the C{ldconfig} program
+    in each system library directory.
 
     Without use of this policy class, unowned symlinks may be created when
     C{ldconfig} is run from the shlib tag handler which may then be packaged,

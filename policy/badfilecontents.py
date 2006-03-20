@@ -35,9 +35,9 @@ class NonBinariesInBindirs(policy.EnforcementPolicy):
     DESCRIPTION
     ===========
 
-    The C{r.NonBinariesInBindirs()} class is called from within a Conary
-    recipe to ensure files residing in directories which are explicitly for
-    binary files have some executable bit set.
+    The C{r.NonBinariesInBindirs()} policy ensures files residing in
+    directories which are explicitly for binary files have some executable
+    bit set.
 
     EXAMPLES
     ========
@@ -92,7 +92,7 @@ class FilesInMandir(policy.EnforcementPolicy):
     DESCRIPTION
     ===========
 
-    The C{r.FilesInMandir()}  policy is called to ensure system manual pages
+    The C{r.FilesInMandir()}  policy ensures system manual page
     directories contain only other directories, and not files.
 
     The main cause of files in C{%(mandir)s} is confusion in packages
@@ -132,9 +132,8 @@ class BadInterpreterPaths(policy.EnforcementPolicy):
     DESCRIPTION
     ===========
 
-    The C{r.BadInterpreterPaths()} policy is called to ensure all paths
-    referring to an interpreter instance are not relative, but are instead,
-    absolute paths.
+    The C{r.BadInterpreterPaths()} policy ensures all paths referring to an
+    interpreter instance are absolute, and not relative paths.
 
     No exceptions to this policy should occur outside of C{%(thisdocdir)s}.
 
@@ -179,9 +178,9 @@ class ImproperlyShared(policy.EnforcementPolicy):
     DESCRIPTION
     ===========
 
-    The C{r.ImproperlyShared()} policy is called to ensure the
-    C{%(datadir)s} directory, which is normally C{/usr/share} contains data
-    that can be shared between architectures.
+    The C{r.ImproperlyShared()} policy ensures the C{%(datadir)s} directory,
+    (normally C{/usr/share}) contains data which can be shared between
+    architectures.
 
     Files which are architecture-specific, such as ELF files, should not
     reside in C{%(datadir)s}..
@@ -222,8 +221,8 @@ class CheckDesktopFiles(policy.EnforcementPolicy):
     DESCRIPTION
     ===========
 
-    The C{r.CheckDesktopFiles()} policy is called to warn about possible
-    errors in desktop files, such as missing icon files.
+    The C{r.CheckDesktopFiles()} policy warns about possible errors in
+    desktop files, such as missing icon files.
 
 
     Use C{r.CheckDesktopFiles} to search for desktop icon files in the
@@ -313,8 +312,8 @@ class RequireChkconfig(policy.EnforcementPolicy):
     DESCRIPTION
     ===========
 
-    The C{r.RequireChkconfig()} policy is called to require that all
-    initscripts provide chkconfig information.
+    The C{r.RequireChkconfig()} policy requires that all initscripts provide
+    chkconfig information.
 
     The only exceptions should be core initscripts, such as reboot
 

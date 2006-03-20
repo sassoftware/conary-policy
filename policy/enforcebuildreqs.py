@@ -173,9 +173,9 @@ class EnforceSonameBuildRequirements(_enforceBuildRequirements):
     DESCRIPTION
     ===========
 
-    The C{r.EnforceSonameBuildRequirements()} policy is called to ensure that
-    each requires dependency in the package is matched by a suitable element
-    in the C{buildRequires} list
+    The C{r.EnforceSonameBuildRequirements()} policy ensures that each
+    requires dependency in the package is matched by a suitable element in
+    the C{buildRequires} list
 
     Any trove names wrongly suggested can be eliminated from the
     list with C{r.EnforceSonameBuildRequirements(exceptions='I{pkg}:I{comp}')}
@@ -217,9 +217,9 @@ class EnforcePythonBuildRequirements(_enforceBuildRequirements):
     DESCRIPTION
     ===========
 
-    The C{r.EnforcePythonBuildRequirements()} policy is called to ensure that
-    Python runtime requirements are met by the package, or by components listed
-    in the C{buildRequires} list.
+    The C{r.EnforcePythonBuildRequirements()} policy ensures that Python
+    runtime requirements are met by the package, or by components listed in
+    the C{buildRequires} list.
 
     Any trove names wrongly suggested can be eliminated from the
     list with C{r.EnforcePythonBuildRequirements(exceptions='I{pkg}:I{comp}')}.
@@ -254,9 +254,9 @@ class EnforceJavaBuildRequirements(_enforceBuildRequirements):
     DESCRIPTION
     ===========
 
-    The C{r.EnforceJavaBuildRequirements()} policy is called to ensure that
-    Java runtime requirements are met by the package, or by components listed
-    in the C{buildRequires} list.
+    The C{r.EnforceJavaBuildRequirements()} policy ensures that Java runtime
+    requirements are met by the package, or by components listed in the
+    C{buildRequires} list.
 
     Any trove names wrongly suggested can be eliminated from the
     list with C{r.EnforceJavaBuildRequirements(exceptions='I{pkg}:I{comp}')}.
@@ -291,9 +291,9 @@ class EnforceCILBuildRequirements(_enforceBuildRequirements):
     DESCRIPTION
     ===========
 
-    The C{r.EnforceCILBuildRequirements()} policy is called to ensure that
-    CIL runtime requirements are met by the package, or by components listed
-    in the C{buildRequires} list.
+    The C{r.EnforceCILBuildRequirements()} policy ensures that CIL runtime
+    requirements are met by the package, or by components listed in the
+    C{buildRequires} list.
 
     Any trove names wrongly suggested can be eliminated from the
     list with C{r.EnforceJavaBuildRequirements(exceptions='I{pkg}:I{comp}')}.
@@ -324,9 +324,9 @@ class EnforcePerlBuildRequirements(_enforceBuildRequirements):
     DESCRIPTION
     ===========
 
-    The C{r.EnforcePerlBuildRequirements()} policy is called to ensure that
-    Perl runtime requirements are met by the package, or by components listed
-    in the C{buildRequires} list.
+    The C{r.EnforcePerlBuildRequirements()} policy ensures that Perl runtime
+    requirements are met by the package, or by components listed in the
+    C{buildRequires} list.
 
     Any trove names wrongly suggested can be eliminated from the
     list with C{r.EnforceJavaBuildRequirements(exceptions='I{pkg}:I{comp}')}.
@@ -361,9 +361,9 @@ class EnforceConfigLogBuildRequirements(policy.EnforcementPolicy):
     DESCRIPTION
     ===========
 
-    The C{r.EnforcePerlBuildRequirements()} policy is called to ensure
-    components containing files mentioned in C{config.log} files are listed
-    as build requirements.
+    The C{r.EnforcePerlBuildRequirements()} policy ensures components
+    containing files mentioned in C{config.log} files are listed as build
+    requirements.
 
     EXAMPLES
     ========
