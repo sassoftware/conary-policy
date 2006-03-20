@@ -35,7 +35,7 @@ class NonBinariesInBindirs(policy.EnforcementPolicy):
     DESCRIPTION
     ===========
 
-    The C{r.NonBinariesInBindirs()} policy ensures files residing in
+    The C{r.NonBinariesInBindirs()} policy ensures that files residing in
     directories which are explicitly for binary files have some executable
     bit set.
 
@@ -92,7 +92,7 @@ class FilesInMandir(policy.EnforcementPolicy):
     DESCRIPTION
     ===========
 
-    The C{r.FilesInMandir()}  policy ensures system manual page
+    The C{r.FilesInMandir()}  policy ensures that system manual page
     directories contain only other directories, and not files.
 
     The main cause of files in C{%(mandir)s} is confusion in packages
@@ -132,8 +132,8 @@ class BadInterpreterPaths(policy.EnforcementPolicy):
     DESCRIPTION
     ===========
 
-    The C{r.BadInterpreterPaths()} policy ensures all paths referring to an
-    interpreter instance are absolute, and not relative paths.
+    The C{r.BadInterpreterPaths()} policy ensures that all paths referring
+    to an interpreter instance are absolute, and not relative paths.
 
     No exceptions to this policy should occur outside of C{%(thisdocdir)s}.
 
@@ -178,9 +178,9 @@ class ImproperlyShared(policy.EnforcementPolicy):
     DESCRIPTION
     ===========
 
-    The C{r.ImproperlyShared()} policy ensures the C{%(datadir)s} directory,
-    (normally C{/usr/share}) contains data which can be shared between
-    architectures.
+    The C{r.ImproperlyShared()} policy ensures that the C{%(datadir)s}
+    directory, (normally C{/usr/share}) contains data which can be shared
+    between architectures.
 
     Files which are architecture-specific, such as ELF files, should not
     reside in C{%(datadir)s}..

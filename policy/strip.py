@@ -37,7 +37,7 @@ class Strip(policy.DestdirPolicy):
     DESCRIPTION
     ===========
 
-    The C{r.Strip()} policy strips executables, and libraries of debugging
+    The C{r.Strip()} policy strips executables and libraries of debugging
     information.
 
     Depending upon configuration, C{r.Strip} may save the debugging

@@ -350,8 +350,8 @@ class EnforceConfigLogBuildRequirements(policy.EnforcementPolicy):
     NAME
     ====
 
-    B{C{r.EnforcePerlBuildRequirements()}} - Ensures components mentioned in
-    config.log files are list as build requirements
+    B{C{r.EnforcePerlBuildRequirements()}} - Ensures that components
+    mentioned in config.log files are listed as build requirements
 
     SYNOPSIS
     ========
@@ -361,7 +361,7 @@ class EnforceConfigLogBuildRequirements(policy.EnforcementPolicy):
     DESCRIPTION
     ===========
 
-    The C{r.EnforcePerlBuildRequirements()} policy ensures components
+    The C{r.EnforcePerlBuildRequirements()} policy ensures that components
     containing files mentioned in C{config.log} files are listed as build
     requirements.
 

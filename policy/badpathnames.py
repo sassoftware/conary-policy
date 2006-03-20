@@ -36,8 +36,9 @@ class BadFilenames(policy.EnforcementPolicy):
     DESCRIPTION
     ===========
 
-    The C{r.BadFilenames()} policy ensures filenames do not contain newlines,
-    as filenames are separated by newlines in several conary protocols.
+    The C{r.BadFilenames()} policy ensures that filenames do not contain
+    newlines, as filenames are separated by newlines in several conary
+    protocols.
 
     No exceptions are allowed.
 

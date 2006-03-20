@@ -83,8 +83,8 @@ class DanglingSymlinks(policy.PackagePolicy):
     ===========
 
     The C{r.DanglingSymlinks()} policy enforces the absence of dangling
-    symbolic links, that is, symbolic links point to targets which no longer
-    exist.
+    symbolic links; that is, symbolic links pointing to targets which no
+    longer exist.
 
     If you know that a dangling symbolic link created by your package
     is fulfilled by another package on which your package depends,
