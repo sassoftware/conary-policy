@@ -22,6 +22,9 @@ class RemoveNonPackageFiles(policy.DestdirPolicy):
     C{r.RemoveNonPackageFiles(exceptions=I{filterexpression})}
     allows one of these files to be included in a package.
     """
+    requires = (
+        ('Strip', policy.CONDITIONAL_PRIOR),
+    )
     invariantinclusions = [
         r'\.la$',
         # python .a's might have been installed in the wrong place on multilib

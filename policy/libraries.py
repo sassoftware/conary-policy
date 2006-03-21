@@ -93,6 +93,7 @@ class FixupMultilibPaths(policy.DestdirPolicy):
     are supposed to be installing to C{lib64} but install to C{lib} instead.
     """
     requires = (
+        ('ExecutableLibraries', policy.CONDITIONAL_SUBSEQUENT),
         ('Strip', policy.CONDITIONAL_SUBSEQUENT),
     )
     invariantinclusions = [
@@ -303,6 +304,9 @@ class NormalizeLibrarySymlinks(policy.DestdirPolicy):
     """
     requires = (
         ('SharedLibrary', policy.REQUIRED),
+        ('ExecutableLibraries', policy.CONDITIONAL_PRIOR),
+        ('FixupMultilibPaths', policy.CONDITIONAL_PRIOR),
+        ('Strip', policy.CONDITIONAL_SUBSEQUENT),
     )
     invariantsubtrees = librarydirs
 

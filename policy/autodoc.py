@@ -28,6 +28,9 @@ class AutoDoc(policy.DestdirPolicy):
     C{%(destdir)s}.
     """
 
+    requires = (
+        ('ReadableDocs', policy.CONDITIONAL_SUBSEQUENT),
+    )
     rootdir = '%(builddir)s'
     invariantinclusions = [
         '.*/NEWS$',

@@ -84,6 +84,9 @@ class NormalizeManPages(policy.DestdirPolicy):
      - change all symlinks to point to .gz (if they don't already)
      - make all man pages be mode 644
     """
+    requires = (
+        ('ReadableDocs', policy.CONDITIONAL_SUBSEQUENT),
+    )
     def _uncompress(self, dirname, names):
         for name in names:
             path = dirname + os.sep + name
@@ -236,6 +239,9 @@ class NormalizeInfoPages(policy.DestdirPolicy):
     C{r.NormalizeInfoPages(r.macros.infodir+'/dir')} in the one recipe that
     should own the info dir file.
     """
+    requires = (
+        ('ReadableDocs', policy.CONDITIONAL_SUBSEQUENT),
+    )
     def do(self):
         dir = self.macros['infodir']+'/dir'
         fsdir = self.macros['destdir']+dir
@@ -275,6 +281,11 @@ class NormalizeInitscriptLocation(policy.DestdirPolicy):
     (if, as is true for the default settings, /etc/rc.d/init.d isn't their
     official location, that is).
     """
+
+    requires = (
+        ('RelativeSymlinks', policy.CONDITIONAL_SUBSEQUENT),
+        ('NormalizeInterpreterPaths', policy.CONDITIONAL_SUBSEQUENT),
+    )
     # need both of the next two lines to avoid following /etc/rc.d/init.d
     # if it is a symlink
     invariantsubtrees = [ '/etc/rc.d' ]
