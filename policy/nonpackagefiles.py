@@ -18,9 +18,30 @@ from conary.build import policy
 
 class RemoveNonPackageFiles(policy.DestdirPolicy):
     """
-    Remove classes of files that normally should not be packaged;
-    C{r.RemoveNonPackageFiles(exceptions=I{filterexpression})}
-    allows one of these files to be included in a package.
+    NAME
+    ====
+
+    B{C{r.RemoveNonPackageFiles()}} - Remove classes of files that should not
+    be packaged
+
+    SYNOPSIS
+    ========
+
+    C{r.RemoveNonPackageFiles([I{filterexp}] I{exceptions=filterexp}])}
+
+    DESCRIPTION
+    ===========
+
+    The C{r.RemoveNonPackageFiles()} policy removes classes of files that
+    normally should not be packaged
+
+    EXAMPLES
+    ========
+
+    C{r.RemoveNonPackageFiles(exceptions='.*\.la')}
+
+    This is one of the rare packages that requires .la files to be
+    installed in order to work.
     """
     requires = (
         ('Strip', policy.CONDITIONAL_PRIOR),

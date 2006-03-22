@@ -21,8 +21,21 @@ from conary.build import policy
 
 class EtcConfig(policy.EnforcementPolicy):
     """
-    Deprecated class included only for backwards compatibility; use
-    C{Config} instead.
+    NAME
+    ====
+
+    B{C{r.EtcConfig()}} - DEPRECATED CLASS
+
+    SYNOPSIS
+    ========
+
+    Do not use
+
+    DESCRIPTION
+    ===========
+
+    The C{r.EtcConfig()} class is a deprecated class, included only for
+    backwards compatibility.  Use C{r.Config} instead.
     """
     def updateArgs(self, *args, **keywords):
         self.warn('EtcConfig deprecated, please use Config instead')
@@ -33,7 +46,21 @@ class EtcConfig(policy.EnforcementPolicy):
 
 class InstallBucket(policy.EnforcementPolicy):
     """
-    Stub for older recipes
+    NAME
+    ====
+
+    B{C{r.InstallBucket()}} - STUB CLASS
+
+    SYNOPSIS
+    ========
+
+    Do not use
+
+    DESCRIPTION
+    ===========
+
+    The C{r.InstallBucket()} policy is a stub, included only for backwards
+    compatibility, and should be removed from use in recipes.
     """
     def updateArgs(self, *args, **keywords):
         self.warn('Install buckets are deprecated')
@@ -44,7 +71,21 @@ class InstallBucket(policy.EnforcementPolicy):
 
 class User(policy.EnforcementPolicy):
     """
-    Stub for older recipes
+    NAME
+    ====
+
+    B{C{r.User()}} - STUB CLASS
+
+    SYNOPSIS
+    ========
+
+    Do not use
+
+    DESCRIPTION
+    ===========
+
+    The C{r.User()} policy is a stub, included only for backwards
+    compatibility, and should be removed from use in recipes.
     """
     def updateArgs(self, *args, **keywords):
         self.warn('User policy is deprecated, create a separate UserInfoRecipe instead')
@@ -55,7 +96,21 @@ class User(policy.EnforcementPolicy):
 
 class SupplementalGroup(policy.EnforcementPolicy):
     """
-    Stub for older recipes
+    NAME
+    ====
+
+    B{C{r.User()}} - STUB CLASS
+
+    SYNOPSIS
+    ========
+
+    Do not use
+
+    DESCRIPTION
+    ===========
+
+    The C{r.SupplementalGroup()} policy is a stub, included only for
+    backwards compatibility, and should be removed from use in recipes.
     """
     def updateArgs(self, *args, **keywords):
         self.warn('SupplementalGroup policy is deprecated, create a separate GroupInfoRecipe instead')
@@ -66,7 +121,21 @@ class SupplementalGroup(policy.EnforcementPolicy):
 
 class Group(policy.EnforcementPolicy):
     """
-    Stub for older recipes
+    NAME
+    ====
+
+    B{C{r.Group()}} - STUB CLASS
+
+    SYNOPSIS
+    ========
+
+    Do not use
+
+    DESCRIPTION
+    ===========
+
+    The C{r.Group()} policy is a stub, included only for backwards
+    compatibility, and should be removed from use in recipes.
     """
     def updateArgs(self, *args, **keywords):
         self.warn('Group policy is deprecated, create a separate GroupInfoRecipe instead')

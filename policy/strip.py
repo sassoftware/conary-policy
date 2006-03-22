@@ -23,9 +23,33 @@ from conary.build import macros, policy
 
 class Strip(policy.DestdirPolicy):
     """
-    Strips executables and libraries of debugging information.
-    May (depending on configuration) save the debugging information
-    for future use.
+    NAME
+    ====
+
+    B{C{r.Strip()}} - Strip debugging information from executables and
+    libraries
+
+    SYNOPSIS
+    ========
+
+    C{r.Strip([I{filterexp}] I{exceptions=filterexp}])}
+
+    DESCRIPTION
+    ===========
+
+    The C{r.Strip()} policy strips executables and libraries of debugging
+    information.
+
+    Depending upon configuration, C{r.Strip} may save the debugging
+    information for future use.
+
+    EXAMPLES
+    ========
+
+    C{r.Strip(exceptions='%(essentiallibdir)s/libpthread-.*.so')}
+
+    This file needs to be handled differently to allow threaded
+    debugging, so do not use the C{r.Strip} policy on it.
     """
     invariantinclusions = [
         ('%(bindir)s/', None, stat.S_IFDIR),
@@ -117,7 +141,7 @@ class Strip(policy.DestdirPolicy):
             else:
                 if m.name == 'ar' or path.endswith('.o'):
                     # just in case strip is eu-strip, which segfaults
-                    # whenever it touches an ar archive, and seems to 
+                    # whenever it touches an ar archive, and seems to
                     # break some .o files
                     util.execute('%(strip_archive)s ' %self.dm +fullpath)
                 else:

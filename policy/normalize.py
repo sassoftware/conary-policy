@@ -23,15 +23,35 @@ from conary.build import policy
 
 class NormalizeCompression(policy.DestdirPolicy):
     """
-    Compresses files with maximum compression and without data that can
-    change from invocation to invocation;
-    C{r.NormalizeCompression(exceptions=I{filterexp}} to disable this
-    policy for a file.
+    NAME
+    ====
+
+    B{C{r.NormalizeCompression()}} - Compress files with maximum compression
+
+    SYNOPSIS
+    ========
+
+    C{r.NormalizeCompression([I{filterexp}] I{exceptions=filterexp}])}
+
+    DESCRIPTION
+    ===========
+
+    The C{r.NormalizeCompression()} policy compresses files with maximum
+    compression, and without data which may change from invocation, to
+    invocation.
 
     Recompresses .gz files with -9 -n, and .bz2 files with -9, to get maximum
     compression and avoid meaningless changes overpopulating the database.
-    Ignores man/info pages, as we get them separately while making other
+    Ignores man/info pages, as they are encountered separately while making other
     changes to man/info pages later.
+
+    EXAMPLES
+    ========
+
+    C{r.NormalizeCompression(exceptions='%(thistestdir)s/.*')}
+
+    This package has test files that are tested byte-for-byte and
+    cannot be modified at all and still pass the tests.
     """
     invariantexceptions = [
         '%(mandir)s/man.*/',
@@ -75,14 +95,34 @@ class NormalizeCompression(policy.DestdirPolicy):
 
 class NormalizeManPages(policy.DestdirPolicy):
     """
-    Make all man pages follow sane system policy; not called from recipes,
-    as there are no exceptions, period.
-     - Fix all man pages' contents:
-       - remove instances of C{/?%(destdir)s} from all man pages
-       - C{.so foo.n} becomes a symlink to foo.n
-     - (re)compress all man pages with gzip -f -n -9
-     - change all symlinks to point to .gz (if they don't already)
-     - make all man pages be mode 644
+    NAME
+    ====
+
+    B{C{r.RemoveNonPackageFiles()}} - Make all man pages follow sane system policy
+
+    SYNOPSIS
+    ========
+
+    C{r.RemoveNonPackageFiles([I{filterexp}] I{exceptions=filterexp}])}
+
+    DESCRIPTION
+    ===========
+
+    The C{r.RemoveNonPackageFiles()} policy makes all system manual pages
+    follow sane system policy
+
+    Note: This policy class is not called directly from recipes, and does not
+    honor exceptions.
+
+    Some of the following tasks are performed against system manual pages via
+    C{r.NormalizeManPages}:
+
+    - Fix all man pages' contents:
+    - remove instances of C{/?%(destdir)s} from all man pages
+    - C{.so foo.n} becomes a symlink to foo.n
+    - (re)compress all man pages with gzip -f -n -9
+    - change all symlinks to point to .gz (if they don't already)
+    - make all man pages be mode 644
     """
     requires = (
         ('ReadableDocs', policy.CONDITIONAL_SUBSEQUENT),
@@ -235,9 +275,28 @@ class NormalizeManPages(policy.DestdirPolicy):
 
 class NormalizeInfoPages(policy.DestdirPolicy):
     """
-    Properly compress info files and remove dir file; only recipe invocation is
-    C{r.NormalizeInfoPages(r.macros.infodir+'/dir')} in the one recipe that
-    should own the info dir file.
+    NAME
+    ====
+
+    B{C{r.NormalizeInfoPages()}} - Compress files with maximum compression
+
+    SYNOPSIS
+    ========
+
+    C{r.NormalizeInfoPages([I{filterexp}] I{exceptions=filterexp}])}
+
+    DESCRIPTION
+    ===========
+
+    The C{r.NormalizeInfoPages()} policy properly compresses info files,
+    and removes the info directory file.
+
+    EXAMPLES
+    ========
+
+    The only recipe invocation possible for C{r.NormalizeInfoPages} is
+    C{r.NormalizeInfoPages(exceptions='%(infodir)s/dir')} in the recipe that
+    should own the info directory file (normally texinfo).
     """
     requires = (
         ('ReadableDocs', policy.CONDITIONAL_SUBSEQUENT),
@@ -274,12 +333,23 @@ class NormalizeInfoPages(policy.DestdirPolicy):
 
 class NormalizeInitscriptLocation(policy.DestdirPolicy):
     """
-    Puts initscripts in their place, resolving ambiguity about their
-    location.
+    NAME
+    ====
 
-    Moves all initscripts from /etc/rc.d/init.d/ to their official location
-    (if, as is true for the default settings, /etc/rc.d/init.d isn't their
-    official location, that is).
+    B{C{r.NormalizeInitscriptLocation()}} - Properly locates initscripts
+
+    SYNOPSIS
+    ========
+
+    C{r.NormalizeInitscriptLocation([I{filterexp}] I{exceptions=filterexp}])}
+
+    DESCRIPTION
+    ===========
+
+    The C{r.NormalizeInitscriptLocation()} policy puts initscripts in their
+    proper location, resolving ambiguity about their proper location.
+
+    Moves all initscripts from /etc/rc.d/init.d/ to their official location.
     """
 
     requires = (
@@ -309,8 +379,29 @@ class NormalizeInitscriptLocation(policy.DestdirPolicy):
 
 class NormalizeInitscriptContents(policy.DestdirPolicy):
     """
-    Fixes common errors within init scripts, and adds some dependencies
-    if needed.
+    NAME
+    ====
+
+    B{C{r.NormalizeInitscriptContents()}} - Fixes common errors within init scripts
+
+    SYNOPSIS
+    ========
+
+    C{r.NormalizeInitscriptContents([I{filterexp}] I{exceptions=filterexp}])}
+
+    DESCRIPTION
+    ===========
+
+    The C{r.NormalizeInitscriptContents()} policy fixes common errors within
+    init scripts, and adds some dependencies if needed.
+
+    EXAMPLES
+    ========
+
+    C{r.NormalizeInitscriptContents(exeptions='%(initdir)s/foo')}
+
+    Use this in the unprecedented case that C{r.NormalizeInitscriptContents}
+    damages an init script.
     """
     requires = (
         # for invariantsubtree to be sufficient
@@ -338,9 +429,23 @@ class NormalizeInitscriptContents(policy.DestdirPolicy):
 
 class NormalizeAppDefaults(policy.DestdirPolicy):
     """
-    There is some disagreement about where to put X app-defaults
-    files; this policy resolves that disagreement, and no exceptions
-    are recommended.
+    NAME
+    ====
+
+    B{C{r.NormalizeAppDefaults()}} - Locate X application defaults files
+
+    SYNOPSIS
+    ========
+
+    C{r.NormalizeAppDefaults([I{filterexp}] I{exceptions=filterexp}])}
+
+    DESCRIPTION
+    ===========
+
+    The C{r.NormalizeAppDefaults()} policy locates X application defaults
+    files.
+
+    No exceptions to this policy are recommended.
     """
     def do(self):
         e = '%(destdir)s/%(sysconfdir)s/X11/app-defaults' % self.macros
@@ -360,13 +465,34 @@ class NormalizeAppDefaults(policy.DestdirPolicy):
 
 class NormalizeInterpreterPaths(policy.DestdirPolicy):
     """
-    Interpreter paths in scripts vary; this policy re-writes the
-    paths, in particular changing indirect calls through env to
-    direct calls; exceptions to this policy should only be made
-    when it is part of the explicit calling convention of a script
-    that the location of the final interpreter depend on the
-    user's C{PATH}:
-    C{r.NormalizeInterpreterPaths(exceptions=I{filterexp})}
+    NAME
+    ====
+
+    B{C{r.NormalizeInterpreterPaths()}} - Rewrites interpreter paths in
+    scripts
+
+    SYNOPSIS
+    ========
+
+    C{r.NormalizeInterpreterPaths([I{filterexp}] I{exceptions=filterexp}])}
+
+    DESCRIPTION
+    ===========
+
+    The C{r.NormalizeInterpreterPaths()} policy re-writes the paths, in
+    particular changing indirect calls through env to direct calls.
+
+    Exceptions to this policy should only be made when they are part of the
+    explicit calling convention of a script where the location of the final
+    interpreter depend on the user's C{PATH}.
+
+    EXAMPLES
+    ========
+
+    C{r.NormalizeInterpreterPaths(exceptions=".*")}
+
+    Do not modify any interpreter paths for this package.  Not
+    generally recommended.
     """
     invariantexceptions = [ '%(thisdocdir.literalRegex)s/', ]
 
@@ -398,7 +524,7 @@ class NormalizeInterpreterPaths(policy.DestdirPolicy):
                 if fullintpath == None:
                     self.error("Interpreter %s for file %s not found, could not convert from /usr/bin/env syntax", wordlist[0], path)
                     return
-                
+
                 wordlist[0] = fullintpath
                 l.insert(0, '#!'+" ".join(wordlist)+'\n')
                 f.seek(0)
@@ -414,12 +540,24 @@ class NormalizeInterpreterPaths(policy.DestdirPolicy):
 
 class NormalizePamConfig(policy.DestdirPolicy):
     """
-    Some older PAM configuration files include "/lib/security/$ISA/"
-    as part of the module path; there is no need for this prefix
-    with modern PAM libraries.
+    NAME
+    ====
 
-    You should never need to run
-    C{r.NormalizePamConfig(exceptions=I{filterexp})}
+    B{C{r.NormalizePamConfig()}} - Adjust PAM configuration files
+
+    SYNOPSIS
+    ========
+
+    C{r.NormalizePamConfig([I{filterexp}] I{exceptions=filterexp}])}
+
+    DESCRIPTION
+    ===========
+
+    The C{r.NormalizePamConfig()} policy adjusts PAM configuration files, and
+    remove references to older module paths such as: C{/lib/security/$ISA} as
+    there is no need for such paths in modern PAM libraries.
+
+    Exceptions to this policy should never be required.
     """
     invariantsubtrees = [
         '%(sysconfdir)s/pam.d/',

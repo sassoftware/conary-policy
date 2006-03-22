@@ -22,10 +22,43 @@ from conary.lib import util
 
 class AutoDoc(policy.DestdirPolicy):
     """
-    Automatically adds likely documentation not otherwise installed;
-    exceptions passed in via C{r.AutoDoc(exceptions=I{filterexpression})}
-    are evaluated relative to the C{%(builddir)s}, not the
-    C{%(destdir)s}.
+    NAME
+    ====
+
+    B{C{r.AutoDoc()}} - Adds likely documentation not otherwise installed
+
+    SYNOPSIS
+    ========
+
+    C{r.AutoDoc([I{filterexp}] || [I{exceptions=filterexp}])}
+
+    DESCRIPTION
+    ===========
+
+    The C{r.AutoDoc()} policy ensures likely documentation not otherwise
+    installed is added automatically. Exceptions to the policy are
+    passed in via C{r.AutoDoc(I{exceptions=filterexpression})}, and  are
+    evaluated relative to the build directory, and not the destination
+    directory.
+
+    EXAMPLES
+    ========
+
+    C{r.AutoDoc('COPYRIGHT.PATENT', 'GPL_LICENSE.txt')}
+
+    Adds the documentation files C{COPYRIGHT.PATENT}, and C{GPL_LICENSE.txt},
+    wherever they are found in the source tree.
+
+    C{r.AutoDoc(exceptions='/')}
+
+    Effectively disables the C{AutoDoc} policy.
+
+    C{r.AutoDoc(exceptions='foo/TODO')}
+
+    Prevents any file whose pathname includes C{foo/TODO} from
+    being added to the package by the C{AutoDoc} policy, while
+    still allowing the C{AutoDoc} policy to add other C{TODO}
+    files to the package.
     """
 
     requires = (

@@ -21,8 +21,21 @@ from conary.build import policy
 
 class ReadableDocs(policy.DestdirPolicy):
     """
-    Documentation should always be world readable
-    C{r.ReadableDocs(exceptions=I{filterexp})}
+    NAME
+    ====
+
+    B{C{r.ReadableDocs()}} - Sets documentation file modes
+
+    SYNOPSIS
+    ========
+
+    C{r.ReadableDocs([I{filterexp}] I{exceptions=filterexp}])}
+
+    DESCRIPTION
+    ===========
+
+    C{r.ReadableDocs()} policy sets documentation file modes to
+    world-readable.  This policy should not require exceptions.
     """
     invariantsubtrees = [
         '%(thisdocdir)s/',
@@ -46,8 +59,23 @@ class ReadableDocs(policy.DestdirPolicy):
 
 class WarnWriteable(policy.EnforcementPolicy):
     """
-    Warns about unexpectedly group- or other-writeable files; rather
-    than set exceptions to this policy, use C{r.SetModes} so that the
+    NAME
+    ====
+
+    B{C{r.WarnWriteable()}} - Warns about unexpectedly writeable files
+
+    SYNOPSIS
+    ========
+
+    C{r.WarnWriteable([I{filterexp}] I{exceptions=filterexp}])}
+
+    DESCRIPTION
+    ===========
+
+    The C{r.WarnWriteable()} policy warns about unexpected group-writeable,
+    or other-writeable files.
+
+    Rather than set exceptions to this policy, use C{r.SetModes} so that the
     open permissions are explicit and expected.
     """
 
@@ -75,10 +103,23 @@ class WarnWriteable(policy.EnforcementPolicy):
 
 class WorldWriteableExecutables(policy.EnforcementPolicy):
     """
-    No executable file should ever be world-writeable.  If you have an
-    exception, you can use:
-    C{r.WorldWriteableExecutables(exceptions=I{filterexp})}
-    But you should never have an exception.
+    NAME
+    ====
+
+    B{C{r.WorldWriteableExecutables()}} - Warns about world-writeable executable files
+
+    SYNOPSIS
+    ========
+
+    C{r.WorldWriteableExecutables([I{filterexp}] I{exceptions=filterexp}])}
+
+    DESCRIPTION
+    ===========
+
+    The C{r.WorldWriteableExecutables()} policy warns about world-writeable
+    executable files
+
+    Exceptions to this policy should not be required.
     """
     # Note that this policy is separate from WarnWriteable because
     # calling r.SetModes should not override this policy automatically.
@@ -94,10 +135,27 @@ class WorldWriteableExecutables(policy.EnforcementPolicy):
 
 class IgnoredSetuid(policy.EnforcementPolicy):
     """
-    Files/directories that are setuid/setgid in the filesystem
-    but do not have that mode explicitly set in the recipe will
-    be packaged without setuid/setgid bits set.  This might be
-    a bug, so flag it with a warning.
+    NAME
+    ====
+
+    B{C{r.IgnoredSetuid()}} - Warns about world-writeable executable files
+
+    SYNOPSIS
+    ========
+
+    C{r.IgnoredSetuid([I{filterexp}] I{exceptions=filterexp}])}
+
+    DESCRIPTION
+    ===========
+
+    The C{r.IgnoredSetuid()} policy warns about files with setuid/setgid
+    bits in the filesystem which differ from those explicitly set in the
+    recipe.
+
+    Such files will be packaged with no setuid/setid bits set.
+
+    Instead of providing an exception to this policy, use the
+    C{r.SetModes} command to explicitly set the setuid/setgid bits.
     """
     def doFile(self, path):
 	fullpath = self.macros.destdir + path

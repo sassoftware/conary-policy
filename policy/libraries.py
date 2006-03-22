@@ -37,13 +37,39 @@ librarydirs = [
 
 class SharedLibrary(policy.PackagePolicy):
     """
-    Mark system shared libaries as such so that ldconfig will be run:
+    NAME
+    ====
+
+    B{C{r.SharedLibrary()}} - Mark system shared libraries
+
+    SYNOPSIS
+    ========
+
+    C{r.SharedLibrary([I{filterexp}] || [I{subtrees=path}])}
+
+    DESCRIPTION
+    ===========
+
+    The C{r.SharedLibrary()} policy marks system shared libraries such
+    that C{ldconfig} will be run.
+
     C{r.SharedLibrary(subtrees=I{path})} to mark a path as containing
     shared libraries; C{r.SharedLibrary(I{filterexp})} to mark a file.
 
     C{r.SharedLibrary} does B{not} walk entire directory trees.  Every
     directory that you want to add must be passed in using the
     C{subtrees} keyword.
+
+    EXAMPLES
+    ========
+
+    C{r.SharedLibrary(subtrees='%(libdir)s/mysql/')}
+
+    Causes the C{%(libdir)s/mysql/} directory to be considered as a
+    source of shared libraries; files in that directory will be marked
+    as shared libraries, all appropriate actions will be taken at
+    install time, and Conary policies enforcing appropriate practices
+    for libraries will be enabled for that directory.
     """
     requires = (
         ('ExecutableLibraries', policy.REQUIRED),
@@ -89,8 +115,30 @@ class SharedLibrary(policy.PackagePolicy):
 
 class FixupMultilibPaths(policy.DestdirPolicy):
     """
-    Fix up (and warn) when programs do not know about C{%(lib)s} and they
-    are supposed to be installing to C{lib64} but install to C{lib} instead.
+    NAME
+    ====
+
+    B{C{r.FixupMultilibPaths()}} - Fix up and warn about files installed in directories that do not allow side-by-side installation of multilib-capable libraries
+
+    SYNOPSIS
+    ========
+
+    C{r.FixupMultilibPaths([I{filterexp}] I{exceptions=filterexp}])}
+
+    DESCRIPTION
+    ===========
+
+    The C{r.FixupMultilibPaths()} policy fixes up and warns about programs
+    which do not know about C{%(lib)s}, and attempt to install to C{lib}
+    when they should be installing to C{lib64} instead.
+
+    EXAMPLES
+    ========
+
+    C{r.FixupMultilibPaths(exceptions='.*')}
+
+    This package is explicitly not multilib and the policy should not
+    run (extremely rare).
     """
     requires = (
         ('ExecutableLibraries', policy.CONDITIONAL_SUBSEQUENT),
@@ -129,7 +177,7 @@ class FixupMultilibPaths(policy.DestdirPolicy):
         currentsubtree = self.currentsubtree % self.macros
         targetdir = self.dirmap[currentsubtree]
         # we want to append whatever path came after the currentsubtree -
-        # e.g. if the original path is /usr/lib/subdir/libfoo.a, 
+        # e.g. if the original path is /usr/lib/subdir/libfoo.a,
         # we still need to add the /subdir/
         targetdir += os.path.dirname(path[len(currentsubtree):])
         target = util.joinPaths(targetdir, basename)
@@ -141,7 +189,7 @@ class FixupMultilibPaths(policy.DestdirPolicy):
                 # one or both might be symlinks, in which case we do
                 # not want to touch this
                 return
-            if ('abi' in m.contents and 'abi' in tm.contents 
+            if ('abi' in m.contents and 'abi' in tm.contents
                 and m.contents['abi'] != tm.contents['abi']):
                 # path and target both exist and are of different abis.
                 # This means that this is actually a multilib package
@@ -199,12 +247,25 @@ class FixupMultilibPaths(policy.DestdirPolicy):
 
 class ExecutableLibraries(policy.DestdirPolicy):
     """
-    The C{ldconfig} program will complain if libraries do not have have
-    executable bits set; this policy changes the mode and warns that
-    it has done so.
+    NAME
+    ====
 
-    Do not invoke C{r.ExecutableLibraries()} from recipes; invoke
-    C{r.SharedLibrary(subtrees='/path/to/libraries/')} instead.
+    B{C{r.ExecutableLibraries()}} - Set executable bits on library files
+
+    SYNOPSIS
+    ========
+
+    C{r.ExecutableLibraries([I{filterexp}] I{exceptions=filterexp}])}
+
+    DESCRIPTION
+    ===========
+
+    The C{r.ExecutableLibraries()} policy changes the mode on library files,
+    and warn that it has done so to prevent issues with C{ldconfig}, which
+    expects library files to have their executable bits set.
+
+    Note: Do not invoke C{r.ExecutableLibraries()} directly from recipes.
+    Invoke C{r.SharedLibrary(subtrees='/path/to/libraries/')} instead.
     """
     requires = (
         ('SharedLibrary', policy.REQUIRED),
@@ -229,9 +290,32 @@ class ExecutableLibraries(policy.DestdirPolicy):
 
 class CheckSonames(policy.EnforcementPolicy):
     """
-    Warns about various possible shared library packaging errors:
-    C{r.CheckSonames(exceptions=I{filterexp})} for things like directories
+    NAME
+    ====
+
+    B{C{r.CheckSonames()}} - Warns about shared library packaging errors
+
+    SYNOPSIS
+    ========
+
+    C{r.CheckSonames([I{filterexp}] I{exceptions=filterexp}])}
+
+    DESCRIPTION
+    ===========
+
+    The C{r.CheckSonames()} policy warns about various possible shared
+    library packaging errors.
+
+    Use C{r.CheckSonames(exceptions=I{filterexp})} for things like directories
     full of plugins.
+
+    EXAMPLES
+    ========
+
+    C{r.CheckSonames(exceptions='%(libdir)s/libkdeinit_.*')}
+
+    All the C{libkdeinit_*} files are plugins and do not follow standard
+    shared library conventions; this is not an error.
     """
     requires = (
         ('SharedLibrary', policy.REQUIRED),
@@ -291,16 +375,30 @@ class CheckSonames(policy.EnforcementPolicy):
 
 class NormalizeLibrarySymlinks(policy.DestdirPolicy):
     """
-    Runs the ldconfig program in each system library directory.
-    Without this, when ldconfig is run from the shlib tag handler,
-    it can create unowned symlinks that are later packaged and
-    cause problems updating because a newly-packaged file already
-    exists on the filesystem.
+    NAME
+    ====
 
-    Pass in additional system libraries only by calling
-    C{r.SharedLibrary(subtrees='I{/path/to/libraries/}')}; do not
-    pass them in directly.  Exceptions can be passed in directly by
-    calling C{r.NormalizeLibrarySymlinks(exceptions='I{/path/to/libraries/}')}.
+    B{C{r.NormalizeLibrarySymlinks()}} - Executes ldconfig in each system
+    library directory
+
+    SYNOPSIS
+    ========
+
+    C{r.NormalizeLibrarySymlinks([I{filterexp}] I{exceptions=filterexp}])}
+
+    DESCRIPTION
+    ===========
+
+    The C{r.NormalizeLibrarySymlinks()} policy runs the C{ldconfig} program
+    in each system library directory.
+
+    Without use of this policy class, unowned symlinks may be created when
+    C{ldconfig} is run from the shlib tag handler which may then be packaged,
+    and cause problems with updating due to newly-packaged files already
+    existing on the filesystem.
+
+    Note: Do not invoke C{r.NormalizeLibrarySymlinks()} directly from recipes.
+    Invoke C{r.SharedLibrary(subtrees='/path/to/libraries/')} instead.
     """
     requires = (
         ('SharedLibrary', policy.REQUIRED),

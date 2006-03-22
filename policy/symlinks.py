@@ -21,9 +21,23 @@ from conary.lib import util
 
 class RelativeSymlinks(policy.DestdirPolicy):
     """
-    Makes all symlinks relative; create absolute symlinks in your
-    recipes, and this will create minimal relative symlinks from them;
-    C{r.RelativeSymlinks(exceptions=I{filterexp})}
+   NAME
+    ====
+
+    B{C{r.RelativeSymlinks()}} - Create relative symbolic links
+
+    SYNOPSIS
+    ========
+
+    C{r.RelativeSymlinks([filterexp])}
+
+    DESCRIPTION
+    ===========
+
+    The C{r.RelativeSymlinks()} policy makes symbolic links relative.
+
+    Create absolute symbolic links in your recipes, and C{r.RelativeSymlinks}
+    will create minimal relative symbolic links from them.
     """
     def doFile(self, path):
         fullpath = self.macros['destdir']+path
@@ -47,14 +61,35 @@ class RelativeSymlinks(policy.DestdirPolicy):
 
 class DanglingSymlinks(policy.PackagePolicy):
     """
-    Disallow dangling symbolic links (symbolic links which point to
-    files which do not exist):
-    C{DanglingSymlinks(exceptions=I{filterexp})} for intentionally
-    dangling symlinks.
-    
+    NAME
+    ====
+
+    B{C{r.DanglingSymlinks()}} - Disallow dangling symbolic links
+
+    SYNOPSIS
+    ========
+
+    C{r.DanglingSymlinks([filterexp] || [I{exceptions=filterexp})}
+
+    DESCRIPTION
+    ===========
+
+    The C{r.DanglingSymlinks()} policy enforces the absence of dangling
+    symbolic links; that is, symbolic links pointing to targets which no
+    longer exist.
+
     If you know that a dangling symbolic link created by your package
     is fulfilled by another package on which your package depends,
     you may set up an exception for that file.
+
+    EXAMPLES
+    ========
+
+    C{r.DanglingSymlinks(exceptions='%(htconfdir)s/run')}
+
+    The C{%(htconfdir)s/run} file is a symlink that is intentionally
+    left dangling within this package, because we know that it will
+    be satisfied by runtime dependencies at installation time.
     """
     invariantexceptions = (
 	'%(testdir)s/.*', )

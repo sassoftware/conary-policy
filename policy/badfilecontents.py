@@ -21,9 +21,31 @@ from conary.build import policy
 
 class NonBinariesInBindirs(policy.EnforcementPolicy):
     """
-    Directories that are specifically for binaries should have only
-    files that have some executable bit set:
-    C{r.NonBinariesInBindirs(exceptions=I{filterexp})}
+    NAME
+    ====
+
+    B{C{r.NonBinariesInBindirs()}} - Enforces executable bits on files in
+    binary directories
+
+    SYNOPSIS
+    ========
+
+    C{r.NonBinariesInBindirs([I{filterexp}] || [I{exceptions=filterexp}])}
+
+    DESCRIPTION
+    ===========
+
+    The C{r.NonBinariesInBindirs()} policy ensures that files residing in
+    directories which are explicitly for binary files have some executable
+    bit set.
+
+    EXAMPLES
+    ========
+
+    C{r.NonBinariesInBindirs(exceptions='.*')}
+
+    Uses C{r.NonBinariesInBindirs} to except all files in the destination
+    directory from the requirement to have executable bits set on them.
     """
     invariantexceptions = [ ('.*', stat.S_IFDIR) ]
     invariantsubtrees = [
@@ -56,9 +78,28 @@ class NonBinariesInBindirs(policy.EnforcementPolicy):
 
 class FilesInMandir(policy.EnforcementPolicy):
     """
-    The C{%(mandir)s} directory should normally have only files in it;
-    the main cause of files in C{%(mandir)s} is confusion in packages
-    about whether "mandir" means /usr/share/man or /usr/share/man/man<n>.
+    NAME
+    ====
+
+    B{C{r.FilesInMandir()}} - Enforces man pages being added to
+    section directories
+
+    SYNOPSIS
+    ========
+
+    C{r.FilesInMandir([I{filterexp}] || [I{exceptions=filterexp}])}
+
+    DESCRIPTION
+    ===========
+
+    The C{r.FilesInMandir()}  policy ensures that system manual page
+    directories contain only other directories, and not files,
+    so that manual pages are installed into specific sections where
+    the man command will find them.
+
+    The main cause of files in C{%(mandir)s} is confusion in packages
+    about whether C{%(mandir)s} means /usr/share/man or
+    (for example) /usr/share/man/man1.
     """
     invariantsubtrees = [
         '%(mandir)s',
@@ -76,8 +117,24 @@ class FilesInMandir(policy.EnforcementPolicy):
 
 class BadInterpreterPaths(policy.EnforcementPolicy):
     """
-    Interpreters must not use relative paths.  There should be no
-    exceptions outside of %(thisdocdir)s.
+    NAME
+    ====
+
+    B{C{r.BadInterpreterPaths()}} - Enforces absolute interpreter paths
+
+    SYNOPSIS
+    ========
+
+    C{r.BadInterpreterPaths([I{filterexp}] || [I{exceptions=filterexp}])}
+
+    DESCRIPTION
+    ===========
+
+    The C{r.BadInterpreterPaths()} policy ensures that all paths referring
+    to an interpreter instance are absolute, and not relative paths.
+
+    No exceptions to this policy should occur outside of C{%(thisdocdir)s},
+    and C{%(thisdocdir)s} is implicitly ignored by this policy.
     """
     invariantexceptions = [ '%(thisdocdir.literalRegex)s/', ]
 
@@ -102,9 +159,35 @@ class BadInterpreterPaths(policy.EnforcementPolicy):
 
 class ImproperlyShared(policy.EnforcementPolicy):
     """
-    The C{%(datadir)s} directory (normally /usr/share) is intended for
-    data that can be shared between architectures; therefore, no
-    ELF files should be there.
+    NAME
+    ====
+
+    B{C{r.ImproperlyShared()}} - Enforces shared data directory content
+
+    SYNOPSIS
+    ========
+
+    C{r.ImproperlyShared([I{filterexp}] || [I{exceptions=filterexp}])}
+
+    DESCRIPTION
+    ===========
+
+    The C{r.ImproperlyShared()} policy ensures that the C{%(datadir)s}
+    directory, (normally C{/usr/share}) contains data which can be shared
+    between architectures.
+
+    Files which are architecture-specific, such as ELF files, should not
+    reside in C{%(datadir)s}..
+
+    EXAMPLES
+    ========
+
+    C{r.ImproperlyShared(exceptions='%(datadir)s/.*')}
+
+    The contents of C{%(datadir)s} are excepted from the policy, allowing
+    architecture-dependent data.  (This might be done in a package which
+    contains files which are not used directly, but rather used in other
+    contexts; for example, binary files interpreted only by emulators.)
     """
     invariantsubtrees = [ '/usr/share/' ]
 
@@ -121,17 +204,38 @@ class ImproperlyShared(policy.EnforcementPolicy):
 
 class CheckDesktopFiles(policy.EnforcementPolicy):
     """
-    Warns about possible errors in desktop files, such as missing icon
-    files; C{r.CheckDesktopFiles(exceptions=I{filterexp}} if (for
-    example) an icon is provided somehow, directly or indirectly, by a
-    runtime requirement of this package.
+    NAME
+    ====
 
-    C{CheckDesktopFiles} looks for icon files in C{%(destdir)s/%(datadir)s},
-    C{%(datadir)s/icons}, and C{%(datadir)s/pixmaps}; you can add additional
-    directories (which will be searched both within C{%(destdir)s} and 
-    relative to C{/}) with C{CheckDesktopFiles(iconDirs='I{/path/to/dir}')} 
-    or C{CheckDesktopFiles(iconDirs=('I{/path/to/dir1}', 
-    'I{/path/to/dir2}'))}
+    B{C{r.CheckDesktopFiles()}} - Warns about possible errors in desktop files
+
+    SYNOPSIS
+    ========
+
+    C{r.CheckDesktopFiles([I{filterexp}] || [I{exceptions=filterexp}])}
+
+    DESCRIPTION
+    ===========
+
+    The C{r.CheckDesktopFiles()} policy warns about possible errors in
+    desktop files, such as missing icon files.
+
+    Use C{r.CheckDesktopFiles} to search for desktop icon files in the
+    directories C{%(destdir)s/%(datadir)s} and C{%(datadir)s/icons}.
+
+    You can add additional directories (which will be searched both within
+    C{%(destdir)s} and relative to C{/}) with
+    C{CheckDesktopFiles(iconDirs='I{/path/to/dir}')} or
+    C{CheckDesktopFiles(iconDirs=('I{/path/to/dir1}', 'I{/path/to/dir2}'))}
+
+    EXAMPLES
+    ========
+
+    C{r.CheckDesktopFiles(exceptions='%(datadir)s/applications/')}
+
+    Specifies that an element of the package provides an icon in some way
+    through the directory named in the exceptions filter expression
+    (C{%(datadir)s/applications}).
     """
     invariantsubtrees = [ '%(datadir)s/applications/' ]
     invariantinclusions = [ r'.*\.desktop' ]
@@ -192,9 +296,32 @@ class CheckDesktopFiles(policy.EnforcementPolicy):
 
 class RequireChkconfig(policy.EnforcementPolicy):
     """
-    Require that all initscripts provide chkconfig information; the only
-    exceptions should be core initscripts like reboot:
-    C{r.RequireChkconfig(exceptions=I{filterexp})}
+    NAME
+    ====
+
+    B{C{r.RequireChkconfig()}} - Require all initscripts provide chkconfig
+    information
+
+    SYNOPSIS
+    ========
+
+    C{r.RequireChkconfig([I{filterexp}] || [I{exceptions=filterexp}])}
+
+    DESCRIPTION
+    ===========
+
+    The C{r.RequireChkconfig()} policy requires that all initscripts provide
+    chkconfig information.
+
+    The only exceptions should be core initscripts, such as reboot
+
+    EXAMPLES
+    ========
+
+    C{r.RequireChkconfig(exceptions='%(initdir)s/halt')}
+
+    Specifies a core initiscript, C{%(initdir)s/halt} as an exception to the
+    policy.
     """
     invariantsubtrees = [ '%(initdir)s' ]
     def doFile(self, path):
