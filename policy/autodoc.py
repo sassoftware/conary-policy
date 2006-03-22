@@ -46,12 +46,19 @@ class AutoDoc(policy.DestdirPolicy):
 
     C{r.AutoDoc('COPYRIGHT.PATENT', 'GPL_LICENSE.txt')}
 
-    Adds the documentation files C{COPYRIGHT.PATENT}, and C{GPL_LICENSE.txt}.
+    Adds the documentation files C{COPYRIGHT.PATENT}, and C{GPL_LICENSE.txt},
+    wherever they are found in the source tree.
 
     C{r.AutoDoc(exceptions='/')}
 
-    Insructs C{r.AutoDoc} to except any documentation files in the path C{/}
-    from being automatically added.
+    Effectively disables the C{AutoDoc} policy.
+
+    C{r.AutoDoc(exceptions='foo/TODO')}
+
+    Prevents any file whose pathname includes C{foo/TODO} from
+    being added to the package by the C{AutoDoc} policy, while
+    still allowing the C{AutoDoc} policy to add other C{TODO}
+    files to the package.
     """
 
     rootdir = '%(builddir)s'

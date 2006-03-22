@@ -24,23 +24,18 @@ class ReadableDocs(policy.DestdirPolicy):
     NAME
     ====
 
-    B{C{r.NormalizePamConfig()}} - Sets documentation file modes
+    B{C{r.ReadableDocs()}} - Sets documentation file modes
 
     SYNOPSIS
     ========
 
-    C{r.NormalizePamConfig([I{filterexp}] I{exceptions=filterexp}])}
+    C{r.ReadableDocs([I{filterexp}] I{exceptions=filterexp}])}
 
     DESCRIPTION
     ===========
 
-    C{r.NormalizePamConfig()} policy sets documentation file modes to
-    world-readable.
-
-    EXAMPLES
-    ========
-
-    FIXME NEED EXAMPLE
+    C{r.ReadableDocs()} policy sets documentation file modes to
+    world-readable.  This policy should not require exceptions.
     """
     invariantsubtrees = [
         '%(thisdocdir)s/',
@@ -67,7 +62,7 @@ class WarnWriteable(policy.EnforcementPolicy):
     NAME
     ====
 
-    B{C{r.WarnWriteable()}} - Warns about writeable files
+    B{C{r.WarnWriteable()}} - Warns about unexpectedly writeable files
 
     SYNOPSIS
     ========
@@ -82,11 +77,6 @@ class WarnWriteable(policy.EnforcementPolicy):
 
     Rather than set exceptions to this policy, use C{r.SetModes} so that the
     open permissions are explicit and expected.
-
-    EXAMPLES
-    ========
-
-    FIXME NEED EXAMPLE
     """
 
     requires = (
@@ -130,11 +120,6 @@ class WorldWriteableExecutables(policy.EnforcementPolicy):
     executable files
 
     Exceptions to this policy should not be required.
-
-    EXAMPLES
-    ========
-
-    FIXME NEED EXAMPLE
     """
     # Note that this policy is separate from WarnWriteable because
     # calling r.SetModes should not override this policy automatically.
@@ -169,10 +154,8 @@ class IgnoredSetuid(policy.EnforcementPolicy):
 
     Such files will be packaged with no setuid/setid bits set.
 
-    EXAMPLES
-    ========
-
-    FIXME NEED EXAMPLE
+    Instead of providing an exception to this policy, use the
+    C{r.SetModes} command to explicitly set the setuid/setgid bits.
     """
     def doFile(self, path):
 	fullpath = self.macros.destdir + path

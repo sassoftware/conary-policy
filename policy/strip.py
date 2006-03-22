@@ -46,7 +46,10 @@ class Strip(policy.DestdirPolicy):
     EXAMPLES
     ========
 
-    FIXME NEED EXAMPLE
+    C{r.Strip(exceptions='%(essentiallibdir)s/libpthread-.*.so')}
+
+    This file needs to be handled differently to allow threaded
+    debugging, so do not use the C{r.Strip} policy on it.
     """
     invariantinclusions = [
         ('%(bindir)s/', None, stat.S_IFDIR),

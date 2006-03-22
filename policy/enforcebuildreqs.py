@@ -183,7 +183,11 @@ class EnforceSonameBuildRequirements(_enforceBuildRequirements):
     EXAMPLES
     ========
 
-    FIXME NEED EXAMPLE
+    C{r.EnforceSonameBuildRequirements(exceptions='.*')}
+
+    Useful when packaging pre-built executables which do not need to
+    (and cannot) be linked at cook time to development libraries
+    specified in C{buildRequires}.
     """
 
     depClassType = deps.DEP_CLASS_SONAME
@@ -219,15 +223,12 @@ class EnforcePythonBuildRequirements(_enforceBuildRequirements):
 
     The C{r.EnforcePythonBuildRequirements()} policy ensures that Python
     runtime requirements are met by the package, or by components listed in
-    the C{buildRequires} list.
+    the C{buildRequires} list.  In general, missing Python build
+    requirements will translate into missing or incomplete Python
+    runtime requirements.
 
-    Any trove names wrongly suggested can be eliminated from the
-    list with C{r.EnforcePythonBuildRequirements(exceptions='I{pkg}:I{comp}')}.
-
-    EXAMPLES
-    ========
-
-    FIXME NEED EXAMPLE.
+    Any trove names wrongly suggested should be eliminated from consideration
+    by using C{r.Requires(exceptDeps='python: ...')}
     """
 
     depClassType = deps.DEP_CLASS_PYTHON
@@ -264,7 +265,18 @@ class EnforceJavaBuildRequirements(_enforceBuildRequirements):
     EXAMPLES
     ========
 
-    FIXME NEED EXAMPLE
+    C{r.EnforceJavaBuildRequirements(exceptions='.*')}
+
+    This turns off all enforcement of Java build requirements, which is
+    particularly useful when packaging pre-built Java applications.
+
+    If you are packaging an application that includes Java files that
+    are never executed on the system on which they are installed, but
+    are only provided to other systems (likely via HTTP to a remote
+    web browser), then you should instead remove the runtime requirements
+    entirely with C{r.Requires(exceptions='.*\.(java|jar|zip)')} (the
+    fastest approach) or C{r.Requires(exceptDeps='java:.*')} (slower
+    but more accurate).
     """
 
     depClassType = deps.DEP_CLASS_JAVA
@@ -296,12 +308,14 @@ class EnforceCILBuildRequirements(_enforceBuildRequirements):
     C{buildRequires} list.
 
     Any trove names wrongly suggested can be eliminated from the
-    list with C{r.EnforceJavaBuildRequirements(exceptions='I{pkg}:I{comp}')}.
+    list with C{r.EnforceCILBuildRequirements(exceptions='I{pkg}:I{comp}')}.
 
     EXAMPLES
     ========
 
-    FIXME NEED EXAMPLE
+    C{r.EnforceCILBuildRequirements(exceptions='.*')
+
+    Useful when packaging pre-built CIL files.
     """
 
     depClassType = deps.DEP_CLASS_CIL
@@ -326,15 +340,12 @@ class EnforcePerlBuildRequirements(_enforceBuildRequirements):
 
     The C{r.EnforcePerlBuildRequirements()} policy ensures that Perl runtime
     requirements are met by the package, or by components listed in the
-    C{buildRequires} list.
+    C{buildRequires} list.  In general, missing Perl build
+    requirements will translate into missing or incomplete Perl
+    runtime requirements.
 
-    Any trove names wrongly suggested can be eliminated from the
-    list with C{r.EnforceJavaBuildRequirements(exceptions='I{pkg}:I{comp}')}.
-
-    EXAMPLES
-    ========
-
-    FIXME NEED EXAMPLE
+    Any trove names wrongly suggested should be eliminated from consideration
+    by using C{r.Requires(exceptDeps='perl: ...')}
     """
 
     depClassType = deps.DEP_CLASS_PERL
@@ -350,25 +361,30 @@ class EnforceConfigLogBuildRequirements(policy.EnforcementPolicy):
     NAME
     ====
 
-    B{C{r.EnforcePerlBuildRequirements()}} - Ensures that components
+    B{C{r.EnforceConfigLogBuildRequirements()}} - Ensures that components
     mentioned in config.log files are listed as build requirements
 
     SYNOPSIS
     ========
 
-    C{r.EnforcePerlBuildRequirements([I{filterexp}] || [I{/path/to/file/found}] || [I{exceptions='I{pkg}:I{comp}'}])}
+    C{r.EnforceConfigLogBuildRequirements([I{filterexp}] || [I{/path/to/file/found}] || [I{exceptions='I{pkg}:I{comp}'}])}
 
     DESCRIPTION
     ===========
 
-    The C{r.EnforcePerlBuildRequirements()} policy ensures that components
+    The C{r.EnforceConfigLogBuildRequirements()} policy ensures that components
     containing files mentioned in C{config.log} files are listed as build
     requirements.
 
     EXAMPLES
     ========
 
-    FIXME NEED EXAMPLE
+    C{r.EnforceConfigLogBuildRequirements(exceptions='flex:runtime')
+
+    This disables a requirement for flex:runtime; this would normally
+    be because the C{configure} program checked for flex, but does not
+    actually need to run it because the program is shipped with a
+    prebuilt lexical analyzer.
     """
     filetree = policy.BUILDDIR
     invariantinclusions = [ (r'.*/config\.log', 0400, stat.S_IFDIR), ]

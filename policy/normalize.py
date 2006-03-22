@@ -48,7 +48,10 @@ class NormalizeCompression(policy.DestdirPolicy):
     EXAMPLES
     ========
 
-    FIXME NEED EXAMPLE
+    C{r.NormalizeCompression(exceptions='%(thistestdir)s/.*')}
+
+    This package has test files that are tested byte-for-byte and
+    cannot be modified at all and still pass the tests.
     """
     invariantexceptions = [
         '%(mandir)s/man.*/',
@@ -96,7 +99,6 @@ class NormalizeManPages(policy.DestdirPolicy):
     ====
 
     B{C{r.RemoveNonPackageFiles()}} - Make all man pages follow sane system policy
-    be packaged
 
     SYNOPSIS
     ========
@@ -286,14 +288,12 @@ class NormalizeInfoPages(policy.DestdirPolicy):
     The C{r.NormalizeInfoPages()} policy properly compresses info files,
     and removes the info directory file.
 
-    The only recipe invocation possible for C{r.NormalizeInfoPages} is
-    C{r.NormalizeInfoPages(r.macros.infodir+'/dir')} in the recipe that
-    should own the info directory file.
-
     EXAMPLES
     ========
 
-    FIXME NEED EXAMPLE
+    The only recipe invocation possible for C{r.NormalizeInfoPages} is
+    C{r.NormalizeInfoPages(exceptions='%(infodir)s/dir')} in the recipe that
+    should own the info directory file (normally texinfo).
     """
     def do(self):
         dir = self.macros['infodir']+'/dir'
@@ -344,11 +344,6 @@ class NormalizeInitscriptLocation(policy.DestdirPolicy):
     proper location, resolving ambiguity about their proper location.
 
     Moves all initscripts from /etc/rc.d/init.d/ to their official location.
-
-    EXAMPLES
-    ========
-
-    FIXME NEED EXAMPLE
     """
     # need both of the next two lines to avoid following /etc/rc.d/init.d
     # if it is a symlink
@@ -392,7 +387,10 @@ class NormalizeInitscriptContents(policy.DestdirPolicy):
     EXAMPLES
     ========
 
-    FIXME NEED EXAMPLE
+    C{r.NormalizeInitscriptContents(exeptions='%(initdir)s/foo')}
+
+    Use this in the unprecedented case that C{r.NormalizeInitscriptContents}
+    damages an init script.
     """
     requires = (
         # for invariantsubtree to be sufficient
@@ -437,11 +435,6 @@ class NormalizeAppDefaults(policy.DestdirPolicy):
     files.
 
     No exceptions to this policy are recommended.
-
-    EXAMPLES
-    ========
-
-    FIXME NEED EXAMPLE
     """
     def do(self):
         e = '%(destdir)s/%(sysconfdir)s/X11/app-defaults' % self.macros
@@ -485,7 +478,10 @@ class NormalizeInterpreterPaths(policy.DestdirPolicy):
     EXAMPLES
     ========
 
-    FIXME NEED EXAMPLE
+    C{r.NormalizeInterpreterPaths(exceptions=".*")}
+
+    Do not modify any interpreter paths for this package.  Not
+    generally recommended.
     """
     invariantexceptions = [ '%(thisdocdir.literalRegex)s/', ]
 
@@ -536,8 +532,7 @@ class NormalizePamConfig(policy.DestdirPolicy):
     NAME
     ====
 
-    B{C{r.NormalizePamConfig()}} - Adjust PAM configuration
-    scripts
+    B{C{r.NormalizePamConfig()}} - Adjust PAM configuration files
 
     SYNOPSIS
     ========
@@ -552,11 +547,6 @@ class NormalizePamConfig(policy.DestdirPolicy):
     there is no need for such paths in modern PAM libraries.
 
     Exceptions to this policy should never be required.
-
-    EXAMPLES
-    ========
-
-    FIXME NEED EXAMPLE
     """
     invariantsubtrees = [
         '%(sysconfdir)s/pam.d/',

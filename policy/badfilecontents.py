@@ -81,8 +81,8 @@ class FilesInMandir(policy.EnforcementPolicy):
     NAME
     ====
 
-    B{C{r.FilesInMandir()}} - Enforces executable bits on files in
-    binary directories
+    B{C{r.FilesInMandir()}} - Enforces man pages being added to
+    section directories
 
     SYNOPSIS
     ========
@@ -93,15 +93,13 @@ class FilesInMandir(policy.EnforcementPolicy):
     ===========
 
     The C{r.FilesInMandir()}  policy ensures that system manual page
-    directories contain only other directories, and not files.
+    directories contain only other directories, and not files,
+    so that manual pages are installed into specific sections where
+    the man command will find them.
 
     The main cause of files in C{%(mandir)s} is confusion in packages
-    about whether C{%(mandir)s} means /usr/share/man or /usr/share/man/man.
-
-    EXAMPLES
-    ========
-
-    FIXME NEED EXAMPLE
+    about whether C{%(mandir)s} means /usr/share/man or
+    (for example) /usr/share/man/man1.
     """
     invariantsubtrees = [
         '%(mandir)s',
@@ -135,12 +133,8 @@ class BadInterpreterPaths(policy.EnforcementPolicy):
     The C{r.BadInterpreterPaths()} policy ensures that all paths referring
     to an interpreter instance are absolute, and not relative paths.
 
-    No exceptions to this policy should occur outside of C{%(thisdocdir)s}.
-
-    EXAMPLES
-    ========
-
-    FIXME NEED EXAMPLE
+    No exceptions to this policy should occur outside of C{%(thisdocdir)s},
+    and C{%(thisdocdir)s} is implicitly ignored by this policy.
     """
     invariantexceptions = [ '%(thisdocdir.literalRegex)s/', ]
 
@@ -191,7 +185,9 @@ class ImproperlyShared(policy.EnforcementPolicy):
     C{r.ImproperlyShared(exceptions='%(datadir)s/.*')}
 
     The contents of C{%(datadir)s} are excepted from the policy, allowing
-    architecture-dependent data.
+    architecture-dependent data.  (This might be done in a package which
+    contains files which are not used directly, but rather used in other
+    contexts; for example, binary files interpreted only by emulators.)
     """
     invariantsubtrees = [ '/usr/share/' ]
 
@@ -223,7 +219,6 @@ class CheckDesktopFiles(policy.EnforcementPolicy):
 
     The C{r.CheckDesktopFiles()} policy warns about possible errors in
     desktop files, such as missing icon files.
-
 
     Use C{r.CheckDesktopFiles} to search for desktop icon files in the
     directories C{%(destdir)s/%(datadir)s} and C{%(datadir)s/icons}.

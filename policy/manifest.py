@@ -52,12 +52,6 @@ class ParseManifest(policy.PackagePolicy):
     Conary construct.
 
     Warning: tested only with MAKEDEV output so far.
-
-
-    EXAMPLES
-    ========
-
-    FIXME NEED EXAMPLE
     """
 
     requires = (

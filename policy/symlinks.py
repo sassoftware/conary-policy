@@ -38,14 +38,6 @@ class RelativeSymlinks(policy.DestdirPolicy):
 
     Create absolute symbolic links in your recipes, and C{r.RelativeSymlinks}
     will create minimal relative symbolic links from them.
-
-    PARAMETERS
-    ==========
-
-    EXAMPLES
-    ========
-
-    FIXME NEED EXAMPLE
     """
     def doFile(self, path):
         fullpath = self.macros['destdir']+path
@@ -90,13 +82,14 @@ class DanglingSymlinks(policy.PackagePolicy):
     is fulfilled by another package on which your package depends,
     you may set up an exception for that file.
 
-    PARAMETERS
-    ==========
-
     EXAMPLES
     ========
 
-    FIXME NEED EXAMPLE
+    C{r.DanglingSymlinks(exceptions='%(htconfdir)s/run')}
+
+    The C{%(htconfdir)s/run} file is a symlink that is intentionally
+    left dangling within this package, because we know that it will
+    be satisfied by runtime dependencies at installation time.
     """
     invariantexceptions = (
 	'%(testdir)s/.*', )

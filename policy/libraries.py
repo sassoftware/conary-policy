@@ -63,7 +63,13 @@ class SharedLibrary(policy.PackagePolicy):
     EXAMPLES
     ========
 
-    FIXME NEED EXAMPLE
+    C{r.SharedLibrary(subtrees='%(libdir)s/mysql/')}
+
+    Causes the C{%(libdir)s/mysql/} directory to be considered as a
+    source of shared libraries; files in that directory will be marked
+    as shared libraries, all appropriate actions will be taken at
+    install time, and Conary policies enforcing appropriate practices
+    for libraries will be enabled for that directory.
     """
     requires = (
         ('ExecutableLibraries', policy.REQUIRED),
@@ -112,7 +118,7 @@ class FixupMultilibPaths(policy.DestdirPolicy):
     NAME
     ====
 
-    B{C{r.FixupMultilibPaths()}} - Fix up and warn about multilib paths
+    B{C{r.FixupMultilibPaths()}} - Fix up and warn about files installed in directories that do not allow side-by-side installation of multilib-capable libraries
 
     SYNOPSIS
     ========
@@ -129,7 +135,10 @@ class FixupMultilibPaths(policy.DestdirPolicy):
     EXAMPLES
     ========
 
-    FIXME NEED EXAMPLE
+    C{r.FixupMultilibPaths(exceptions='.*')}
+
+    This package is explicitly not multilib and the policy should not
+    run (extremely rare).
     """
     requires = (
         ('Strip', policy.CONDITIONAL_SUBSEQUENT),
@@ -256,11 +265,6 @@ class ExecutableLibraries(policy.DestdirPolicy):
 
     Note: Do not invoke C{r.ExecutableLibraries()} directly from recipes.
     Invoke C{r.SharedLibrary(subtrees='/path/to/libraries/')} instead.
-
-    EXAMPLES
-    ========
-
-    FIXME NEED EXAMPLE
     """
     requires = (
         ('SharedLibrary', policy.REQUIRED),
@@ -304,11 +308,13 @@ class CheckSonames(policy.EnforcementPolicy):
     Use C{r.CheckSonames(exceptions=I{filterexp})} for things like directories
     full of plugins.
 
-
     EXAMPLES
     ========
 
-    FIXME NEED EXAMPLE
+    C{r.CheckSonames(exceptions='%(libdir)s/libkdeinit_.*')}
+
+    All the C{libkdeinit_*} files are plugins and do not follow standard
+    shared library conventions; this is not an error.
     """
     requires = (
         ('SharedLibrary', policy.REQUIRED),
@@ -390,10 +396,8 @@ class NormalizeLibrarySymlinks(policy.DestdirPolicy):
     and cause problems with updating due to newly-packaged files already
     existing on the filesystem.
 
-    EXAMPLES
-    ========
-
-    FIXME NEED EXAMPLE
+    Note: Do not invoke C{r.NormalizeLibrarySymlinks()} directly from recipes.
+    Invoke C{r.SharedLibrary(subtrees='/path/to/libraries/')} instead.
     """
     requires = (
         ('SharedLibrary', policy.REQUIRED),

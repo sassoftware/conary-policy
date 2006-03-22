@@ -26,7 +26,6 @@ class BadFilenames(policy.EnforcementPolicy):
     ====
 
     B{C{r.BadFilenames()}} - Require absence of newlines in filenames
-    information
 
     SYNOPSIS
     ========
@@ -41,11 +40,6 @@ class BadFilenames(policy.EnforcementPolicy):
     protocols.
 
     No exceptions are allowed.
-
-    EXAMPLES
-    ========
-
-    FIXME NEED EXAMPLE
     """
     def test(self):
         assert(not self.exceptions)
@@ -70,13 +64,8 @@ class NonUTF8Filenames(policy.EnforcementPolicy):
     DESCRIPTION
     ===========
 
-    The C{r.NonUTF8Filenames()} policy requires filenames be encoded UTF-8,
-    as that is the standard filename encoding system.
-
-    EXAMPLES
-    ========
-
-    FIXME NEED EXAMPLE
+    The C{r.NonUTF8Filenames()} policy requires filenames be encoded in
+    UTF-8, as that is the standard encoding.
     """
     def doFile(self, path):
         try:
@@ -107,11 +96,6 @@ class NonMultilibComponent(policy.EnforcementPolicy):
     Python and Perl components should generally be under C{/usr/lib}, unless
     they have binaries and are built on a 64-bit platform, in which case
     they should have no files under C{/usr/lib}.
-
-    EXAMPLES
-    ========
-
-    FIXME NEED EXAMPLE
     """
     invariantsubtrees = [
         '%(libdir)s/',
@@ -175,13 +159,8 @@ class NonMultilibDirectories(policy.EnforcementPolicy):
     ===========
 
     The C{r.NonMultilibDirectories()} policy enforces proper directories,
-    relavent to platform. Troves for 32-bit platforms should not normally
+    relevant to platform. Troves for 32-bit platforms should not normally
     contain directories named "C{lib64}".
-
-    EXAMPLES
-    ========
-
-    FIXME NEED EXAMPLE
     """
     invariantinclusions = [ ( '.*/lib64', stat.S_IFDIR ), ]
 
@@ -202,7 +181,7 @@ class CheckDestDir(policy.EnforcementPolicy):
     ====
 
     B{C{r.CheckDestDir()}} - Searches for destination directory in file paths
-    and symbolic links contents
+    and symbolic link contents
 
     SYNOPSIS
     ========
@@ -220,11 +199,6 @@ class CheckDestDir(policy.EnforcementPolicy):
 
     Though files should also not contain C{%(destdir)s}, C{r.CheckDestDir}
     does not search inside files.
-
-    EXAMPLES
-    ========
-
-    FIXME NEED EXAMPLE
     """
     def doFile(self, file):
 	d = self.macros.destdir
@@ -275,11 +249,6 @@ class FilesForDirectories(policy.EnforcementPolicy):
     C{r.Install()} invocations.
 
     This policy does not honor exceptions.
-
-    EXAMPLES
-    ========
-
-    FIXME NEED EXAMPLE
     """
     # This list represents an attempt to pick the most likely directories
     # to make these mistakes with: directories potentially inhabited by
@@ -349,12 +318,7 @@ class ObsoletePaths(policy.EnforcementPolicy):
     The C{r.ObsoletePaths()} policy warns about paths which were at one time
     considered correct, but are now considered obsolete.
 
-    Note: this policy class does not honor exceptions.
-
-    EXAMPLES
-    ========
-
-    FIXME NEED EXAMPLE
+    Note: this policy does not honor exceptions.
     """
 
     requires = (
@@ -400,11 +364,6 @@ class PythonEggs(policy.EnforcementPolicy):
     Python  packages should be built with the
     C{--single-version-externally-managed} command line argument, in which
     case the C{.egg} files will not be created.
-
-    EXAMPLES
-    ========
-
-    FIXME NEED EXAMPLE
     """
     invariantinclusions = [
         '.*/python[^/]*/site-packages/.*\.egg',

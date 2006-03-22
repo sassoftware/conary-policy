@@ -38,7 +38,10 @@ class RemoveNonPackageFiles(policy.DestdirPolicy):
     EXAMPLES
     ========
 
-    FIXME NEED EXAMPLE
+    C{r.RemoveNonPackageFiles(exceptions='.*\.la')}
+
+    This is one of the rare packages that requires .la files to be
+    installed in order to work.
     """
     invariantinclusions = [
         r'\.la$',
