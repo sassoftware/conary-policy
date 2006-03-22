@@ -3,6 +3,7 @@ Changes in 1.0.1:
     instead of raising an error; raising an error works very poorly
     because it adds too many false dependencies.
   o More policies have explicit ordering constraints added.
+  o The documentation has been extensively updated.
 
 Changes in 1.0:
   o Added the new PythonEggs policy which prevents packaging python
