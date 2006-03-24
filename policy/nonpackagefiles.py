@@ -33,7 +33,7 @@ class RemoveNonPackageFiles(policy.DestdirPolicy):
     ===========
 
     The C{r.RemoveNonPackageFiles()} policy removes classes of files that
-    normally should not be packaged
+    normally should not be packaged.
 
     EXAMPLES
     ========

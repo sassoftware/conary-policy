@@ -37,8 +37,8 @@ class AutoDoc(policy.DestdirPolicy):
 
     The C{r.AutoDoc()} policy ensures likely documentation not otherwise
     installed is added automatically. Exceptions to the policy are
-    passed in via C{r.AutoDoc(I{exceptions=filterexpression})}, and  are
-    evaluated relative to the build directory, and not the destination
+    passed in via C{r.AutoDoc(I{exceptions=filterexpression})}. Exceptions
+    are evaluated relative to the build directory, and not the destination
     directory.
 
     EXAMPLES

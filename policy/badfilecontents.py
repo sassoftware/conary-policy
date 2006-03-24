@@ -95,7 +95,7 @@ class FilesInMandir(policy.EnforcementPolicy):
     The C{r.FilesInMandir()}  policy ensures that system manual page
     directories contain only other directories, and not files,
     so that manual pages are installed into specific sections where
-    the man command will find them.
+    the C{man} command will find them.
 
     The main cause of files in C{%(mandir)s} is confusion in packages
     about whether C{%(mandir)s} means /usr/share/man or
@@ -176,8 +176,8 @@ class ImproperlyShared(policy.EnforcementPolicy):
     directory, (normally C{/usr/share}) contains data which can be shared
     between architectures.
 
-    Files which are architecture-specific, such as ELF files, should not
-    reside in C{%(datadir)s}..
+    Architecture-specific files, such as ELF files should not reside in
+    C{%(datadir)s}.
 
     EXAMPLES
     ========
@@ -299,7 +299,7 @@ class RequireChkconfig(policy.EnforcementPolicy):
     NAME
     ====
 
-    B{C{r.RequireChkconfig()}} - Require all initscripts provide chkconfig
+    B{C{r.RequireChkconfig()}} - Require all init scripts provide chkconfig
     information
 
     SYNOPSIS
@@ -310,17 +310,17 @@ class RequireChkconfig(policy.EnforcementPolicy):
     DESCRIPTION
     ===========
 
-    The C{r.RequireChkconfig()} policy requires that all initscripts provide
+    The C{r.RequireChkconfig()} policy requires that all init scripts provide
     chkconfig information.
 
-    The only exceptions should be core initscripts, such as reboot
+    The only exceptions should be core init scripts, such as reboot.
 
     EXAMPLES
     ========
 
     C{r.RequireChkconfig(exceptions='%(initdir)s/halt')}
 
-    Specifies a core initiscript, C{%(initdir)s/halt} as an exception to the
+    Specifies a core init script, C{%(initdir)s/halt} as an exception to the
     policy.
     """
     invariantsubtrees = [ '%(initdir)s' ]

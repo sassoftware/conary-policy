@@ -336,7 +336,7 @@ class NormalizeInitscriptLocation(policy.DestdirPolicy):
     NAME
     ====
 
-    B{C{r.NormalizeInitscriptLocation()}} - Properly locates initscripts
+    B{C{r.NormalizeInitscriptLocation()}} - Properly locates init scripts
 
     SYNOPSIS
     ========
@@ -346,10 +346,10 @@ class NormalizeInitscriptLocation(policy.DestdirPolicy):
     DESCRIPTION
     ===========
 
-    The C{r.NormalizeInitscriptLocation()} policy puts initscripts in their
+    The C{r.NormalizeInitscriptLocation()} policy puts init scripts in their
     proper location, resolving ambiguity about their proper location.
 
-    Moves all initscripts from /etc/rc.d/init.d/ to their official location.
+    Moves all init scripts from /etc/rc.d/init.d/ to their official location.
     """
 
     requires = (

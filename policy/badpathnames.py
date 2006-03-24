@@ -90,7 +90,7 @@ class NonMultilibComponent(policy.EnforcementPolicy):
     ===========
 
     The C{r.NonMultilibComponent()} policy enforces multilib support so
-    that both 32-bit, and 64-bit components may be installed for Python,
+    that both 32-bit and 64-bit components may be installed for Python
     and Perl.
 
     Python and Perl components should generally be under C{/usr/lib}, unless
@@ -158,7 +158,7 @@ class NonMultilibDirectories(policy.EnforcementPolicy):
     DESCRIPTION
     ===========
 
-    The C{r.NonMultilibDirectories()} policy enforces proper directories,
+    The C{r.NonMultilibDirectories()} policy enforces proper directories
     relevant to platform. Troves for 32-bit platforms should not normally
     contain directories named "C{lib64}".
     """
@@ -180,8 +180,7 @@ class CheckDestDir(policy.EnforcementPolicy):
     NAME
     ====
 
-    B{C{r.CheckDestDir()}} - Searches for destination directory in file paths
-    and symbolic link contents
+    B{C{r.CheckDestDir()}} - Enforces absence of destination directory
 
     SYNOPSIS
     ========
@@ -318,7 +317,7 @@ class ObsoletePaths(policy.EnforcementPolicy):
     The C{r.ObsoletePaths()} policy warns about paths which were at one time
     considered correct, but are now considered obsolete.
 
-    Note: this policy does not honor exceptions.
+    This policy does not honor exceptions.
     """
 
     requires = (

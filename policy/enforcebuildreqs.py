@@ -175,10 +175,10 @@ class EnforceSonameBuildRequirements(_enforceBuildRequirements):
 
     The C{r.EnforceSonameBuildRequirements()} policy ensures that each
     requires dependency in the package is matched by a suitable element in
-    the C{buildRequires} list
+    the C{buildRequires} list.
 
     Any trove names wrongly suggested can be eliminated from the
-    list with C{r.EnforceSonameBuildRequirements(exceptions='I{pkg}:I{comp}')}
+    list with C{r.EnforceSonameBuildRequirements(exceptions='I{pkg}:I{comp}')}.
 
     EXAMPLES
     ========
@@ -211,7 +211,7 @@ class EnforcePythonBuildRequirements(_enforceBuildRequirements):
     ====
 
     B{C{r.EnforcePythonBuildRequirements()}} - Ensure package meets Python
-    runtime requirments
+    runtime requirements
 
     SYNOPSIS
     ========
