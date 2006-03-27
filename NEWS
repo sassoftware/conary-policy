@@ -1,3 +1,8 @@
+Changes in 1.0.2:
+  o The warning previously generated for "bad RPATH entries" (that is,
+    entries starting with the destdir, the builddir, /tmp, or /var/tmp)
+    has been changed to an error.
+
 Changes in 1.0.1:
   o CheckDesktopFiles now merely warns about missing icon files
     instead of raising an error; raising an error works very poorly

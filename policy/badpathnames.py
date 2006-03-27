@@ -222,8 +222,7 @@ class CheckDestDir(policy.EnforcementPolicy):
             for rpath in rpaths.split(':'):
                 for badRPATH in badRPATHS:
                     if rpath.startswith(badRPATH):
-                        self.warn('file %s has illegal RPATH %s',
-                                    file, rpath)
+                        self.error('file %s has illegal RPATH %s', file, rpath)
                         break
 
 
