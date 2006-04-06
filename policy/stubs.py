@@ -79,13 +79,14 @@ class User(policy.EnforcementPolicy):
     SYNOPSIS
     ========
 
-    Do not use
+    Do not use in package recipes
 
     DESCRIPTION
     ===========
 
     The C{r.User()} policy is a stub, included only for backwards
-    compatibility, and should be removed from use in recipes.
+    compatibility, and should be removed from use in packages recipes.
+    Use of C{r.User} in UserInfoRecipes is valid, however.
     """
     def updateArgs(self, *args, **keywords):
         self.warn('User policy is deprecated, create a separate UserInfoRecipe instead')
