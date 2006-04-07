@@ -79,14 +79,15 @@ class User(policy.EnforcementPolicy):
     SYNOPSIS
     ========
 
-    Do not use in package recipes
+    Used in info recipes, but not used in package recipes
 
     DESCRIPTION
     ===========
 
-    The C{r.User()} policy is a stub, included only for backwards
-    compatibility, and should be removed from use in packages recipes.
-    Use of C{r.User} in UserInfoRecipes is valid, however.
+    The C{r.User()} policy is a stub in package recipe context, included
+    only for backwards compatibility with older package recipes, and should
+    be removed from use in package recipes. Use of C{r.User} in info recipes
+    is valid, however.
     """
     def updateArgs(self, *args, **keywords):
         self.warn('User policy is deprecated, create a separate UserInfoRecipe instead')
@@ -100,18 +101,20 @@ class SupplementalGroup(policy.EnforcementPolicy):
     NAME
     ====
 
-    B{C{r.User()}} - STUB CLASS
+    B{C{r.SupplementalGroup()}} - STUB CLASS
 
     SYNOPSIS
     ========
 
-    Do not use
+    Used in info recipes, but not used in package recipes
 
     DESCRIPTION
     ===========
 
-    The C{r.SupplementalGroup()} policy is a stub, included only for
-    backwards compatibility, and should be removed from use in recipes.
+    The C{r.SupplementalGroup()} policy is a stub in package recipe context,
+    included only for backwards compatibility with older package recipes,
+    and should be removed from use in package recipes. Use of 
+    C{r.SupplementalGroup} in info recipes is valid, however.
     """
     def updateArgs(self, *args, **keywords):
         self.warn('SupplementalGroup policy is deprecated, create a separate GroupInfoRecipe instead')
@@ -130,13 +133,15 @@ class Group(policy.EnforcementPolicy):
     SYNOPSIS
     ========
 
-    Do not use
+    Used in info recipes, but not used in package recipes
 
     DESCRIPTION
     ===========
 
-    The C{r.Group()} policy is a stub, included only for backwards
-    compatibility, and should be removed from use in recipes.
+    The C{r.Group()} policy is a stub in package recipe context, included
+    only for backwards compatibility with older package recipes, and should
+    be removed from use in package recipes. Use of C{r.Group} in info recipes
+    is valid, however.
     """
     def updateArgs(self, *args, **keywords):
         self.warn('Group policy is deprecated, create a separate GroupInfoRecipe instead')
