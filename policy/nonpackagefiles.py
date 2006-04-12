@@ -27,7 +27,7 @@ class RemoveNonPackageFiles(policy.DestdirPolicy):
     SYNOPSIS
     ========
 
-    C{r.RemoveNonPackageFiles([I{filterexp}] I{exceptions=filterexp}])}
+    C{r.RemoveNonPackageFiles([I{filterexp},] [I{exceptions=filterexp}])}
 
     DESCRIPTION
     ===========
