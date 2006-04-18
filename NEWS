@@ -1,6 +1,9 @@
 Changes in 1.0.3:
   o Enforce*BuildRequirements now take regular expressions for
     exceptions, as well as literal strings.
+  * All suggested additions to buildRequires are coalesced via the
+    reportMissingBuildRequires policy, when run with a Conary new
+    enough to provide that policy (1.0.13 or later) (bz #869).
 
 Changes in 1.0.2:
   o The warning previously generated for "bad RPATH entries" (that is,

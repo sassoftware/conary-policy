@@ -153,10 +153,17 @@ class _enforceBuildRequirements(policy.EnforcementPolicy):
         if missingBuildRequires:
             self.talk('add to buildRequires: %s',
                        str(sorted(list(set(missingBuildRequires)))))
+            try:
+                self.recipe.reportMissingBuildRequires(missingBuildRequires)
+            except AttributeError:
+                # it is OK if we are running with an earlier Conary that
+                # does not have reportMissingBuildRequires
+                pass
         if missingBuildRequiresChoices:
             for candidateSet in missingBuildRequiresChoices:
                 self.talk('add to buildRequires one of: %s',
                            str(sorted(list(candidateSet))))
+            # These are too unclear to pass to reportMissingBuildRequires
         if self.unprovided:
             self.talk('The following dependencies are not resolved'
                       ' within the package or in the system database: %s',
@@ -502,3 +509,9 @@ class EnforceConfigLogBuildRequirements(policy.EnforcementPolicy):
         if missingReqs:
             self.warn('Probably add to buildRequires: %s',
                       str(sorted(list(missingReqs))))
+            try:
+                self.recipe.reportMissingBuildRequires(missingReqs)
+            except AttributeError:
+                # it is OK if we are running with an earlier Conary that
+                # does not have reportMissingBuildRequires
+                pass
