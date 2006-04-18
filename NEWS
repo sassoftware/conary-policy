@@ -1,3 +1,7 @@
+Changes in 1.0.3:
+  o Enforce*BuildRequirements now take regular expressions for
+    exceptions, as well as literal strings.
+
 Changes in 1.0.2:
   o The warning previously generated for "bad RPATH entries" (that is,
     entries starting with the destdir, the builddir, /tmp, or /var/tmp)

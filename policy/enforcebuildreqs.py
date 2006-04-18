@@ -30,9 +30,15 @@ class _enforceBuildRequirements(policy.EnforcementPolicy):
     """
     def preProcess(self):
         self.compExceptions = set()
+        self.compReExceptions = set()
+        compRe = re.compile('[a-zA-Z0-9]+:[a-zA-Z0-9]+')
         if self.exceptions:
             for exception in self.exceptions:
-                self.compExceptions.add(exception % self.recipe.macros)
+                exception = exception % self.recipe.macros
+                if compRe.match(exception):
+                    self.compExceptions.add(exception)
+                else:
+                    self.compReExceptions.add(re.compile(exception))
         self.exceptions = None
 
         # right now we do not enforce branches.  This could be
@@ -102,6 +108,9 @@ class _enforceBuildRequirements(policy.EnforcementPolicy):
                         foundCandidates.add(candidate)
                         break
             foundCandidates -= self.compExceptions
+            for compRe in self.compReExceptions:
+                foundCandidates -= set(x for x in foundCandidates
+                                       if not compRe.match(x))
 
             missingCandidates = foundCandidates - self.truncatedBuildRequires
             if missingCandidates == foundCandidates:
