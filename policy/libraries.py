@@ -424,7 +424,7 @@ class NormalizeLibrarySymlinks(policy.DestdirPolicy):
             addedfiles = newfiles - oldfiles
             removedfiles = oldfiles - newfiles
             if addedfiles:
-                self.warn('ldconfig found missing files in %s: %s', path,
+                self.info('ldconfig the following new files in %s: %s', path,
                           ', '.join(sorted(list(addedfiles))))
             if removedfiles:
                 self.warn('ldconfig removed files in %s: %s', path,

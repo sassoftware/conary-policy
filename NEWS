@@ -1,9 +1,13 @@
 Changes in 1.0.3:
   o Enforce*BuildRequirements now take regular expressions for
     exceptions, as well as literal strings.
-  * All suggested additions to buildRequires are coalesced via the
+  o All suggested additions to buildRequires are coalesced via the
     reportMissingBuildRequires policy, when run with a Conary new
     enough to provide that policy (1.0.13 or later) (bz #869).
+  o NormalizeLibrarySymlinks has a clearer message when ldconfig
+    adds files to a directory, and the message is informational
+    rather than a warning, since depending on NormalizeLibrarySymlinks
+    instead of calling r.Ldconfig() explicitly is generally preferred.
 
 Changes in 1.0.2:
   o The warning previously generated for "bad RPATH entries" (that is,
