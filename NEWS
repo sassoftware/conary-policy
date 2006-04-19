@@ -8,8 +8,8 @@ Changes in 1.0.3:
     adds files to a directory, and the message is informational
     rather than a warning, since depending on NormalizeLibrarySymlinks
     instead of calling r.Ldconfig() explicitly is generally preferred.
-  o DanglingSymlinks is no reports all symbolic links as dangling
-    symlinks if the buildpath contains a symbolic link (bz #856).
+  o DanglingSymlinks no longer reports all symbolic links as dangling
+    symlinks when the buildpath contains a symbolic link (bz #856).
 
 Changes in 1.0.2:
   o The warning previously generated for "bad RPATH entries" (that is,
