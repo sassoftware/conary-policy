@@ -565,6 +565,9 @@ class NormalizePamConfig(policy.DestdirPolicy):
 
     def doFile(self, path):
         d = util.joinPaths(self.recipe.macros.destdir, path)
+        mode = os.lstat(d)[stat.ST_MODE]
+        if not mode & 0200:
+            os.chmod(d, mode | 0200)
         f = file(d, 'r+')
         l = f.readlines()
         l = [x.replace('/lib/security/$ISA/', '') for x in l]
@@ -572,6 +575,7 @@ class NormalizePamConfig(policy.DestdirPolicy):
         f.truncate(0) # we may have shrunk the file, avoid garbage
         f.writelines(l)
         f.close()
+        os.chmod(d, mode)
 
 
 # Note: NormalizeLibrarySymlinks is in libraries.py

@@ -1,3 +1,6 @@
+Changes in 1.0.4:
+  o NormalizePamConfig can now handle read-only /etc/pam.d files.
+
 Changes in 1.0.3:
   o Enforce*BuildRequirements now take regular expressions for
     exceptions, as well as literal strings.
