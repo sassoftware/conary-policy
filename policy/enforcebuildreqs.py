@@ -17,7 +17,7 @@ import re
 import stat
 
 from conary.deps import deps
-from conary.lib import util
+from conary.lib import util, magic
 from conary.local import database
 from conary.build import policy
 from conary.build.use import Use
@@ -96,6 +96,7 @@ class _enforceBuildRequirements(policy.EnforcementPolicy):
 	components = self.recipe.autopkg.components
         pathMap = self.recipe.autopkg.pathMap
         pathReqMap = {}
+        interpreterSet = set()
 
         for dep in self.localProvides:
             provideNameList = [x[0] for x in self.localProvides[dep]]
@@ -142,6 +143,25 @@ class _enforceBuildRequirements(policy.EnforcementPolicy):
                               str(sorted(list(foundCandidates))),
                               str(dep),
                               ', '.join(sorted(pathList)))
+
+        # look for interpreters
+        for path in pathMap:
+            pkgfile = pathMap[path]
+            if pkgfile.hasContents and (pkgfile.requires() & dep):
+                m = self.recipe.magic[path]
+                if isinstance(m, magic.script):
+                    interpreter = m.contents['interpreter']
+                    if interpreter:
+                        interpreterSet.add(interpreter)
+        if interpreterSet:
+            # find their components and add them to the list
+            for interpreter in interpreterSet:
+                for trove in self.db.iterTrovesByPath(interpreter):
+                    interpreterTroveName = trove.getName()
+                    if interpreterTroveName not in self.truncatedBuildRequires:
+                        self.talk('interpreter %s missing build requirement %s',
+                                  interpreter, interpreterTroveName)
+                        missingBuildRequires.add(interpreterTroveName)
 
         if pathReqMap:
             for path in pathReqMap:

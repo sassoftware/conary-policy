@@ -1,3 +1,7 @@
+Changes in 1.0.5:
+  o Enforce*BuildRequirements now enforce that interpreters for
+    scripts are listed as build requirements.
+
 Changes in 1.0.4:
   o NormalizePamConfig can now handle read-only /etc/pam.d files.
 
