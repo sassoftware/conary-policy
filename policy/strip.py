@@ -92,8 +92,15 @@ class Strip(policy.DestdirPolicy):
         if self.tryDebuginfo and\
            'eu-strip' in self.macros.strip and \
            'debugedit' in self.macros and \
-           util.checkPath(self.macros.debugedit) and \
-           len(self.macros.debugsrcdir) <= len(topbuilddir):
+           util.checkPath(self.macros.debugedit):
+            if len(self.macros.debugsrcdir) > len(topbuilddir):
+                # because we have to overwrite fixed-length strings
+                # in binaries, we need to ensure that the value being
+                # written is no longer than the existing value to
+                # avoid corrupting the binaries
+                raise RuntimeError('insufficient space in binaries'
+                    ' for path replacement, add %d characters to buildPath'
+                    % (len(self.macros.debugsrcdir) - len(topbuilddir)))
             self.debuginfo = True
             self.debugfiles = set()
             self.dm.topbuilddir = topbuilddir
