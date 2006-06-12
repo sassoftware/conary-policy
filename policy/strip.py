@@ -19,6 +19,7 @@ import stat
 
 from conary.lib import util
 from conary.build import macros, policy
+from conary.build.use import Use
 
 
 class Strip(policy.DestdirPolicy):
@@ -79,6 +80,11 @@ class Strip(policy.DestdirPolicy):
         self.debuginfo = False
         self.tryDebuginfo = keywords.pop('debuginfo', True)
         policy.DestdirPolicy.updateArgs(self, *args, **keywords)
+
+    def test(self):
+        # stripping bootstrap builds just makes debugging harder,
+        # as debuginfo is generally not available in boostrap builds
+        return not Use.bootstrap._get()
 
     def preProcess(self):
         self.invariantsubtrees = [x[0] for x in self.invariantinclusions]

@@ -4,6 +4,8 @@ Changes in 1.0.5:
   o Strip now raises an exception if debuginfo will fail because
     the buildPath was too short to modify path references in
     binary files.  Before, it silently disabled debuginfo.
+  o Strip is no longer run for bootstrap builds, in order to ease
+    debugging bootstrap builds.
 
 Changes in 1.0.4:
   o NormalizePamConfig can now handle read-only /etc/pam.d files.
