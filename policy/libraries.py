@@ -325,6 +325,7 @@ class CheckSonames(policy.EnforcementPolicy):
 	(r'..*\.so', None, stat.S_IFDIR),
     ]
     recursive = False
+    nonSymlinkWarn = set()
 
     def doFile(self, path):
 	d = self.macros.destdir
@@ -364,13 +365,15 @@ class CheckSonames(policy.EnforcementPolicy):
 	    s = soname[destlen:]
 	    try:
 		os.stat(soname)
-		if not os.path.islink(soname):
-                    self.warn('%s has soname %s; therefore should be a symlink',
+		if not os.path.islink(soname) and s not in self.nonSymlinkWarn:
+                    self.nonSymlinkWarn.add(s)
+                    self.info('%s has soname %s; best practice is that the'
+                              ' filename that matches the soname is a symlink:'
+                              ' soname -> soname.minorversion',
                               s, m.contents['soname'])
-	    except:
-                self.warn("%s implies %s, which does not exist --"
-                          " use r.Ldconfig('%s')?",
-                          path, s, os.path.dirname(path))
+            except OSError:
+                # the missing file case will be fixed up by other policy
+                pass
 
 
 class NormalizeLibrarySymlinks(policy.DestdirPolicy):

@@ -1,3 +1,13 @@
+Changes in 1.0.6:
+  o CheckSonames no longer suggests calling r.Ldconfig, because
+    the NormalizeLibrarySymlinks policy will automatically take
+    care of every case where CheckSonames could have suggested
+    calling r.Ldconfig.
+  o CheckSonames will warn about shared libraries that have a
+    SONAME that matches the name of an actual file instead of a
+    symlink only once, and it will print a more helpful message
+    as information rather than as a warning.
+
 Changes in 1.0.5:
   o Enforce*BuildRequirements now enforce that interpreters for
     scripts are listed as build requirements. (CNP-11)
