@@ -147,7 +147,7 @@ class _enforceBuildRequirements(policy.EnforcementPolicy):
         # look for interpreters
         for path in pathMap:
             pkgfile = pathMap[path]
-            if pkgfile.hasContents and (pkgfile.requires() & dep):
+            if pkgfile.hasContents:
                 m = self.recipe.magic[path]
                 if isinstance(m, magic.script):
                     interpreter = m.contents['interpreter']

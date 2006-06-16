@@ -7,6 +7,9 @@ Changes in 1.0.6:
     SONAME that matches the name of an actual file instead of a
     symlink only once, and it will print a more helpful message
     as information rather than as a warning.
+  o A bug that caused the new interpreter checking behavior in
+    EnforceBuildRequirements to traceback in many situations has
+    been fixed.
 
 Changes in 1.0.5:
   o Enforce*BuildRequirements now enforce that interpreters for
