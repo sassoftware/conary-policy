@@ -566,7 +566,11 @@ class NormalizePamConfig(policy.DestdirPolicy):
     def doFile(self, path):
         d = util.joinPaths(self.recipe.macros.destdir, path)
         mode = os.lstat(d)[stat.ST_MODE]
-        if not mode & 0200:
+        if stat.S_ISLNK(mode):
+            # we'll process whatever this is pointing to whenever we
+            # get there.
+            return
+        if not (mode & 0200):
             os.chmod(d, mode | 0200)
         f = file(d, 'r+')
         l = f.readlines()

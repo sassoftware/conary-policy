@@ -1,3 +1,8 @@
+Changes in 1.0.7:
+  o A bug in NormalizePamConfig that would change pam files pointed
+    to by symlinks in /etc/pam.d to have permissions 0777.  This would
+    cause conary to fail to build the package.
+
 Changes in 1.0.6:
   o CheckSonames no longer suggests calling r.Ldconfig, because
     the NormalizeLibrarySymlinks policy will automatically take
