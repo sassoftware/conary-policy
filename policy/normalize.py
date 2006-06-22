@@ -98,17 +98,17 @@ class NormalizeManPages(policy.DestdirPolicy):
     NAME
     ====
 
-    B{C{r.RemoveNonPackageFiles()}} - Make all man pages follow sane system policy
+    B{C{r.NormalizeManPages()}} - Make all man pages follow sane system policy
 
     SYNOPSIS
     ========
 
-    C{r.RemoveNonPackageFiles([I{filterexp}] I{exceptions=filterexp}])}
+    C{r.NormalizeManPages([I{filterexp}] I{exceptions=filterexp}])}
 
     DESCRIPTION
     ===========
 
-    The C{r.RemoveNonPackageFiles()} policy makes all system manual pages
+    The C{r.NormalizeManPages()} policy makes all system manual pages
     follow sane system policy
 
     Note: This policy class is not called directly from recipes, and does not
