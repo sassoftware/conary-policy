@@ -144,15 +144,16 @@ class _enforceBuildRequirements(policy.EnforcementPolicy):
                               str(dep),
                               ', '.join(sorted(pathList)))
 
-        # look for interpreters
-        for path in pathMap:
-            pkgfile = pathMap[path]
-            if pkgfile.hasContents:
-                m = self.recipe.magic[path]
-                if isinstance(m, magic.script):
-                    interpreter = m.contents['interpreter']
-                    if interpreter:
-                        interpreterSet.add(interpreter)
+            # look for interpreters
+            for path in pathMap:
+                pkgfile = pathMap[path]
+                if pkgfile.hasContents and (pkgfile.requires() & dep):
+                    m = self.recipe.magic[path]
+                    if isinstance(m, magic.script):
+                        interpreter = m.contents['interpreter']
+                        if interpreter:
+                            interpreterSet.add(interpreter)
+
         if interpreterSet:
             # find their components and add them to the list
             for interpreter in interpreterSet:

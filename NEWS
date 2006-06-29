@@ -2,6 +2,9 @@ Changes in 1.0.7:
   o A bug in NormalizePamConfig that would change pam files pointed
     to by symlinks in /etc/pam.d to have permissions 0777.  This would
     cause conary to fail to build the package.
+  o A bug in Enforce*BuildRequirements that caused it to suggest
+    overly aggressive and unnecessary build requirements, introduced
+    in conary-policy 1.0.5, has been fixed. (CNP-12)
 
 Changes in 1.0.6:
   o CheckSonames no longer suggests calling r.Ldconfig, because
@@ -18,7 +21,7 @@ Changes in 1.0.6:
 
 Changes in 1.0.5:
   o Enforce*BuildRequirements now enforce that interpreters for
-    scripts are listed as build requirements. (CNP-11)
+    scripts are listed as build requirements. (CNP-1)
   o Strip now raises an exception if debuginfo will fail because
     the buildPath was too short to modify path references in
     binary files.  Before, it silently disabled debuginfo.
