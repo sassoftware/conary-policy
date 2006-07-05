@@ -111,10 +111,10 @@ class _enforceBuildRequirements(policy.EnforcementPolicy):
             foundCandidates -= self.compExceptions
             for compRe in self.compReExceptions:
                 foundCandidates -= set(x for x in foundCandidates
-                                       if not compRe.match(x))
+                                       if compRe.match(x))
 
             missingCandidates = foundCandidates - self.truncatedBuildRequires
-            if missingCandidates == foundCandidates:
+            if foundCandidates and missingCandidates == foundCandidates:
                 # None of the troves that provides this requirement is
                 # reflected in the buildRequires list.  Add candidates
                 # to proper list to print at the end:
