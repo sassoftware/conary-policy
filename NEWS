@@ -1,3 +1,10 @@
+Changes in 1.0.8:
+  o Enforce*BuildRequirements now provides some more explanation about
+    what is wrong when dependencies are not resolved in the system
+    database or within a package, and gives specific instructions about
+    how to handle the common case where binaries are built incorrectly.
+    (CNP-15)
+
 Changes in 1.0.7:
   o Enforce*BuildRequirements regular expression exceptions now
     function with the correct sense. (CNP-14)

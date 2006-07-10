@@ -73,8 +73,8 @@ class _enforceBuildRequirements(policy.EnforcementPolicy):
 
         cfg = self.recipe.cfg
         self.db = database.Database(cfg.root, cfg.dbPath)
-        self.localProvides = self.db.getTrovesWithProvides(depSetList)
-        self.unprovided = [x for x in depSetList if x not in self.localProvides]
+        self.systemProvides = self.db.getTrovesWithProvides(depSetList)
+        self.unprovided = [x for x in depSetList if x not in self.systemProvides]
 
         return True
 
@@ -98,8 +98,18 @@ class _enforceBuildRequirements(policy.EnforcementPolicy):
         pathReqMap = {}
         interpreterSet = set()
 
-        for dep in self.localProvides:
-            provideNameList = [x[0] for x in self.localProvides[dep]]
+        interpreterMap = {}
+        for path in pathMap:
+            pkgfile = pathMap[path]
+            if pkgfile.hasContents:
+                m = self.recipe.magic[path]
+                if isinstance(m, magic.script):
+                    interpreter = m.contents['interpreter']
+                    if interpreter:
+                        interpreterMap[path] = (pkgfile.requires(), interpreter)
+
+        for dep in self.systemProvides:
+            provideNameList = [x[0] for x in self.systemProvides[dep]]
             # normally, there is only one name in provideNameList
 
             foundCandidates = set()
@@ -145,14 +155,10 @@ class _enforceBuildRequirements(policy.EnforcementPolicy):
                               ', '.join(sorted(pathList)))
 
             # look for interpreters
-            for path in pathMap:
-                pkgfile = pathMap[path]
-                if pkgfile.hasContents and (pkgfile.requires() & dep):
-                    m = self.recipe.magic[path]
-                    if isinstance(m, magic.script):
-                        interpreter = m.contents['interpreter']
-                        if interpreter:
-                            interpreterSet.add(interpreter)
+            if path in interpreterMap:
+                requires, interpreter = interpreterMap[path]
+                if requires & dep:
+                    interpreterSet.add(interpreter)
 
         if interpreterSet:
             # find their components and add them to the list
@@ -189,6 +195,14 @@ class _enforceBuildRequirements(policy.EnforcementPolicy):
             self.talk('The following dependencies are not resolved'
                       ' within the package or in the system database: %s',
                       str(sorted([str(x) for x in self.unprovided])))
+            self.talk('The package may not function if installed, and'
+                      ' Conary may require the --no-deps option to install the'
+                      ' package.')
+            self.talk('If you know that these libraries are really provided'
+                      ' within the package, add these lines:')
+            for depStr in sorted(str(x) for x in self.unprovided):
+                self.talk("       r.Requires(exceptDeps=r'%s')" % 
+                           util.literalRegex(depStr))
 
     def providesNames(self, libname):
         return [libname]
