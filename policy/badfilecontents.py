@@ -62,7 +62,6 @@ class NonBinariesInBindirs(policy.EnforcementPolicy):
 	'%(sysconfdir)s/cron.hourly/',
 	'%(sysconfdir)s/cron.weekly/',
 	'%(sysconfdir)s/cron.monthly/',
-        '%(taghandlerdir)s/',
     ]
 
     def doFile(self, file):

@@ -4,8 +4,6 @@ Changes in 1.0.8:
     database or within a package, and gives specific instructions about
     how to handle the common case where binaries are built incorrectly.
     (CNP-15)
-  o NonBinariesInBindirs now considers %(taghandlerdir)s as a directory
-    that should contain only binaries. (CNP-23)
 
 Changes in 1.0.7:
   o Enforce*BuildRequirements regular expression exceptions now
