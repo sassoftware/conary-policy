@@ -4,6 +4,8 @@ Changes in 1.0.8:
     database or within a package, and gives specific instructions about
     how to handle the common case where binaries are built incorrectly.
     (CNP-15)
+  o The WarnWriteable policy now does not warn about group-writeable
+    files if the group in question is "root". (CNP-24)
 
 Changes in 1.0.7:
   o Enforce*BuildRequirements regular expression exceptions now

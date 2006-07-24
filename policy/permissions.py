@@ -82,23 +82,26 @@ class WarnWriteable(policy.EnforcementPolicy):
     requires = (
         # Needs to run after setModes because setModes sets exceptions
         ('setModes', policy.CONDITIONAL_PRIOR),
+        # Needs to run after Ownership for group info
+        ('Ownership', policy.REQUIRED_SUBSEQUENT),
     )
 
-    def doFile(self, file):
-	fullpath = self.macros.destdir + file
+    def doFile(self, filename):
+        fullpath = self.macros.destdir + filename
 	if os.path.islink(fullpath):
 	    return
-	if file not in self.recipe.autopkg.pathMap:
+        if filename not in self.recipe.autopkg.pathMap:
 	    # directory has been deleted
 	    return
 	mode = os.lstat(fullpath)[stat.ST_MODE]
-	if mode & 022:
+        group = self.recipe.autopkg.pathMap[filename].inode.group()
+        if mode & 02 or (mode & 020 and group != 'root'):
 	    if stat.S_ISDIR(mode):
 		type = "directory"
 	    else:
 		type = "file"
             self.warn('Possibly inappropriately writeable permission'
-                      ' 0%o for %s %s', mode & 0777, type, file)
+                      ' 0%o for %s %s', mode & 0777, type, filename)
 
 
 class WorldWriteableExecutables(policy.EnforcementPolicy):
