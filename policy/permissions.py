@@ -141,7 +141,7 @@ class IgnoredSetuid(policy.EnforcementPolicy):
     NAME
     ====
 
-    B{C{r.IgnoredSetuid()}} - Warns about world-writeable executable files
+    B{C{r.IgnoredSetuid()}} - Warns about potentially missing setuid bits
 
     SYNOPSIS
     ========
