@@ -21,7 +21,7 @@ from conary.lib import util
 
 class RelativeSymlinks(policy.DestdirPolicy):
     """
-   NAME
+    NAME
     ====
 
     B{C{r.RelativeSymlinks()}} - Create relative symbolic links
