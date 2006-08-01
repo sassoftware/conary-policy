@@ -49,7 +49,7 @@ class RelativeSymlinks(policy.DestdirPolicy):
                 if pathlist == contentslist:
                     raise policy.PolicyError('Symlink points to itself:'
                                              ' %s -> %s' % (path, contents))
-                while pathlist[0] == contentslist[0]:
+                while contentslist and pathlist[0] == contentslist[0]:
                     pathlist = pathlist[1:]
                     contentslist = contentslist[1:]
                 os.remove(fullpath)

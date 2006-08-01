@@ -6,6 +6,9 @@ Changes in 1.0.8:
     (CNP-15)
   o The WarnWriteable policy now does not warn about group-writeable
     files if the group in question is "root". (CNP-24)
+  o A bug that caused a traceback when attempting to make a symlink
+    that points to the directory which contains it a relative symlink
+    has been fixed. (CNP-28)
 
 Changes in 1.0.7:
   o Enforce*BuildRequirements regular expression exceptions now
