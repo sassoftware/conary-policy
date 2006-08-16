@@ -137,8 +137,8 @@ class FixupMultilibPaths(policy.DestdirPolicy):
 
     C{r.FixupMultilibPaths(exceptions='.*')}
 
-    This package is explicitly not multilib and the policy should not
-    run (extremely rare).
+    The package being built is explicitly not multilib-safe, and
+    therefore the policy should not run (extremely rare).
     """
     requires = (
         ('ExecutableLibraries', policy.CONDITIONAL_SUBSEQUENT),
