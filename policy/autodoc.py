@@ -67,9 +67,10 @@ class AutoDoc(policy.DestdirPolicy):
     rootdir = '%(builddir)s'
     invariantinclusions = [
         '.*/NEWS$',
-        r'.*/(LICENSE|COPY(ING|RIGHT))(\.lib|)$',
+        r'.*/(LICENSE|COPY(ING|RIGHT))(\.(lib|txt)|)$',
         '.*/RELEASE-NOTES$',
         '.*/HACKING$',
+        '.*/NOTICE.txt$',
         '.*/INSTALL$',
         '.*README.*',
         '.*/CHANGES$',
