@@ -1,6 +1,8 @@
 Changes in 1.0.9:
   o The AutoDoc policy now includes LICENSE.txt and NOTICE.txt files,
     since those names are common in Java packages. (CNP-29)
+  o The NonMultilibComponent policy now considers only files, not
+    directories. (CNP-39)
 
 Changes in 1.0.8:
   o Enforce*BuildRequirements now provides some more explanation about
