@@ -130,7 +130,7 @@ class NonMultilibComponent(policy.EnforcementPolicy):
         p = self.productMapRe.match(path).group(1)
         if self.reported[p]:
             return
-        if os.path.isdir(self.recipe.macros.destdir+path)
+        if os.path.isdir(self.recipe.macros.destdir+path):
             return
         if self.currentsubtree == '%(libdir)s/':
             self.foundlib64[p] = path
