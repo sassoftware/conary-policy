@@ -410,7 +410,7 @@ class NormalizeInitscriptContents(policy.DestdirPolicy):
         ('Requires', policy.REQUIRED_SUBSEQUENT),
     )
     invariantsubtrees = [ '%(initdir)s' ]
-    invariantinclusions = [ ('.*', 0400, stat.S_IFDIR)) ]
+    invariantinclusions = [ ('.*', 0400, stat.S_IFDIR), ]
 
     def doFile(self, path):
         m = self.recipe.macros
