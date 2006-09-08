@@ -398,7 +398,7 @@ class NormalizeInitscriptContents(policy.DestdirPolicy):
     EXAMPLES
     ========
 
-    C{r.NormalizeInitscriptContents(exeptions='%(initdir)s/foo')}
+    C{r.NormalizeInitscriptContents(exceptions='%(initdir)s/foo')}
 
     Use this in the unprecedented case that C{r.NormalizeInitscriptContents}
     damages an init script.
@@ -410,6 +410,7 @@ class NormalizeInitscriptContents(policy.DestdirPolicy):
         ('Requires', policy.REQUIRED_SUBSEQUENT),
     )
     invariantsubtrees = [ '%(initdir)s' ]
+    invariantinclusions = [ ('.*', 0400, stat.S_IFDIR)) ]
 
     def doFile(self, path):
         m = self.recipe.macros

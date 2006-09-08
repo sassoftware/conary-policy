@@ -3,6 +3,8 @@ Changes in 1.0.9:
     since those names are common in Java packages. (CNP-29)
   o The NonMultilibComponent policy now considers only files, not
     directories. (CNP-39)
+  o The NormalizeInitscriptContents policy now ignores directories.
+    (CNP-41)
 
 Changes in 1.0.8:
   o Enforce*BuildRequirements now provides some more explanation about
