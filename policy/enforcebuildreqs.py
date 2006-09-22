@@ -61,15 +61,14 @@ class _enforceBuildRequirements(policy.EnforcementPolicy):
         self.setTalk()
 
     def test(self):
-        localDeps = self.depSet.getDepClasses().get(self.depClassType, None)
-        if not localDeps:
-            return False
-
         depSetList = [ ]
-        for dep in localDeps.getDeps():
+        for dep in self.depSet.iterDepsByClass(self.depClass):
             depSet = deps.DependencySet()
             depSet.addDep(self.depClass, dep)
             depSetList.append(depSet)
+
+        if not depSetList:
+            return False
 
         cfg = self.recipe.cfg
         self.db = database.Database(cfg.root, cfg.dbPath)
