@@ -132,7 +132,7 @@ class WorldWriteableExecutables(policy.EnforcementPolicy):
 	mode = os.lstat(util.joinPaths(d, file))[stat.ST_MODE]
         if mode & 0111 and mode & 02 and not stat.S_ISLNK(mode):
             self.error(
-                "%s has mode 0%o with world-writeable permission in bindir",
+                "%s has executable mode 0%o with world-writeable permission",
                 file, mode)
 
 

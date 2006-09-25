@@ -1,3 +1,7 @@
+Changes in 1.0.10:
+  o The WorldWriteableExecutables policy warning mesesage has been
+    changed to be more accurate.
+
 Changes in 1.0.9:
   o The AutoDoc policy now includes LICENSE.txt and NOTICE.txt files,
     since those names are common in Java packages. (CNP-29)
