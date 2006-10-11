@@ -179,3 +179,5 @@ class Strip(policy.DestdirPolicy):
                 except IOError, msg:
                     if msg.errno == errno.ENOENT:
                         pass
+                    else:
+                        raise
