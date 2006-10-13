@@ -39,7 +39,7 @@ class AutoDoc(policy.DestdirPolicy):
     installed is added automatically. Exceptions to the policy are
     passed in via C{r.AutoDoc(I{exceptions=filterexpression})}. Exceptions
     are evaluated relative to the build directory, and not the destination
-    directory.
+    directory. All files created will have modes of 644.
 
     EXAMPLES
     ========
@@ -95,5 +95,6 @@ class AutoDoc(policy.DestdirPolicy):
             return
         util.mkdirChain(os.path.dirname(dest))
         shutil.copy2(source, dest)
+        os.chmod(dest, 0644)
         # this file should not be counted as making package non-empty
         self.recipe._autoCreatedFileCount += 1
