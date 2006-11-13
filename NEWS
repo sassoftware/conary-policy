@@ -3,6 +3,8 @@ Changes in 1.0.10:
     changed to be more accurate.
   o AutoDoc now enforces a mode of 0644 on files it adds to %(thisdocdir)s
     (CNP-43)
+  o The new FixBuilddirSymlink policy has been added to fix symlinks
+    that include the builddir. (CNP-48)
 
 Changes in 1.0.9:
   o The AutoDoc policy now includes LICENSE.txt and NOTICE.txt files,

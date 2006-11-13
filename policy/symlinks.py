@@ -19,6 +19,55 @@ from conary.deps import deps
 from conary.lib import util
 
 
+class FixBuilddirSymlink(policy.DestdirPolicy):
+    """
+    NAME
+    ====
+
+    B{C{r.FixBuilddirSymlink()}} - Remove builddir from symlink contents when appropriate
+
+    SYNOPSIS
+    ========
+
+    C{r.FixBuilddirSymlink([filterexp])}
+
+    DESCRIPTION
+    ===========
+
+    The C{r.FixBuilddirSymlink()} policy replaces symbolic links into
+    the build directory, as installed by some software packages, with
+    symbolic links with with the C{%(builddir)s} removed, if that file
+    itself exists.
+
+    Exceptions to this policy will generally result in errors in
+    other policy.
+    """
+    requires = (
+        # Needs to run before RelativeSymlinks
+        ('RelativeSymlinks', policy.REQUIRED_SUBSEQUENT),
+        # DanglingSymlinks will announce an error for these, is in later bucket
+        ('DanglingSymlinks', policy.REQUIRED),
+    )
+
+    def doFile(self, path):
+        d = self.macros.destdir
+        f = util.joinPaths(d, path)
+        if not os.path.islink(f):
+            return
+
+        contents = os.readlink(f)
+        builddir = self.recipe.macros.builddir
+        if contents.startswith(builddir):
+            newContents = os.path.normpath(contents[len(builddir):])
+            n = util.joinPaths(d, newContents)
+            if not util.exists(n):
+                return
+            self.info('removing builddir from symlink %s: %s becomes %s',
+                      path, contents, newContents)
+            os.unlink(f)
+            os.symlink(newContents, f)
+
+
 class RelativeSymlinks(policy.DestdirPolicy):
     """
     NAME

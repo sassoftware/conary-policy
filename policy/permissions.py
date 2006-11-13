@@ -83,7 +83,7 @@ class WarnWriteable(policy.EnforcementPolicy):
         # Needs to run after setModes because setModes sets exceptions
         ('setModes', policy.CONDITIONAL_PRIOR),
         # Needs to run after Ownership for group info
-        ('Ownership', policy.REQUIRED_SUBSEQUENT),
+        ('Ownership', policy.REQUIRED_PRIOR),
     )
 
     def doFile(self, filename):
