@@ -512,17 +512,24 @@ class EnforceConfigLogBuildRequirements(policy.EnforcementPolicy):
     def postProcess(self):
         if not self.foundPaths:
             return
+
+        db = database.Database(self.recipe.cfg.root, self.recipe.cfg.dbPath)
+
         # first, get all the trove names in the transitive buildRequires
         # runtime dependency closure
-        db = database.Database(self.recipe.cfg.root, self.recipe.cfg.dbPath)
-        transitiveBuildRequires = set(
-            self.recipe.buildReqMap[spec].getName()
-            for spec in self.recipe.buildRequires)
-        depSetList = [ self.recipe.buildReqMap[spec].getRequires()
-                       for spec in self.recipe.buildRequires ]
-        d = db.getTransitiveProvidesClosure(depSetList)
-        for depSet in d:
-            transitiveBuildRequires.update(set(tup[0] for tup in d[depSet]))
+        try:
+            transitiveBuildRequires = self.recipe._getTransitiveBuildRequiresNames()
+        except AttributeError:
+            # Must be running with older Conary; fall back to manually
+            # doing the same thing locally
+            transitiveBuildRequires = set(
+                self.recipe.buildReqMap[spec].getName()
+                for spec in self.recipe.buildRequires)
+            depSetList = [ self.recipe.buildReqMap[spec].getRequires()
+                           for spec in self.recipe.buildRequires ]
+            d = db.getTransitiveProvidesClosure(depSetList)
+            for depSet in d:
+                transitiveBuildRequires.update(set(tup[0] for tup in d[depSet]))
 
         # next, for each file found, report if it is not in the
         # transitive closure of runtime requirements of buildRequires
