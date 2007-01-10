@@ -5,6 +5,12 @@ Changes in 1.0.10:
     (CNP-43)
   o The new FixBuilddirSymlink policy has been added to fix symlinks
     that include the builddir. (CNP-48)
+  o When multiple components provide a dependency that is discovered
+    to be missing from the buildRequires list, dependencies between
+    those components are investigated to determine which is the
+    best dependency to suggest.  This will cause foo:devel to be
+    suggested instead of providing a choice between foo:devel and
+    foo:devellib. (CNP-60)
 
 Changes in 1.0.9:
   o The AutoDoc policy now includes LICENSE.txt and NOTICE.txt files,

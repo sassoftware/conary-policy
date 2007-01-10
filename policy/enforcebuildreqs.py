@@ -12,6 +12,7 @@
 # full details.
 #
 
+import itertools
 import os
 import re
 import stat
@@ -107,6 +108,9 @@ class _enforceBuildRequirements(policy.EnforcementPolicy):
                     if interpreter:
                         interpreterMap[path] = (pkgfile.requires(), interpreter)
 
+        provideNameMap = dict([(x[0], x) for x in
+                               itertools.chain(*self.systemProvides.values())])
+
         for dep in self.systemProvides:
             provideNameList = [x[0] for x in self.systemProvides[dep]]
             # normally, there is only one name in provideNameList
@@ -116,6 +120,7 @@ class _enforceBuildRequirements(policy.EnforcementPolicy):
                 for candidate in self.providesNames(name):
                     if self.db.hasTroveByName(candidate):
                         foundCandidates.add(candidate)
+                        provideNameMap[candidate] = provideNameMap[name]
                         break
             foundCandidates -= self.compExceptions
             for compRe in self.compReExceptions:
@@ -128,6 +133,12 @@ class _enforceBuildRequirements(policy.EnforcementPolicy):
                 # reflected in the buildRequires list.  Add candidates
                 # to proper list to print at the end:
                 if len(foundCandidates) > 1:
+                    reduceTroves = sorted([provideNameMap[x]
+                                          for x in foundCandidates])
+                    reduceTroves = self.reduceCandidates(reduceTroves)
+                    foundCandidates = set([x[0] for x in reduceTroves])
+                    if len(foundCandidates) == 1:
+                        break
                     found = False
                     for candidateSet in missingBuildRequiresChoices:
                         if candidateSet == foundCandidates:
@@ -205,6 +216,34 @@ class _enforceBuildRequirements(policy.EnforcementPolicy):
 
     def providesNames(self, libname):
         return [libname]
+
+    def reduceCandidates(self, foundCandidates):
+        # this may not be the most efficient algorithm, but almost
+        # every case will be two providers (:devel and :devellib)
+        # so it doesn't matter
+
+        def satisfies(a, b):
+            return self.db.getTrove(*a).getProvides().intersection(
+                       self.db.getTrove(*b).getRequires())
+
+        if len(foundCandidates) < 2:
+            return foundCandidates
+
+        a = foundCandidates[0]
+        b = foundCandidates[1]
+        c = foundCandidates[2:]
+
+        if satisfies(a, b):
+            return self.reduceCandidates([a] + c)
+        if satisfies(b, a):
+            return self.reduceCandidates([b] + c)
+
+        if c:
+            return sorted(list(set(
+                self.reduceCandidates([a] + c),
+                self.reduceCandidates([b] + c))))
+
+        return [a, b]
 
 
 class EnforceSonameBuildRequirements(_enforceBuildRequirements):
