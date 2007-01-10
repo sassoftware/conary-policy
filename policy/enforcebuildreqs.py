@@ -21,10 +21,20 @@ from conary.deps import deps
 from conary.lib import util, magic
 from conary.local import database
 from conary.build import policy
-from conary.build.use import Use
+from conary.build import use
 
 
-class _enforceBuildRequirements(policy.EnforcementPolicy):
+class _warnBuildRequirements(policy.EnforcementPolicy):
+    def setTalk(self):
+        # FIXME: remove "True or " when we are ready for errors
+        if (True or 'local@local' in self.recipe.macros.buildlabel
+            or use.Use.bootstrap._get()):
+            self.talk = self.warn
+        else:
+            self.talk = self.error
+
+
+class _enforceBuildRequirements(_warnBuildRequirements):
     """
     Pure virtual base class from which classes are derived that
     enforce buildRequires population from runtime dependencies.
@@ -89,14 +99,6 @@ class _enforceBuildRequirements(policy.EnforcementPolicy):
 
     def postProcess(self):
         del self.db
-
-    def setTalk(self):
-        # FIXME: remove "True or " when we are ready for errors
-        if (True or 'local@local' in self.recipe.macros.buildlabel
-            or Use.bootstrap._get()):
-            self.talk = self.warn
-        else:
-            self.talk = self.error
 
     def do(self):
         missingBuildRequires = set()
@@ -604,3 +606,48 @@ class EnforceConfigLogBuildRequirements(policy.EnforcementPolicy):
                 # it is OK if we are running with an earlier Conary that
                 # does not have reportMissingBuildRequires
                 pass
+
+class EnforceFlagBuildRequirements(_warnBuildRequirements):
+    """
+    NAME
+    ====
+
+    B{C{r.EnforceFlagBuildRequirements()}} - Ensures that all files
+    used to define the current flavor are listed as build requirements
+
+    B{C{EnforceFlagBuildRequirements}} should never be called, and
+    takes no exceptions.
+
+    """
+    def test(self):
+        # use flags track their provider only if the
+        # _getTransitiveBuildRequiresNames recipe method exists
+        try:
+            self.transitiveBuildRequires = self.recipe._getTransitiveBuildRequiresNames()
+        except AttributeError:
+            return False
+
+        cfg = self.recipe.cfg
+        self.db = database.Database(cfg.root, cfg.dbPath)
+        self.setTalk()
+
+        return True
+
+    def postProcess(self):
+        del self.db
+
+    def do(self):
+        missingBuildRequires = set()
+        for flag in use.iterUsed():
+            path = flag._path
+            for trove in self.db.iterTrovesByPath(path):
+                flagTroveName = trove.getName()
+                if flagTroveName not in self.transitiveBuildRequires:
+                    self.talk('flag %s missing build requirement %s',
+                              flag._name, flagTroveName)
+                    missingBuildRequires.add(flagTroveName)
+
+        if missingBuildRequires:
+            self.talk('add to buildRequires: %s',
+                       str(sorted(list(set(missingBuildRequires)))))
+            self.recipe.reportMissingBuildRequires(missingBuildRequires)
