@@ -1,5 +1,5 @@
 Changes in 1.0.10:
-  o The WorldWriteableExecutables policy warning mesesage has been
+  o The WorldWriteableExecutables policy warning message has been
     changed to be more accurate.
   o AutoDoc now enforces a mode of 0644 on files it adds to %(thisdocdir)s
     (CNP-43)
@@ -11,6 +11,9 @@ Changes in 1.0.10:
     best dependency to suggest.  This will cause foo:devel to be
     suggested instead of providing a choice between foo:devel and
     foo:devellib. (CNP-60)
+  o Now that Conary records the transitive closure of the buildRequires
+    list, Enforce*BuildRequires inspects that transitive closure,
+    eliminating unnecessary and redundant suggestions. (CNP-61)
 
 Changes in 1.0.9:
   o The AutoDoc policy now includes LICENSE.txt and NOTICE.txt files,

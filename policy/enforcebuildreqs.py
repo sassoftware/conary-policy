@@ -42,13 +42,22 @@ class _enforceBuildRequirements(policy.EnforcementPolicy):
                     self.compReExceptions.add(re.compile(exception))
         self.exceptions = None
 
-        # right now we do not enforce branches.  This could be
-        # done with more work.  There is no way I know of to
-        # enforce flavors, so we just remove them from the spec.
-        self.truncatedBuildRequires = set(
-            self.recipe.buildReqMap[spec].getName()
-            for spec in self.recipe.buildRequires
-            if spec in self.recipe.buildReqMap)
+        try:
+            self.transitiveBuildRequires = self.recipe._getTransitiveBuildRequiresNames()
+        except AttributeError:
+            # Must be running with older Conary; fall back to manually
+            # doing the same thing locally
+            self.transitiveBuildRequires = set(
+                self.recipe.buildReqMap[spec].getName()
+                for spec in self.recipe.buildRequires)
+            depSetList = [ self.recipe.buildReqMap[spec].getRequires()
+                           for spec in self.recipe.buildRequires ]
+            d = db.getTransitiveProvidesClosure(depSetList)
+            for depSet in d:
+                self.transitiveBuildRequires.update(set(tup[0]
+                                                        for tup in d[depSet]))
+        # For compatibility with older external policy that derives from this
+        self.truncatedBuildRequires = self.transitiveBuildRequires
 
 	components = self.recipe.autopkg.components
         reqDepSet = deps.DependencySet()
@@ -127,7 +136,7 @@ class _enforceBuildRequirements(policy.EnforcementPolicy):
                 foundCandidates -= set(x for x in foundCandidates
                                        if compRe.match(x))
 
-            missingCandidates = foundCandidates - self.truncatedBuildRequires
+            missingCandidates = foundCandidates - self.transitiveBuildRequires
             if foundCandidates and missingCandidates == foundCandidates:
                 # None of the troves that provides this requirement is
                 # reflected in the buildRequires list.  Add candidates
@@ -175,7 +184,7 @@ class _enforceBuildRequirements(policy.EnforcementPolicy):
             for interpreter in interpreterSet:
                 for trove in self.db.iterTrovesByPath(interpreter):
                     interpreterTroveName = trove.getName()
-                    if interpreterTroveName not in self.truncatedBuildRequires:
+                    if interpreterTroveName not in self.transitiveBuildRequires:
                         self.talk('interpreter %s missing build requirement %s',
                                   interpreter, interpreterTroveName)
                         missingBuildRequires.add(interpreterTroveName)
