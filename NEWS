@@ -14,6 +14,9 @@ Changes in 1.0.10:
   o Now that Conary records the transitive closure of the buildRequires
     list, Enforce*BuildRequires inspects that transitive closure,
     eliminating unnecessary and redundant suggestions. (CNP-61)
+  o The pam_stack module is now deprecated, so the NormalizePamConfig
+    policy now changes to the preferred include mechanism by default.
+    (CNP-42)
 
 Changes in 1.0.9:
   o The AutoDoc policy now includes LICENSE.txt and NOTICE.txt files,

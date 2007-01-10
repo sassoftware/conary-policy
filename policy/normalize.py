@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2004-2005 rPath, Inc.
+# Copyright (c) 2004-2007 rPath, Inc.
 #
 # This program is distributed under the terms of the Common Public License,
 # version 1.0. A copy of this license should have been distributed with this
@@ -576,6 +576,13 @@ class NormalizePamConfig(policy.DestdirPolicy):
         f = file(d, 'r+')
         l = f.readlines()
         l = [x.replace('/lib/security/$ISA/', '') for x in l]
+        stackRe = re.compile('(.*)required.*pam_stack.so.*service=(.*)')
+        def removeStack(line):
+            m = stackRe.match(line)
+            if m:
+                return '%s include %s\n'%(m.group(1), m.group(2))
+            return line
+        l = [removeStack(x) for x in l]
         f.seek(0)
         f.truncate(0) # we may have shrunk the file, avoid garbage
         f.writelines(l)
