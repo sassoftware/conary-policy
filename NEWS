@@ -20,6 +20,7 @@ Changes in 1.0.10:
   o If Conary is new enough (1.0.41/1.1.14 or newer), Conary will now
     report if files that provide use flags are not included in the
     buildRequires list. (CNP-44)
+  o All pkgconfig files are moved to be multilib-safe. (CNP-55)
 
 Changes in 1.0.9:
   o The AutoDoc policy now includes LICENSE.txt and NOTICE.txt files,
