@@ -61,5 +61,5 @@ class NormalizePkgConfig(policy.DestdirPolicy):
                 self.error('%s and %s/%s/%s both exist',
                            filename, libdir, 'pkgconfig', basename)
                 return
-        util.mkdirChain(os.path.dirname(dest))
-        util.rename(destdir+filename, dest)
+            util.mkdirChain(os.path.dirname(dest))
+            util.rename(destdir+filename, dest)
