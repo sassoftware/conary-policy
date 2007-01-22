@@ -335,10 +335,6 @@ class ObsoletePaths(policy.EnforcementPolicy):
 	for path in self.candidates.keys():
 	    fullpath = util.joinPaths(d, path)
 	    if os.path.exists(fullpath):
-                # FIXME only report error if directory is included in
-                # the package or a file within the directory is included
-                # in the package; if it is merely an empty directory in
-                # the filesystem only log a warning.
                 self.error('Path %s should not exist, use %s instead',
                            path, self.candidates[path])
 
