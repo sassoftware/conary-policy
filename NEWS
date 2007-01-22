@@ -21,6 +21,7 @@ Changes in 1.0.10:
     report if files that provide use flags are not included in the
     buildRequires list. (CNP-44)
   o All pkgconfig files are moved to be multilib-safe. (CNP-55)
+  o Policy now fails on paths of /usr/usr (CNP-46).
 
 Changes in 1.0.9:
   o The AutoDoc policy now includes LICENSE.txt and NOTICE.txt files,

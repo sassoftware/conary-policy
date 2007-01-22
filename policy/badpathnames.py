@@ -293,9 +293,6 @@ class FilesForDirectories(policy.EnforcementPolicy):
 	    fullpath = util.joinPaths(d, path)
 	    if os.path.exists(fullpath):
 		if not os.path.isdir(fullpath):
-                    # XXX only report error if directory is included in
-                    # the package; if it is merely in the filesystem
-                    # only log a warning.  Needs to follow ExcludeDirectories...
                     self.error(
                         'File %s should be a directory; bad r.Install()?', path)
 
@@ -329,6 +326,7 @@ class ObsoletePaths(policy.EnforcementPolicy):
 	'/usr/man': '/usr/share/man',
 	'/usr/info': '/usr/share/info',
 	'/usr/doc': '/usr/share/doc',
+        '/usr/usr/': '/usr',
     }
     def do(self):
 	d = self.recipe.macros.destdir
