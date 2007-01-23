@@ -139,6 +139,9 @@ class FixupManpagePaths(policy.DestdirPolicy, FilesInMandir):
     packages which place files in /usr/share/man/1 instead of
     /usr/share/man/man1
     """
+    requires = (
+        ('FixBadPaths', policy.REQUIRED_PRIOR),
+    )
 
     def doFile(self, file):
         # heuristic parsing of a manpage filename to figure out its catagory
@@ -156,6 +159,7 @@ class FixupManpagePaths(policy.DestdirPolicy, FilesInMandir):
         except ValueError:
             return # not an int
         path = ''.join([x for x in (d,mandir,'/','man',num,'/')])
+        self.warn('Moving %s to %s', file, path)
         os.makedirs(path)
         os.rename(d+file, path+f)
 
