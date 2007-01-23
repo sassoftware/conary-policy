@@ -367,3 +367,33 @@ class PythonEggs(policy.EnforcementPolicy):
         self.error('Python .egg %s exists; use'
                    ' --single-version-externally-managed argument'
                    ' to setup.py or use r.PythonSetup()', path)
+
+class UsrLocal(policy.EnforcementPolicy):
+    """
+    NAME
+    ====
+
+    B{C{r.UsrLocal()}} - Warn about presence of /usr/local
+
+    SYNOPSIS
+    ========
+
+    C{r.UsrLocal([I{filterexp}])}
+
+    DESCRIPTION
+    ===========
+
+    This policy warns about paths containing /usr/local, which is designed for
+    files locally managed (IE: not managed by a package manager such as conary).
+
+    This policy does not honor exceptions.
+    """
+    
+    invariantinclusions = [
+        '/usr/local/.*',
+    ]
+
+    def doFile(self, path):
+        self.warn('Paths of /usr/local are intended for locally managed files;'
+            ' it is usually a good idea to package files elsewhere in the'
+            ' filesystem.')

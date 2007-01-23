@@ -25,6 +25,8 @@ Changes in 1.0.10:
   o Broken symlinks are now removed from the build dir after an error has
     been logged so that policies which check file contents are not confused
     by the broken symlink (CNP-59).
+  o Packagers which place things into /usr/local will now recieve a warning
+    stating that /usr/local is inteded for non-managed files. (CNP-13)
 
 Changes in 1.0.9:
   o The AutoDoc policy now includes LICENSE.txt and NOTICE.txt files,
