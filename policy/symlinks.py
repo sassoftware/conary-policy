@@ -223,3 +223,7 @@ class DanglingSymlinks(policy.PackagePolicy):
 	    self.error(
 	        "Dangling symlink: %s points to non-existant %s (%s)"
 	        %(path, contents, abscontents))
+            # now that an error has been logged, we need to get rid of the file
+            # so the rest of policy won't barf trying to access a file which
+            # doesn't *really* exist (CNP-59)
+            os.unlink(self.recipe.macros.destdir+path)
