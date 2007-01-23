@@ -32,6 +32,9 @@ Changes in 1.0.10:
     The previous behaviour was for ObsoletePaths to log an error and not
     try to correct the issue. For compatability reasons, ObsoletePaths has
     been left unchanged.
+  o Manpages which contain their catagory in their filename will now be moved
+    to the correct location if they exist in %(mandir)s and not
+    %(mandir)s/catagory/ (CNP-5)
 
 Changes in 1.0.9:
   o The AutoDoc policy now includes LICENSE.txt and NOTICE.txt files,

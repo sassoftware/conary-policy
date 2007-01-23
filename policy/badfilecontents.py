@@ -114,6 +114,50 @@ class FilesInMandir(policy.EnforcementPolicy):
     def doFile(self, file):
         self.error("%s is non-directory file in mandir", file)
 
+class FixupManpagePaths(policy.DestdirPolicy, FilesInMandir):
+    """
+    NAME
+    ====
+
+    B{C{r.FixupManpagePaths()}} - Tries to fix up manpage paths normally caught
+    by FilesInMandir, and other mishaps.
+
+    SYNOPSIS
+    ========
+
+    C{r.FixupManpagePaths([I{filterexp}] || [I{exceptions=filterexp}])}
+
+    DESCRIPTION
+    ===========
+
+    The C{r.FixupManpagePaths()}  policy ensures that system manual page
+    directories contain only other directories, and not files,
+    so that manual pages are installed into specific sections where
+    the C{man} command will find them.
+
+    The policy also attempts to correct odd placement of man pages such as
+    packages which place files in /usr/share/man/1 instead of
+    /usr/share/man/man1
+    """
+
+    def doFile(self, file):
+        # heuristic parsing of a manpage filename to figure out its catagory
+        mandir = self.recipe.macros.mandir
+        d = self.recipe.macros.destdir
+        f = file.split('/')[-1]
+        if f[-2:] == 'gz':
+            num = f.split('.')[-2]
+        elif '.' in f:
+            num = f.split('.')[-1]
+        else:
+            return # doesn't have anything parsable in the filename
+        try:
+            if int(num) > 9: return # manpage catagories go up to 9
+        except ValueError:
+            return # not an int
+        path = ''.join([x for x in (d,mandir,'/','man',num,'/')])
+        os.makedirs(path)
+        os.rename(d+file, path+f)
 
 class BadInterpreterPaths(policy.EnforcementPolicy):
     """
