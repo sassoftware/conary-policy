@@ -134,30 +134,45 @@ class FixupManpagePaths(policy.DestdirPolicy, FilesInMandir):
     directories contain only other directories, and not files,
     so that manual pages are installed into specific sections where
     the C{man} command will find them.
-
-    The policy also attempts to correct odd placement of man pages such as
-    packages which place files in /usr/share/man/1 instead of
-    /usr/share/man/man1
     """
     requires = (
         ('FixBadPaths', policy.REQUIRED_PRIOR),
     )
+
+    invariantsubtrees = []
+    for x in '0123456789':
+        for y in FilesInMandir.invariantsubtrees:
+            invariantsubtrees.append(y+'/'+x)
+    invariantsubtrees += FilesInMandir.invariantsubtrees
+    invariantinclusions = FilesInMandir.invariantinclusions
+    recursive = FilesInMandir.recursive
+    
+    def logError(self, file):
+        self.error('Could not figure out where file %s goes. Please correct by '
+            'hand.', file)
 
     def doFile(self, file):
         # heuristic parsing of a manpage filename to figure out its catagory
         mandir = self.recipe.macros.mandir
         d = self.recipe.macros.destdir
         f = file.split('/')[-1]
+        mode = os.stat(d+'/'+file)[stat.ST_MODE]
+        if stat.S_ISDIR(mode):
+            return # irrelevent directory
         if f[-2:] == 'gz':
             num = f.split('.')[-2]
         elif '.' in f:
             num = f.split('.')[-1]
         else:
-            return # doesn't have anything parsable in the filename
+            self.logError(file) # doesn't have anything parsable in the filename
+            return
         try:
-            if int(num) > 9: return # manpage catagories go up to 9
+            if int(num) > 9:
+                self.logError(file) # manpage catagories go up to 9
+                return
         except ValueError:
-            return # not an int
+            self.logError(file) # not an int
+            return
         path = ''.join([x for x in (d,mandir,'/','man',num,'/')])
         self.warn('Moving %s to %s', file, path)
         os.makedirs(path)
