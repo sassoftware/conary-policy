@@ -297,12 +297,12 @@ class FilesForDirectories(policy.EnforcementPolicy):
                         'File %s should be a directory; bad r.Install()?', path)
 
 
-class ObsoletePaths(policy.EnforcementPolicy):
+class ObsoletePaths(policy.DestdirPolicy):
     """
     NAME
     ====
 
-    B{C{r.ObsoletePaths()}} - Warn about paths considered obsolete
+    B{C{r.ObsoletePaths()}} - Move known obsolete paths to the correct place
 
     SYNOPSIS
     ========
@@ -326,15 +326,22 @@ class ObsoletePaths(policy.EnforcementPolicy):
 	'/usr/man': '/usr/share/man',
 	'/usr/info': '/usr/share/info',
 	'/usr/doc': '/usr/share/doc',
-        '/usr/usr/': '/usr',
+        '/usr/usr': '/usr',
     }
     def do(self):
 	d = self.recipe.macros.destdir
 	for path in self.candidates.keys():
 	    fullpath = util.joinPaths(d, path)
 	    if os.path.exists(fullpath):
-                self.error('Path %s should not exist, use %s instead',
-                           path, self.candidates[path])
+                try:
+                    destdir = self.recipe.macros.destdir
+                    os.renames(destdir+path, destdir+self.candidates[path])
+                    self.warn('Path %s should not exist, moving to %s instead',
+                               path, self.candidates[path])
+                except OSError:
+                    self.error('Path %s should not exist and it cannot be'
+                        ' moved to the new location. Please move it to %s'
+                        ' instead.', path, self.candidates[path])
 
 
 class PythonEggs(policy.EnforcementPolicy):
