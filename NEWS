@@ -27,9 +27,11 @@ Changes in 1.0.10:
     by the broken symlink (CNP-59).
   o Packagers which place things into /usr/local will now recieve a warning
     stating that /usr/local is inteded for non-managed files. (CNP-13)
-  o ObsoletePaths will now try to move files to the correct place
-    automatically, and log an error if it is unable to do so. The previous
-    behaviour was to log an error and not try to correct the issue.
+  o A new policy, FixObsoletePaths, will now try to move files to the 
+    correct place automatically, and log an error if it is unable to do so.
+    The previous behaviour was for ObsoletePaths to log an error and not
+    try to correct the issue. For compatability reasons, ObsoletePaths has
+    been left unchanged.
 
 Changes in 1.0.9:
   o The AutoDoc policy now includes LICENSE.txt and NOTICE.txt files,
