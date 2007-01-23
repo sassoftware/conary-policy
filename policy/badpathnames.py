@@ -302,7 +302,7 @@ class ObsoletePaths(policy.EnforcementPolicy):
     NAME
     ====
 
-    B{C{r.ObsoletePaths()}} - Warn about paths considered obsolete
+    B{C{r.ObsoletePaths()}} - Raise an error on paths considered obsolete
 
     SYNOPSIS
     ========
