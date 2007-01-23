@@ -26,17 +26,17 @@ Changes in 1.0.10:
     been logged so that policies which check file contents are not confused
     by the broken symlink (CNP-59).
   o Packagers which place things into /usr/local will now recieve a warning
-    stating that /usr/local is inteded for non-managed files. (CNP-13)
+    stating that /usr/local is intended for non-managed files. (CNP-13)
   o A new policy, FixObsoletePaths, will now try to move files to the 
     correct place automatically, and log an error if it is unable to do so.
     The previous behaviour was for ObsoletePaths to log an error and not
-    try to correct the issue. For compatability reasons, ObsoletePaths has
-    been left unchanged.
-  o Manpages which contain their catagory in their filename will now be moved
-    to the correct location if they exist in %(mandir)s and not
-    %(mandir)s/catagory/ (CNP-5)
+    try to correct the issue. For compatability, an ObsoletePaths stub
+    has been retained.
+  o Manpages which contain their catagory in their filename will now be
+    moved to the correct location if they exist in %(mandir)s and not
+    %(mandir)s/category/. (CNP-5)
   o Manpages which were placed in directories such as /usr/share/man/1 will
-    be moved to their correct location: /usr/share/man/man1 (CNP-4)
+    now be moved to their correct location: /usr/share/man/man1 (CNP-4)
 
 Changes in 1.0.9:
   o The AutoDoc policy now includes LICENSE.txt and NOTICE.txt files,

@@ -148,3 +148,17 @@ class Group(policy.EnforcementPolicy):
 
     def test(self):
         return False
+
+
+class ObsoletePaths(policy.EnforcementPolicy):
+    """
+    NAME
+    ====
+
+    B{C{r.ObsoletePaths()}} - Replaced by B{C{r.FixObsoletePaths}}
+    """
+    def updateArgs(self, *args, **keywords):
+        self.warn('ObsoletePaths has been replaced by FixObsoletePaths')
+
+    def test(self):
+        return False

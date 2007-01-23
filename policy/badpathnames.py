@@ -297,67 +297,34 @@ class FilesForDirectories(policy.EnforcementPolicy):
                         'File %s should be a directory; bad r.Install()?', path)
 
 
-class ObsoletePaths(policy.EnforcementPolicy):
-    """
-    NAME
-    ====
+class _pathMap(policy.Policy):
+    candidates = {}
 
-    B{C{r.ObsoletePaths()}} - Raise an error on paths considered obsolete
-
-    SYNOPSIS
-    ========
-
-    C{r.ObsoletePaths([I{filterexp}])}
-
-    DESCRIPTION
-    ===========
-
-    The C{r.ObsoletePaths()} policy raises an error on paths which were at one
-    time considered correct, but are now considered obsolete.
-
-    This policy does not honor exceptions.
-    """
-
-    requires = (
-        ('ExcludeDirectories', policy.REQUIRED_PRIOR),
-    )
-
-    candidates = {
-	'/usr/man': '/usr/share/man',
-	'/usr/info': '/usr/share/info',
-	'/usr/doc': '/usr/share/doc',
-        '/usr/usr/': '/usr',
-    }
-    # so FixBadPaths can inherit the objects to scan
-    def badPaths(self):
-	d = self.recipe.macros.destdir
-	for path in self.candidates.keys():
-	    fullpath = util.joinPaths(d, path)
-	    if os.path.exists(fullpath):
+    def candidatePaths(self):
+        d = self.recipe.macros.destdir
+        for path in self.candidates.keys():
+            fullpath = util.joinPaths(d, path)
+            if os.path.exists(fullpath):
                 yield (path, self.candidates[path])
-        
-    def do(self):
-        for path in self.badPaths():
-            self.error('Path %s should not exist, use %s instead',
-                path[0], path[1])
 
-class FixBadPaths(policy.DestdirPolicy, ObsoletePaths):
+
+class FixObsoletePaths(policy.DestdirPolicy, _pathMap):
     """
     NAME
     ====
 
-    B{C{r.FixBadPaths()}} - Attempt to fix obsolete paths before ObsoletePaths runs
+    B{C{r.FixObsoletePaths()}} - Attempt to fix obsolete paths
 
     SYNOPSIS
     ========
 
-    C{r.FixBadPaths([I{filterexp}])}
+    C{r.FixObsoletePaths([I{filterexp}])}
 
     DESCRIPTION
     ===========
 
-    The C{r.FixBadPaths()} attempts to correct the same bad paths found in
-    ObsoletePaths.
+    The C{r.FixObsoletePaths()} policy attempts to correct obsolete 
+    paths.
 
     This policy does not honor exceptions.
     """
@@ -366,19 +333,67 @@ class FixBadPaths(policy.DestdirPolicy, ObsoletePaths):
         ('ExcludeDirectories', policy.REQUIRED_PRIOR),
     )
 
+    candidates = {
+        '/usr/man': '/usr/share/man',
+        '/usr/info': '/usr/share/info',
+        '/usr/doc': '/usr/share/doc',
+    }
+
     def do(self):
-        #import epdb;epdb.st()
         d = self.recipe.macros.destdir
-        for path in self.badPaths():
+        for path, newPath in self.candidatePaths():
             try:
-                os.renames(d+path[0], d+path[1])
+                os.renames(d+path, d+newPath)
                 self.warn('Path %s should not exist, moving to %s instead',
-                          path[0], path[1])
+                          path, newPath)
             except OSError:
-                # will be caught by ObsoletePaths
-                self.warn('Path %s should not exist and cannot be'
-                    ' moved to the new location. Please move it to %s'
-                    ' instead.', path[0], path[1])
+                self.error('Path %s should not exist; attempt to '
+                    'move failed. Please move it to %s instead.',
+                    path, newPath)
+
+
+class NonLSBPaths(policy.EnforcementPolicy, _pathMap):
+    """
+    NAME
+    ====
+
+    B{C{r.NonLSBPaths()}} - Warn about non-LSB paths
+
+    SYNOPSIS
+    ========
+
+    C{r.NonLSBPaths(exceptions=I{filterexp})}
+
+    DESCRIPTION
+    ===========
+
+    This policy warns about paths that conflict with the LSB in some
+    way.
+    """
+    
+    candidates = {
+        '/usr/local':
+           ('/usr',
+            False,
+            '/usr/local is recommended by the LSB only for non-packaged files'),
+        '/usr/usr/':
+           ('/usr',
+            True,
+            '/usr/usr is usually caused by using %(prefix)s instead of /'),
+    }
+
+    def doProcess(self, recipe):
+        self.invariantinclusions = self.candidates.keys()
+        policy.EnforcementPolicy.doProcess(self, recipe)
+
+    def doFile(self, path):
+        newPath, error, advice = self.candidates[path]
+        if error:
+            talk = self.error
+        else:
+            talk = self.warn
+        talk('Found path %s: %s', path, advice)
+
 
 class PythonEggs(policy.EnforcementPolicy):
     """
@@ -410,33 +425,3 @@ class PythonEggs(policy.EnforcementPolicy):
         self.error('Python .egg %s exists; use'
                    ' --single-version-externally-managed argument'
                    ' to setup.py or use r.PythonSetup()', path)
-
-class UsrLocal(policy.EnforcementPolicy):
-    """
-    NAME
-    ====
-
-    B{C{r.UsrLocal()}} - Warn about presence of /usr/local
-
-    SYNOPSIS
-    ========
-
-    C{r.UsrLocal([I{filterexp}])}
-
-    DESCRIPTION
-    ===========
-
-    This policy warns about paths containing /usr/local, which is designed for
-    files locally managed (IE: not managed by a package manager such as conary).
-
-    This policy does not honor exceptions.
-    """
-    
-    invariantinclusions = [
-        '/usr/local/.*',
-    ]
-
-    def doFile(self, path):
-        self.warn('Paths of /usr/local are intended for locally managed files;'
-            ' it is usually a good idea to package files elsewhere in the'
-            ' filesystem.')

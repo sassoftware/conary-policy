@@ -136,7 +136,8 @@ class FixupManpagePaths(policy.DestdirPolicy, FilesInMandir):
     the C{man} command will find them.
     """
     requires = (
-        ('FixBadPaths', policy.REQUIRED_PRIOR),
+        ('FixObsoletePaths', policy.REQUIRED_PRIOR),
+        ('NormalizeManPages', policy.CONDITIONAL_SUBSEQUENT),
     )
 
     invariantsubtrees = []
