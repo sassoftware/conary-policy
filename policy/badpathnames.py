@@ -312,8 +312,8 @@ class ObsoletePaths(policy.EnforcementPolicy):
     DESCRIPTION
     ===========
 
-    The C{r.ObsoletePaths()} policy warns about paths which were at one time
-    considered correct, but are now considered obsolete.
+    The C{r.ObsoletePaths()} policy raises an error on paths which were at one
+    time considered correct, but are now considered obsolete.
 
     This policy does not honor exceptions.
     """
@@ -328,14 +328,57 @@ class ObsoletePaths(policy.EnforcementPolicy):
 	'/usr/doc': '/usr/share/doc',
         '/usr/usr/': '/usr',
     }
-    def do(self):
+    # so FixBadPaths can inherit the objects to scan
+    def badPaths(self):
 	d = self.recipe.macros.destdir
 	for path in self.candidates.keys():
 	    fullpath = util.joinPaths(d, path)
 	    if os.path.exists(fullpath):
-                self.error('Path %s should not exist, use %s instead',
-                           path, self.candidates[path])
+                yield (path, self.candidates[path])
+        
+    def do(self):
+        for path in self.badPaths():
+            self.error('Path %s should not exist, use %s instead',
+                path[0], path[1])
 
+class FixBadPaths(policy.DestdirPolicy, ObsoletePaths):
+    """
+    NAME
+    ====
+
+    B{C{r.FixBadPaths()}} - Attempt to fix obsolete paths before ObsoletePaths runs
+
+    SYNOPSIS
+    ========
+
+    C{r.FixBadPaths([I{filterexp}])}
+
+    DESCRIPTION
+    ===========
+
+    The C{r.FixBadPaths()} attempts to correct the same bad paths found in
+    ObsoletePaths.
+
+    This policy does not honor exceptions.
+    """
+    
+    requires = (
+        ('ExcludeDirectories', policy.REQUIRED_PRIOR),
+    )
+
+    def do(self):
+        #import epdb;epdb.st()
+        d = self.recipe.macros.destdir
+        for path in self.badPaths():
+            try:
+                os.renames(d+path[0], d+path[1])
+                self.warn('Path %s should not exist, moving to %s instead',
+                          path[0], path[1])
+            except OSError:
+                # will be caught by ObsoletePaths
+                self.warn('Path %s should not exist and cannot be'
+                    ' moved to the new location. Please move it to %s'
+                    ' instead.', path[0], path[1])
 
 class PythonEggs(policy.EnforcementPolicy):
     """
