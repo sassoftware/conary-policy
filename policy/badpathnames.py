@@ -370,6 +370,9 @@ class NonLSBPaths(policy.EnforcementPolicy, _pathMap):
     This policy warns about paths that conflict with the LSB in some
     way.
     """
+    requires = (
+        ('ExcludeDirectories', policy.REQUIRED_PRIOR),
+    )
     
     candidates = {
         '/usr/local':
