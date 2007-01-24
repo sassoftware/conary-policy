@@ -376,7 +376,7 @@ class NonLSBPaths(policy.EnforcementPolicy, _pathMap):
            ('/usr',
             False,
             '/usr/local is recommended by the LSB only for non-packaged files'),
-        '/usr/usr/':
+        '/usr/usr':
            ('/usr',
             True,
             '/usr/usr is usually caused by using %(prefix)s instead of /'),
