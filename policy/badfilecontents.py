@@ -114,6 +114,7 @@ class FilesInMandir(policy.EnforcementPolicy):
     def doFile(self, file):
         self.error("%s is non-directory file in mandir", file)
 
+
 class FixupManpagePaths(policy.DestdirPolicy, FilesInMandir):
     """
     NAME
@@ -133,12 +134,15 @@ class FixupManpagePaths(policy.DestdirPolicy, FilesInMandir):
     The C{r.FixupManpagePaths()}  policy ensures that system manual page
     directories contain only other directories, and not files,
     so that manual pages are installed into specific sections where
-    the C{man} command will find them.
+    the C{man} command will find them.  Handles only man pages with
+    integer section names.
     """
     requires = (
         ('FixObsoletePaths', policy.REQUIRED_PRIOR),
         ('NormalizeManPages', policy.CONDITIONAL_SUBSEQUENT),
     )
+
+    invariantinclusions = [ ('.*', None, stat.S_IFDIR), ]
 
     invariantsubtrees = []
     for x in '0123456789':
@@ -148,36 +152,32 @@ class FixupManpagePaths(policy.DestdirPolicy, FilesInMandir):
     invariantinclusions = FilesInMandir.invariantinclusions
     recursive = FilesInMandir.recursive
     
-    def logError(self, file):
-        self.error('Could not figure out where file %s goes. Please correct by '
-            'hand.', file)
+    def logError(self, path):
+        self.error('Could not choose correct location for file %s.', path)
 
-    def doFile(self, file):
+    def doFile(self, path):
         # heuristic parsing of a manpage filename to figure out its catagory
         mandir = self.recipe.macros.mandir
         d = self.recipe.macros.destdir
-        f = file.split('/')[-1]
-        mode = os.stat(d+'/'+file)[stat.ST_MODE]
-        if stat.S_ISDIR(mode):
-            return # irrelevent directory
-        if f[-2:] == 'gz':
-            num = f.split('.')[-2]
-        elif '.' in f:
-            num = f.split('.')[-1]
-        else:
-            self.logError(file) # doesn't have anything parsable in the filename
+        basename = os.path.basename(path)
+
+        stripped = basename
+        if basename.endswith('.gz'):
+            stripped =  basename.split('.', 2)[-2]
+
+        if '.' not in stripped:
+            self.logError(file)
             return
-        try:
-            if int(num) > 9:
-                self.logError(file) # manpage catagories go up to 9
-                return
-        except ValueError:
-            self.logError(file) # not an int
+
+        num = stripped.split('.', 2)[-1]
+        if len(num) > 1 or not num.isdigit():
+            self.logError(path)
             return
-        path = ''.join([x for x in (d,mandir,'/','man',num,'/')])
-        self.warn('Moving %s to %s', file, path)
-        os.makedirs(path)
-        os.rename(d+file, path+f)
+
+        newPath = util.joinPaths(d, mandir, 'man'+num, basename)
+        self.warn('Moving %s to %s', file, newPath)
+        os.renames(d+path, newPath)
+
 
 class BadInterpreterPaths(policy.EnforcementPolicy):
     """
