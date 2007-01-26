@@ -421,8 +421,12 @@ class NormalizeLibrarySymlinks(policy.DestdirPolicy):
             fullpath = '/'.join((self.macros.destdir, path))
             if not os.path.exists(fullpath):
                 continue
+            # this state can only be reached if SharedLibrary is called with
+            # bad arguments... see CNP-45
             mode = os.stat(fullpath)[stat.ST_MODE]
             if not stat.S_ISDIR(mode):
+                self.error('The SharedLibrary policy requires arguments which '
+                    'are directories. You passed %s', path)
                 continue
             oldfiles = set(os.listdir(fullpath))
             util.execute('%(essentialsbindir)s/ldconfig -n '%macros + fullpath)
