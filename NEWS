@@ -37,6 +37,8 @@ Changes in 1.0.10:
     %(mandir)s/category/. (CNP-5)
   o Manpages which were placed in directories such as /usr/share/man/1 will
     now be moved to their correct location: /usr/share/man/man1 (CNP-4)
+  o Calling SharedLibrary with bad arguments will no longer cause a traceback.
+    (CNP-45)
 
 Changes in 1.0.9:
   o The AutoDoc policy now includes LICENSE.txt and NOTICE.txt files,

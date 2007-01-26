@@ -421,6 +421,9 @@ class NormalizeLibrarySymlinks(policy.DestdirPolicy):
             fullpath = '/'.join((self.macros.destdir, path))
             if not os.path.exists(fullpath):
                 continue
+            mode = os.stat(fullpath)[stat.ST_MODE]
+            if not stat.S_ISDIR(mode):
+                continue
             oldfiles = set(os.listdir(fullpath))
             util.execute('%(essentialsbindir)s/ldconfig -n '%macros + fullpath)
             newfiles = set(os.listdir(fullpath))
