@@ -78,6 +78,7 @@ class SharedLibrary(policy.PackagePolicy):
         ('Provides', policy.REQUIRED),
         ('Requires', policy.REQUIRED),
     )
+    processUnmodified = False
 
     invariantsubtrees = librarydirs
     invariantinclusions = [
@@ -144,6 +145,7 @@ class FixupMultilibPaths(policy.DestdirPolicy):
         ('ExecutableLibraries', policy.CONDITIONAL_SUBSEQUENT),
         ('Strip', policy.CONDITIONAL_SUBSEQUENT),
     )
+    processUnmodified = False
     invariantinclusions = [
         '.*\.(so.*|a)$',
     ]
@@ -270,6 +272,7 @@ class ExecutableLibraries(policy.DestdirPolicy):
     requires = (
         ('SharedLibrary', policy.REQUIRED),
     )
+    processUnmodified = False
     invariantsubtrees = librarydirs
     invariantinclusions = [
         (r'..*\.so\..*', None, stat.S_IFDIR),
@@ -320,6 +323,7 @@ class CheckSonames(policy.EnforcementPolicy):
     requires = (
         ('SharedLibrary', policy.REQUIRED),
     )
+    processUnmodified = False
     invariantsubtrees = librarydirs
     invariantinclusions = [
 	(r'..*\.so', None, stat.S_IFDIR),
@@ -409,6 +413,7 @@ class NormalizeLibrarySymlinks(policy.DestdirPolicy):
         ('FixupMultilibPaths', policy.CONDITIONAL_PRIOR),
         ('Strip', policy.CONDITIONAL_SUBSEQUENT),
     )
+    processUnmodified = True
     invariantsubtrees = librarydirs
 
     def do(self):

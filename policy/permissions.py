@@ -37,6 +37,7 @@ class ReadableDocs(policy.DestdirPolicy):
     C{r.ReadableDocs()} policy sets documentation file modes to
     world-readable.  This policy should not require exceptions.
     """
+    processUnmodified = False
     invariantsubtrees = [
         '%(thisdocdir)s/',
         '%(mandir)s/',
@@ -85,6 +86,7 @@ class WarnWriteable(policy.EnforcementPolicy):
         # Needs to run after Ownership for group info
         ('Ownership', policy.REQUIRED_PRIOR),
     )
+    processUnmodified = False
 
     def doFile(self, filename):
         fullpath = self.macros.destdir + filename
@@ -124,6 +126,7 @@ class WorldWriteableExecutables(policy.EnforcementPolicy):
 
     Exceptions to this policy should not be required.
     """
+    processUnmodified = False
     # Note that this policy is separate from WarnWriteable because
     # calling r.SetModes should not override this policy automatically.
     invariantexceptions = [ ('.*', stat.S_IFDIR) ]
@@ -160,6 +163,7 @@ class IgnoredSetuid(policy.EnforcementPolicy):
     Instead of providing an exception to this policy, use the
     C{r.SetModes} command to explicitly set the setuid/setgid bits.
     """
+    processUnmodified = False
     def doFile(self, path):
 	fullpath = self.macros.destdir + path
 	mode = os.lstat(fullpath)[stat.ST_MODE]

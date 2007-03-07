@@ -47,6 +47,7 @@ class NonBinariesInBindirs(policy.EnforcementPolicy):
     Uses C{r.NonBinariesInBindirs} to except all files in the destination
     directory from the requirement to have executable bits set on them.
     """
+    processUnmodified = False
     invariantexceptions = [ ('.*', stat.S_IFDIR) ]
     invariantsubtrees = [
 	'%(bindir)s/',
@@ -101,6 +102,7 @@ class FilesInMandir(policy.EnforcementPolicy):
     about whether C{%(mandir)s} means /usr/share/man or
     (for example) /usr/share/man/man1.
     """
+    processUnmodified = False
     invariantsubtrees = [
         '%(mandir)s',
         '%(x11prefix)s/man',
@@ -141,6 +143,7 @@ class FixupManpagePaths(policy.DestdirPolicy, FilesInMandir):
         ('FixObsoletePaths', policy.REQUIRED_PRIOR),
         ('NormalizeManPages', policy.CONDITIONAL_SUBSEQUENT),
     )
+    processUnmodified = False
 
     invariantinclusions = [ ('.*', None, stat.S_IFDIR), ]
 
@@ -200,6 +203,7 @@ class BadInterpreterPaths(policy.EnforcementPolicy):
     No exceptions to this policy should occur outside of C{%(thisdocdir)s},
     and C{%(thisdocdir)s} is implicitly ignored by this policy.
     """
+    processUnmodified = False
     invariantexceptions = [ '%(thisdocdir.literalRegex)s/', ]
 
     def doFile(self, path):
@@ -253,6 +257,7 @@ class ImproperlyShared(policy.EnforcementPolicy):
     contains files which are not used directly, but rather used in other
     contexts; for example, binary files interpreted only by emulators.)
     """
+    processUnmodified = False
     invariantsubtrees = [ '/usr/share/' ]
 
     def doFile(self, file):
@@ -301,6 +306,7 @@ class CheckDesktopFiles(policy.EnforcementPolicy):
     through the directory named in the exceptions filter expression
     (C{%(datadir)s/applications}).
     """
+    processUnmodified = False
     invariantsubtrees = [ '%(datadir)s/applications/' ]
     invariantinclusions = [ r'.*\.desktop' ]
 
@@ -387,6 +393,7 @@ class RequireChkconfig(policy.EnforcementPolicy):
     Specifies a core init script, C{%(initdir)s/halt} as an exception to the
     policy.
     """
+    processUnmodified = False
     invariantsubtrees = [ '%(initdir)s' ]
     def doFile(self, path):
 	d = self.macros.destdir

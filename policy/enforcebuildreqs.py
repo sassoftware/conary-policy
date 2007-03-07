@@ -39,6 +39,7 @@ class _enforceBuildRequirements(_warnBuildRequirements):
     Pure virtual base class from which classes are derived that
     enforce buildRequires population from runtime dependencies.
     """
+    processUnmodified = False
     def preProcess(self):
         self.compExceptions = set()
         self.compReExceptions = set()
@@ -486,6 +487,7 @@ class EnforceConfigLogBuildRequirements(policy.EnforcementPolicy):
     actually need to run it because the program is shipped with a
     prebuilt lexical analyzer.
     """
+    processUnmodified = True
     filetree = policy.BUILDDIR
     invariantinclusions = [ (r'.*/config\.log', 0400, stat.S_IFDIR), ]
     # list of regular expressions (using macros) that cause an
@@ -619,6 +621,7 @@ class EnforceFlagBuildRequirements(_warnBuildRequirements):
     takes no exceptions.
 
     """
+    processUnmodified = True
     def test(self):
         # use flags track their provider only if the
         # _getTransitiveBuildRequiresNames recipe method exists
@@ -639,6 +642,11 @@ class EnforceFlagBuildRequirements(_warnBuildRequirements):
     def do(self):
         missingBuildRequires = set()
         for flag in use.iterUsed():
+            if (hasattr(self.recipe, '_isDerived')
+                and self.recipe._isDerived == True):
+                # In a derived recipe, only enforce this for added flags
+                if flag in self.recipe.useFlags:
+                    continue
             path = flag._path
             for trove in self.db.iterTrovesByPath(path):
                 flagTroveName = trove.getName()

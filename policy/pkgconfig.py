@@ -47,6 +47,7 @@ class NormalizePkgConfig(policy.DestdirPolicy):
     Effectively disables the C{NormalizePkgConfig} policy.
     """
 
+    processUnmodified = False
     invariantinclusions = [
         '(%(prefix)s/lib|%(datadir)s)/pkgconfig/'
     ]

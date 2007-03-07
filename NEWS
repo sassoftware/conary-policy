@@ -1,3 +1,7 @@
+Changes in 1.0.11:
+  o Initial support for derived packages (experimental) has been added
+    to appropriate policies. (CNP-73)
+
 Changes in 1.0.10:
   o The WorldWriteableExecutables policy warning message has been
     changed to be more accurate.

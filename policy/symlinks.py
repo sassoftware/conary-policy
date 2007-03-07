@@ -48,6 +48,7 @@ class FixBuilddirSymlink(policy.DestdirPolicy):
         # DanglingSymlinks will announce an error for these, is in later bucket
         ('DanglingSymlinks', policy.REQUIRED),
     )
+    processUnmodified = False
 
     def doFile(self, path):
         d = self.macros.destdir
@@ -88,6 +89,7 @@ class RelativeSymlinks(policy.DestdirPolicy):
     Create absolute symbolic links in your recipes, and C{r.RelativeSymlinks}
     will create minimal relative symbolic links from them.
     """
+    processUnmodified = False
     def doFile(self, path):
         fullpath = self.macros['destdir']+path
         if os.path.islink(fullpath):
@@ -140,6 +142,7 @@ class DanglingSymlinks(policy.PackagePolicy):
     left dangling within this package, because we know that it will
     be satisfied by runtime dependencies at installation time.
     """
+    processUnmodified = False
     invariantexceptions = (
 	'%(testdir)s/.*', )
     targetexceptions = [

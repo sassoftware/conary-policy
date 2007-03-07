@@ -53,6 +53,7 @@ class NormalizeCompression(policy.DestdirPolicy):
     This package has test files that are tested byte-for-byte and
     cannot be modified at all and still pass the tests.
     """
+    processUnmodified = False
     invariantexceptions = [
         '%(mandir)s/man.*/',
         '%(infodir)s/',
@@ -127,6 +128,8 @@ class NormalizeManPages(policy.DestdirPolicy):
     requires = (
         ('ReadableDocs', policy.CONDITIONAL_SUBSEQUENT),
     )
+    # Note: not safe for derived packages; needs to check in each
+    # internal function for unmodified files
     def _uncompress(self, dirname, names):
         for name in names:
             path = dirname + os.sep + name
@@ -254,10 +257,10 @@ class NormalizeManPages(policy.DestdirPolicy):
         self.commentexp = re.compile(r'^\.\\"')
 
     def do(self):
-        for manpath in (
-            self.macros.mandir,
-            os.sep.join((self.macros.x11prefix, 'man')),
-            os.sep.join((self.macros.krbprefix, 'man')),
+        for manpath in sorted(list(set((
+                self.macros.mandir,
+                os.sep.join((self.macros.x11prefix, 'man')),
+                os.sep.join((self.macros.krbprefix, 'man')),)))
             ):
             manpath = self.macros.destdir + manpath
             self.destdir = self.macros['destdir'][1:] # without leading /
@@ -301,6 +304,7 @@ class NormalizeInfoPages(policy.DestdirPolicy):
     requires = (
         ('ReadableDocs', policy.CONDITIONAL_SUBSEQUENT),
     )
+    # Not safe for derived packages in this form, needs explicit checks
     def do(self):
         dir = self.macros['infodir']+'/dir'
         fsdir = self.macros['destdir']+dir
@@ -356,6 +360,7 @@ class NormalizeInitscriptLocation(policy.DestdirPolicy):
         ('RelativeSymlinks', policy.CONDITIONAL_SUBSEQUENT),
         ('NormalizeInterpreterPaths', policy.CONDITIONAL_SUBSEQUENT),
     )
+    processUnmodified = False
     # need both of the next two lines to avoid following /etc/rc.d/init.d
     # if it is a symlink
     invariantsubtrees = [ '/etc/rc.d' ]
@@ -409,6 +414,7 @@ class NormalizeInitscriptContents(policy.DestdirPolicy):
         # for adding requirements
         ('Requires', policy.REQUIRED_SUBSEQUENT),
     )
+    processUnmodified = False
     invariantsubtrees = [ '%(initdir)s' ]
     invariantinclusions = [ ('.*', 0400, stat.S_IFDIR), ]
 
@@ -448,6 +454,7 @@ class NormalizeAppDefaults(policy.DestdirPolicy):
 
     No exceptions to this policy are recommended.
     """
+    # not safe in this form for derived packages
     def do(self):
         e = '%(destdir)s/%(sysconfdir)s/X11/app-defaults' % self.macros
         if not os.path.isdir(e):
@@ -495,6 +502,7 @@ class NormalizeInterpreterPaths(policy.DestdirPolicy):
     Do not modify any interpreter paths for this package.  Not
     generally recommended.
     """
+    processUnmodified = False
     invariantexceptions = [ '%(thisdocdir.literalRegex)s/', ]
 
     def doFile(self, path):
@@ -560,6 +568,7 @@ class NormalizePamConfig(policy.DestdirPolicy):
 
     Exceptions to this policy should never be required.
     """
+    processUnmodified = False
     invariantsubtrees = [
         '%(sysconfdir)s/pam.d/',
     ]

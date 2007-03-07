@@ -52,6 +52,7 @@ class Strip(policy.DestdirPolicy):
     This file needs to be handled differently to allow threaded
     debugging, so do not use the C{r.Strip} policy on it.
     """
+    processUnmodified = False
     invariantinclusions = [
         ('%(bindir)s/', None, stat.S_IFDIR),
         ('%(essentialbindir)s/', None, stat.S_IFDIR),

@@ -59,6 +59,7 @@ class ParseManifest(policy.PackagePolicy):
         ('MakeDevices', policy.REQUIRED),
         ('Ownership', policy.REQUIRED),
     )
+    processUnmodified = False
 
     def __init__(self, *args, **keywords):
 	self.paths = []

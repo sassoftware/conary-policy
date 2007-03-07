@@ -46,6 +46,7 @@ class RemoveNonPackageFiles(policy.DestdirPolicy):
     requires = (
         ('Strip', policy.CONDITIONAL_PRIOR),
     )
+    processUnmodified = False
     invariantinclusions = [
         r'\.la$',
         # python .a's might have been installed in the wrong place on multilib

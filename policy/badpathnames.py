@@ -41,6 +41,7 @@ class BadFilenames(policy.EnforcementPolicy):
 
     No exceptions are allowed.
     """
+    processUnmodified = True
     def test(self):
         assert(not self.exceptions)
         return True
@@ -67,6 +68,7 @@ class NonUTF8Filenames(policy.EnforcementPolicy):
     The C{r.NonUTF8Filenames()} policy requires filenames be encoded in
     UTF-8, as that is the standard encoding.
     """
+    processUnmodified = True
     def doFile(self, path):
         try:
             path.decode('utf-8')
@@ -97,6 +99,7 @@ class NonMultilibComponent(policy.EnforcementPolicy):
     they have binaries and are built on a 64-bit platform, in which case
     they should have no files under C{/usr/lib}.
     """
+    processUnmodified = False
     invariantsubtrees = [
         '%(libdir)s/',
         '%(prefix)s/lib/',
@@ -164,6 +167,7 @@ class NonMultilibDirectories(policy.EnforcementPolicy):
     relevant to platform. Troves for 32-bit platforms should not normally
     contain directories named "C{lib64}".
     """
+    processUnmodified = False
     invariantinclusions = [ ( '.*/lib64', stat.S_IFDIR ), ]
 
     def test(self):
@@ -201,6 +205,7 @@ class CheckDestDir(policy.EnforcementPolicy):
     Though files should also not contain C{%(destdir)s}, C{r.CheckDestDir}
     does not search inside files.
     """
+    processUnmodified = False
     def doFile(self, file):
 	d = self.macros.destdir
         b = self.macros.builddir
@@ -287,6 +292,7 @@ class FilesForDirectories(policy.EnforcementPolicy):
 	'/var/lib',
 	'/var/spool',
     )
+    processUnmodified = False
     def do(self):
 	d = self.recipe.macros.destdir
 	for path in self.candidates:
@@ -332,6 +338,7 @@ class FixObsoletePaths(policy.DestdirPolicy, _pathMap):
     requires = (
         ('ExcludeDirectories', policy.REQUIRED_PRIOR),
     )
+    processUnmodified = False
 
     candidates = {
         '/usr/man': '/usr/share/man',
@@ -373,6 +380,7 @@ class NonLSBPaths(policy.EnforcementPolicy, _pathMap):
     requires = (
         ('ExcludeDirectories', policy.REQUIRED_PRIOR),
     )
+    processUnmodified = False
     
     candidates = {
         '/usr/local':
@@ -420,6 +428,7 @@ class PythonEggs(policy.EnforcementPolicy):
     C{--single-version-externally-managed} command line argument, in which
     case the C{.egg} files will not be created.
     """
+    processUnmodified = False
     invariantinclusions = [
         '.*/python[^/]*/site-packages/.*\.egg',
     ]
