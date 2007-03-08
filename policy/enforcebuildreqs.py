@@ -112,6 +112,13 @@ class _enforceBuildRequirements(_warnBuildRequirements):
 
         interpreterMap = {}
         for path in pathMap:
+            if (hasattr(self.recipe, '_isDerived')
+                and self.recipe._isDerived == True
+                and self.processUnmodified is False
+                and path in self.recipe._derivedFiles
+                and not self.mtimeChanged(path)):
+                # ignore this file
+                continue
             pkgfile = pathMap[path]
             if pkgfile.hasContents:
                 m = self.recipe.magic[path]
@@ -164,6 +171,13 @@ class _enforceBuildRequirements(_warnBuildRequirements):
                 # in case things do not look so obvious...
                 pathList = []
                 for path in pathMap:
+                    if (hasattr(self.recipe, '_isDerived')
+                        and self.recipe._isDerived == True
+                        and self.processUnmodified is False
+                        and path in self.recipe._derivedFiles
+                        and not self.mtimeChanged(path)):
+                        # ignore this file
+                        continue
                     pkgfile = pathMap[path]
                     if pkgfile.hasContents and (pkgfile.requires() & dep):
                         pathList.append(path)
@@ -644,9 +658,12 @@ class EnforceFlagBuildRequirements(_warnBuildRequirements):
         for flag in use.iterUsed():
             if (hasattr(self.recipe, '_isDerived')
                 and self.recipe._isDerived == True):
-                # In a derived recipe, only enforce this for added flags
-                if flag in self.recipe.useFlags:
-                    continue
+                # In a derived recipe, enforce this only for added flags
+                if flag is use.UseFlag:
+                    for dep in self.recipe.useFlags.iterDeps():
+                        if dep[0] is deps.UseDependency:
+                            if flag.name in dep[1].flags:
+                                continue
             path = flag._path
             for trove in self.db.iterTrovesByPath(path):
                 flagTroveName = trove.getName()
