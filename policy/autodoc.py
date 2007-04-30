@@ -78,6 +78,7 @@ class AutoDoc(policy.DestdirPolicy):
         '.*/TODO$',
         '.*/FAQ$',
         '.*/Change[lL]og.*',
+        '.*EULA.*',
     ]
     invariantexceptions = [ ('.*', stat.S_IFDIR) ]
 
