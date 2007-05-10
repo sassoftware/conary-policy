@@ -428,7 +428,7 @@ class EnforceCILBuildRequirements(_enforceBuildRequirements):
     EXAMPLES
     ========
 
-    C{r.EnforceCILBuildRequirements(exceptions='.*')
+    C{r.EnforceCILBuildRequirements(exceptions='.*')}
 
     Useful when packaging pre-built CIL files.
     """
@@ -494,7 +494,7 @@ class EnforceConfigLogBuildRequirements(policy.EnforcementPolicy):
     EXAMPLES
     ========
 
-    C{r.EnforceConfigLogBuildRequirements(exceptions='flex:runtime')
+    C{r.EnforceConfigLogBuildRequirements(exceptions='flex:runtime')}
 
     This disables a requirement for flex:runtime; this would normally
     be because the C{configure} program checked for flex, but does not

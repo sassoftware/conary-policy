@@ -37,14 +37,14 @@ class ParseManifest(policy.PackagePolicy):
     The C{r.ParseManifest()} policy parses a file containing a manifest
     intended for RPM
 
-    In the manifest, C{r.r.ParseManifest()} finds the information that cannot
+    In the manifest, C{r.ParseManifest()} finds the information that cannot
     be represented by pure filesystem status with non-root built device files,
     (C{%dev}) and permissions (C{%attr}).
 
     It ignores directory ownership (C{%dir}) because Conary handles
     directories very differently from RPM.
 
-    The class C{r.ParseManifest) also ignores C{%defattr} because Conary's
+    The class C{r.ParseManifest} also ignores C{%defattr} because Conary's
     default ownership is C{root:root}, and because permissions
     (except for setuid and setgid files) are collected from the filesystem.
 
