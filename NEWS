@@ -1,3 +1,10 @@
+Changes in 1.0.12:
+  o The _enforceBuildRequirements superclass now handles correctly
+    having multiple packages with different names provide the same
+    dependency required for a build requirement.  Previously, it
+    only handled having multiple components of the same package
+    provide the same dependency. (CNP-97)
+
 Changes in 1.0.11:
   o Initial support for derived packages (experimental) has been added
     to appropriate policies. (CNP-73)

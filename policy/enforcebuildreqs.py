@@ -266,7 +266,7 @@ class _enforceBuildRequirements(_warnBuildRequirements):
 
         if c:
             return sorted(list(set(
-                self.reduceCandidates([a] + c),
+                self.reduceCandidates([a] + c) +
                 self.reduceCandidates([b] + c))))
 
         return [a, b]
