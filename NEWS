@@ -4,6 +4,9 @@ Changes in 1.0.12:
     dependency required for a build requirement.  Previously, it
     only handled having multiple components of the same package
     provide the same dependency. (CNP-97)
+  o The new NormalizePythonInterpreterVersion policy ensures that
+    whenever possible, version-specific python interpreter paths
+    are used. (CNP-99)
 
 Changes in 1.0.11:
   o Initial support for derived packages (experimental) has been added

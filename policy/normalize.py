@@ -16,9 +16,11 @@ import os
 import re
 import stat
 import tempfile
+import filecmp
 
 from conary.lib import util
 from conary.build import policy
+from conary.local import database
 
 
 class NormalizeCompression(policy.DestdirPolicy):
@@ -598,5 +600,117 @@ class NormalizePamConfig(policy.DestdirPolicy):
         f.close()
         os.chmod(d, mode)
 
+class NormalizePythonInterpreterVersion(policy.DestdirPolicy):
+    """
+    NAME
+    ====
+
+    B{C{r.NormalizePythonInterpreterVersion()}} - Provides version-specific path to python interpreter in python program files
+
+    SYNOPSIS
+    ========
+
+    C{r.NormalizePythonInterpreterVersion([I{filterexp}] I{exceptions=filterexp}])}
+
+    DESCRIPTION
+    ===========
+
+    The C{r.NormalizePythonInterpreterVersion()} policy ensures that
+    python script files have a version-specific path to the
+    interpreter if possible.
+    """
+
+    processUnmodified = False
+
+    def preProcess(self):
+        self.interpreterRe = re.compile(".*python[-0-9.]+")
+        self.interpMap = {}
+
+    def doFile(self, path):
+        destdir = self.recipe.macros.destdir
+        d = util.joinPaths(destdir, path)
+        mode = os.lstat(d)[stat.ST_MODE]
+        if not mode & 0111: 
+            # we care about interpreter paths only in executable scripts
+            return
+        m = self.recipe.magic[path]
+        if m and m.name == 'script':
+            interp = m.contents['interpreter']
+            if '/python' not in interp:
+                # we handle only python scripts here
+                return
+            if not self._isNormalizedInterpreter(interp):
+                # normalization
+                if self.interpMap.has_key(interp):
+                    normalized = self.interpMap[interp]
+                else:
+                    normalized = self._normalize(interp)
+                    if normalized:
+                        self.interpMap[interp] = normalized
+                    else:
+                        self.warn('No version-specific python interpreter '
+                                  'found for %s in %s', interp, path)
+                        return
+
+                # we need to be able to write the file
+                os.chmod(d, mode | 0600)
+                f = file(d, 'r+')
+                l = f.readlines()
+                l[0] = l[0].replace(interp, normalized)
+                # we may have shrunk the file, avoid garbage
+                f.seek(0)
+                f.truncate(0)
+                f.writelines(l)
+                f.close()
+                # revert any change to mode
+                os.chmod(d, mode)
+
+                self.info('changed %s to %s in %s', interp, normalized, path)
+                del self.recipe.magic[path]
+
+    def _isNormalizedInterpreter(self, interp):
+        return os.path.basename(interp).startswith('python') and self.interpreterRe.match(interp)
+
+    def _normalize(self, interp):
+        dir = self.recipe.macros.destdir
+       
+        interpFull = '/'.join((dir, interp))
+        interpFullBase = os.path.basename(interpFull)
+        interpFullDir = os.path.dirname(interpFull)
+        interpDir = os.path.dirname(interp)
+
+        links = []
+        if os.path.exists(interpFull):
+            for i in os.listdir(interpFullDir):
+                if os.path.samefile(interpFull, '/'.join((interpFullDir, i))):
+                    links += [i]
+            path = sorted(links, key=len, reverse=True)
+            if path and self._isNormalizedInterpreter('/'.join((interpFullDir, path[0]))):
+                return os.path.join(interpDir, path[0])
+       
+            links = []
+            for i in os.listdir(interpFullDir):
+                try:
+                    if filecmp.cmp(interpFull, '/'.join((interpFullDir, i))):
+                        links += [i]
+                except IOError:
+                    # this is a fallback for a bad install anyway, so
+                    # a failure here is both unusual and not important
+                    pass
+            path = sorted(links, key=len, reverse=True)
+            if path and self._isNormalizedInterpreter('/'.join((interpFullDir, path[0]))):
+                return os.path.join(interpDir, path[0])
+        
+        else:
+            db = database.Database('/', self.recipe.cfg.dbPath)
+            pythonTroveList = db.iterTrovesByPath(interp)
+            for trove in pythonTroveList:
+                pathList = [x[1] for x in trove.iterFileList()]
+                links += [x for x in pathList if x.startswith(interp)]
+            path = sorted(links, key=len, reverse=True)
+            if path and self._isNormalizedInterpreter(path[0]):
+                return path[0]
+
+        return None
 
 # Note: NormalizeLibrarySymlinks is in libraries.py
