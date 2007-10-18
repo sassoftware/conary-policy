@@ -423,6 +423,13 @@ class NormalizeInitscriptContents(policy.DestdirPolicy):
     def doFile(self, path):
         m = self.recipe.macros
         fullpath = '/'.join((m.destdir, path))
+        if os.path.islink(fullpath):
+            linkpath = os.readlink(fullpath)
+            if m.destdir not in linkpath:
+                newpath = '/'.join((m.destdir, linkpath))
+                if os.path.exists(newpath):
+                    fullpath = newpath
+
         contents = file(fullpath).read()
         modified = False
         if '/etc/rc.d/init.d' in contents:

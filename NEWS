@@ -7,6 +7,8 @@ Changes in 1.0.12:
   o The new NormalizePythonInterpreterVersion policy ensures that
     whenever possible, version-specific python interpreter paths
     are used. (CNP-99)
+  o The NormalizeInitscriptContents no longer fails when a file in
+    %(initdir)s is a link to a file outside of %(initdir)s. (CNP-101)
 
 Changes in 1.0.11:
   o Initial support for derived packages (experimental) has been added
