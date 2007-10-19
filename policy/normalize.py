@@ -517,44 +517,110 @@ class NormalizeInterpreterPaths(policy.DestdirPolicy):
     def doFile(self, path):
         destdir = self.recipe.macros.destdir
         d = util.joinPaths(destdir, path)
+        
         mode = os.lstat(d)[stat.ST_MODE]
         if not mode & 0111:
             # we care about interpreter paths only in executable scripts
             return
         m = self.recipe.magic[path]
         if m and m.name == 'script':
-            interp = m.contents['interpreter']
-            if interp.find('/bin/env') != -1: # finds /usr/bin/env too...
-                # rewrite to not have env
-                line = m.contents['line']
-                # we need to be able to write the file
-                os.chmod(d, mode | 0200)
-                f = file(d, 'r+')
-                l = f.readlines()
-                l.pop(0) # we will reconstruct this line, without extra spaces
-                wordlist = [ x for x in line.split() ]
-                wordlist.pop(0) # get rid of env
-                # first look in package
-                fullintpath = util.checkPath(wordlist[0], root=destdir)
-                if fullintpath == None:
-                    # then look on installed system
-                    fullintpath = util.checkPath(wordlist[0])
-                if fullintpath == None:
-                    self.error("Interpreter %s for file %s not found, could not convert from /usr/bin/env syntax", wordlist[0], path)
-                    return
-
-                wordlist[0] = fullintpath
-                l.insert(0, '#!'+" ".join(wordlist)+'\n')
-                f.seek(0)
-                f.truncate(0) # we may have shrunk the file, avoid garbage
-                f.writelines(l)
-                f.close()
-                # revert any change to mode
-                os.chmod(d, mode)
-                self.info('changing %s to %s in %s',
-                          line, " ".join(wordlist), path)
+           
+            if self._correctInterp(m, path):
+                del self.recipe.magic[path]
+                m = self.recipe.magic[path]
+            if self._correctEnv(m, path):
                 del self.recipe.magic[path]
 
+    def _correctInterp(self, m, path):
+        destdir = self.recipe.macros.destdir
+        d = util.joinPaths(destdir, path)
+
+        interp = m.contents['interpreter']
+        interpBase = os.path.basename(interp)
+
+        found = False
+
+        if not os.path.exists('/'.join((destdir, interp))) and not os.path.exists(interp):
+            #try tro remove 'local' part
+            if '/local/' in interp:
+                normalized = interp.replace('/local', '')
+                if os.path.exists('/'.join((destdir, normalized))) or os.path.exists(normalized):
+                    found = True
+                if not found:
+                    cadidates = (
+                                self.recipe.macros.bindir,
+                                self.recipe.macros.sbindir,
+                                self.recipe.macros.essentialbindir,
+                                self.recipe.macros.essentialsbindir,
+                                )
+                    for i in cadidates:
+                        if os.path.exists('/'.join((destdir, i, interpBase))):
+                            normalized = util.joinPaths(i, interpBase)
+                            found = True
+                            break
+                    if not found:
+                        #try to find in '/bin', '/sbin', '/usr/bin', '/usr/sbin'
+                        for i in '/usr/bin', '/bin', '/usr/sbin', '/sbin':
+                            normalized = '/'.join((i, interpBase))
+                            if os.path.exists(normalized):
+                                found = True
+                                break
+                        if not found:
+                            self.warn('The interpreter path %s in %s does not exist!', interp, path)
+       
+        if found:
+                line = m.contents['line']
+                normalized = line.replace(interp, normalized)
+                self._changeInterpLine(d, '#!' + normalized + '\n')
+                self.info('changing %s to %s in %s',
+                            line, normalized, path)
+
+        return found
+       
+    def _correctEnv(self, m, path):
+        destdir = self.recipe.macros.destdir
+        d = util.joinPaths(destdir, path)
+
+        interp = m.contents['interpreter']
+        if interp.find('/bin/env') != -1: #finds /usr/bin/env too...
+            line = m.contents['line']
+            # rewrite to not have env
+            wordlist = [ x for x in line.split() ]
+            if len(wordlist) == 1:
+                self.error("Interpreter is not given for %s in %s", wordlist[0], path)
+                return
+            wordlist.pop(0) # get rid of env
+            # first look in package
+            fullintpath = util.checkPath(wordlist[0], root=destdir)
+            if fullintpath == None:
+                # then look on installed system
+                fullintpath = util.checkPath(wordlist[0])
+            if fullintpath == None:
+                self.error("Interpreter %s for file %s not found, could not convert from /usr/bin/env syntax", wordlist[0], path)
+                return False
+
+            wordlist[0] = fullintpath
+
+            self._changeInterpLine(d, '#!'+" ".join(wordlist)+'\n')
+            self.info('changing %s to %s in %s',
+                        line, " ".join(wordlist), path)
+            return True
+        return False
+
+    def _changeInterpLine(self, path, newline):
+        mode = os.lstat(path)[stat.ST_MODE]
+        # we need to be able to write the file
+        os.chmod(path, mode | 0600)
+        f = file(path, 'r+')
+        l = f.readlines()
+        l[0] = newline
+        f.seek(0)
+        f.truncate(0)# we may have shrunk the file, avoid garbage
+        f.writelines(l)
+        f.close()
+        # revert any change to mode
+        os.chmod(path, mode)
+       
 
 class NormalizePamConfig(policy.DestdirPolicy):
     """

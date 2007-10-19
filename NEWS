@@ -9,6 +9,9 @@ Changes in 1.0.12:
     are used. (CNP-99)
   o The NormalizeInitscriptContents no longer fails when a file in
     %(initdir)s is a link to a file outside of %(initdir)s. (CNP-101)
+  o NormalizeInterpreterPaths now attempts to normalize more interpreter 
+    paths - including those that look in /local/ for interpreters and 
+    those that point to non-existant paths. (CNP-100)
 
 Changes in 1.0.11:
   o Initial support for derived packages (experimental) has been added
