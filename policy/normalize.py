@@ -17,6 +17,7 @@ import re
 import stat
 import tempfile
 import filecmp
+import shutil
 
 from conary.lib import util
 from conary.build import policy
@@ -314,27 +315,45 @@ class NormalizeInfoPages(policy.DestdirPolicy):
             if not self.policyException(dir):
                 util.remove(fsdir)
         if os.path.isdir('%(destdir)s/%(infodir)s' %self.macros):
-            infofiles = os.listdir('%(destdir)s/%(infodir)s' %self.macros)
+            infofilespath = '%(destdir)s/%(infodir)s' %self.macros
+            infofiles = os.listdir(infofilespath)
             for file in infofiles:
-                syspath = '%(destdir)s/%(infodir)s/' %self.macros + file
-                path = '%(infodir)s/' %self.macros + file
-                if not self.policyException(path):
-                    m = self.recipe.magic[path]
-                    if not m:
-                        # not compressed
-                        util.execute('gzip -f -n -9 %s' %syspath)
-                        del self.recipe.magic[path]
-                    elif m.name == 'gzip' and \
-                       (m.contents['compression'] != '9' or \
-                        'name' in m.contents):
-                        util.execute('gunzip %s; gzip -f -n -9 %s'
-                                     %(syspath, syspath[:-3]))
-                        del self.recipe.magic[path]
-                    elif m.name == 'bzip':
-                        # should use gzip instead
-                        util.execute('bunzip2 %s; gzip -f -n -9 %s'
-                                     %(syspath, syspath[:-4]))
-                        del self.recipe.magic[path]
+                self._moveToInfoRoot(file)
+            
+            infofiles = os.listdir(infofilespath)
+            for file in infofiles:
+                self._processInfoFile(file)
+
+    def _moveToInfoRoot(self, file):
+        infofilespath = '%(destdir)s/%(infodir)s' %self.macros
+        fullfile = '/'.join((infofilespath, file))
+        if os.path.isdir(fullfile):
+            for subfile in os.listdir(fullfile):
+                self._moveToInfoRoot('/'.join((file, subfile)))
+            shutil.rmtree(fullfile)
+        elif os.path.dirname(fullfile) != infofilespath:
+            shutil.move(fullfile, infofilespath)
+
+    def _processInfoFile(self, file):
+        syspath = '%(destdir)s/%(infodir)s/' %self.macros + file
+        path = '%(infodir)s/' %self.macros + file
+        if not self.policyException(path):
+            m = self.recipe.magic[path]
+            if not m:
+                # not compressed
+                util.execute('gzip -f -n -9 %s' %syspath)
+                del self.recipe.magic[path]
+            elif m.name == 'gzip' and \
+                (m.contents['compression'] != '9' or \
+                'name' in m.contents):
+                util.execute('gunzip %s; gzip -f -n -9 %s'
+                            %(syspath, syspath[:-3]))
+                del self.recipe.magic[path]
+            elif m.name == 'bzip':
+                # should use gzip instead
+                util.execute('bunzip2 %s; gzip -f -n -9 %s'
+                            %(syspath, syspath[:-4]))
+                del self.recipe.magic[path]
 
 
 class NormalizeInitscriptLocation(policy.DestdirPolicy):
