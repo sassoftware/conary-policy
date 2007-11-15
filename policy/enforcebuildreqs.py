@@ -471,58 +471,26 @@ class EnforcePerlBuildRequirements(_enforceBuildRequirements):
         self.talk = self.warn
 
 
-class EnforceConfigLogBuildRequirements(policy.EnforcementPolicy):
+class _enforceLogRequirements(policy.EnforcementPolicy):
     """
-    NAME
-    ====
-
-    B{C{r.EnforceConfigLogBuildRequirements()}} - Ensures that components
-    mentioned in config.log files are listed as build requirements
-
-    SYNOPSIS
-    ========
-
-    C{r.EnforceConfigLogBuildRequirements([I{filterexp}] || [I{/path/to/file/found}] || [I{exceptions='I{pkg}:I{comp}'}])}
-
-    DESCRIPTION
-    ===========
-
-    The C{r.EnforceConfigLogBuildRequirements()} policy ensures that components
-    containing files mentioned in C{config.log} files are listed as build
-    requirements.
-
-    EXAMPLES
-    ========
-
-    C{r.EnforceConfigLogBuildRequirements(exceptions='flex:runtime')}
-
-    This disables a requirement for flex:runtime; this would normally
-    be because the C{configure} program checked for flex, but does not
-    actually need to run it because the program is shipped with a
-    prebuilt lexical analyzer.
+        Virtual base class
     """
-    processUnmodified = True
+
     filetree = policy.BUILDDIR
-    invariantinclusions = [ (r'.*/config\.log', 0400, stat.S_IFDIR), ]
+    invariantinclusions = []
+
     # list of regular expressions (using macros) that cause an
     # entry to be ignored unless a related strings is found in
     # another named file (empty tuple is unconditional blacklist)
-    greylist = [
-        # config.log string, ((filename, regexp), ...)
-        ('%(prefix)s/X11R6/bin/makedepend', ()),
-        ('%(bindir)s/g77',
-            (('configure.ac', r'\s*AC_PROG_F77'),
-             ('configure.in', r'\s*AC_PROG_F77'))),
-        ('%(bindir)s/bison',
-            (('configure.ac', r'\s*AC_PROC_YACC'),
-             ('configure.in', r'\s*(AC_PROG_YACC|YACC=)'))),
-    ]
+    greylist = []
+
+    # Regexp to search dependencies
+    foundRe = ''
 
     def test(self):
         return not self.recipe.ignoreDeps
 
     def preProcess(self):
-        self.foundRe = re.compile('^[^ ]+: found (/([^ ]+)?bin/[^ ]+)\n$')
         self.foundPaths = set()
         self.greydict = {}
         # turn list into dictionary, interpolate macros, and compile regexps
@@ -550,6 +518,9 @@ class EnforceConfigLogBuildRequirements(policy.EnforcementPolicy):
             return match.group(1)
         return False
 
+    def greylistFilter(self, foundPaths, fullpath):
+        pass
+
     def doFile(self, path):
         fullpath = self.macros.builddir + path
         # iterator to avoid reading in the whole file at once;
@@ -560,19 +531,9 @@ class EnforceConfigLogBuildRequirements(policy.EnforcementPolicy):
 
         # now remove false positives using the greylist
         # copy() for copy because modified
-        for foundPath in foundPaths.copy():
-            if foundPath in self.greydict:
-                foundMatch = False
-                for otherFile, testRe in self.greydict[foundPath]:
-                    otherFile = fullpath.replace('config.log', otherFile)
-                    if not foundMatch and os.path.exists(otherFile):
-                        otherFile = file(otherFile)
-                        if [line for line in otherFile if testRe.match(line)]:
-                            foundMatch = True
-                if not foundMatch:
-                    # greylist entry has no match, so this is a false
-                    # positive and needs to be removed from the set
-                    foundPaths.remove(foundPath)
+        if self.greydict:
+            foundPaths = self.greylistFilter(foundPaths.copy(), fullpath)
+
         self.foundPaths.update(foundPaths)
 
     def postProcess(self):
@@ -622,6 +583,110 @@ class EnforceConfigLogBuildRequirements(policy.EnforcementPolicy):
                 # it is OK if we are running with an earlier Conary that
                 # does not have reportMissingBuildRequires
                 pass
+
+
+class EnforceConfigLogBuildRequirements(_enforceLogRequirements):
+    """
+    NAME
+    ====
+
+    B{C{r.EnforceConfigLogBuildRequirements()}} - Ensures that components
+    mentioned in config.log files are listed as build requirements
+
+    SYNOPSIS
+    ========
+
+    C{r.EnforceConfigLogBuildRequirements([I{filterexp}] || [I{/path/to/file/found}] || [I{exceptions='I{pkg}:I{comp}'}])}
+
+    DESCRIPTION
+    ===========
+
+    The C{r.EnforceConfigLogBuildRequirements()} policy ensures that components
+    containing files mentioned in C{config.log} files are listed as build
+    requirements.
+
+    EXAMPLES
+    ========
+
+    C{r.EnforceConfigLogBuildRequirements(exceptions='flex:runtime')
+
+    This disables a requirement for flex:runtime; this would normally
+    be because the C{configure} program checked for flex, but does not
+    actually need to run it because the program is shipped with a
+    prebuilt lexical analyzer.
+    """
+
+    filetree = policy.BUILDDIR
+    invariantinclusions = [ (r'.*/config\.log', 0400, stat.S_IFDIR), ]
+
+    greylist = [
+        # config.log string, ((filename, regexp), ...)
+        ('%(prefix)s/X11R6/bin/makedepend', ()),
+        ('%(bindir)s/g77',
+            (('configure.ac', r'\s*AC_PROG_F77'),
+             ('configure.in', r'\s*AC_PROG_F77'))),
+        ('%(bindir)s/bison',
+            (('configure.ac', r'\s*AC_PROC_YACC'),
+             ('configure.in', r'\s*(AC_PROG_YACC|YACC=)'))),
+    ]
+
+    foundRe = re.compile('^[^ ]+: found (/([^ ]+)?bin/[^ ]+)\n$')
+
+    def greylistFilter(self, foundPaths, fullpath):
+        # now remove false positives using the greylist
+        # copy() for copy because modified
+        for foundPath in foundPaths.copy():
+            if foundPath in self.greydict:
+                foundMatch = False
+                for otherFile, testRe in self.greydict[foundPath]:
+                    otherFile = fullpath.replace('config.log', otherFile)
+                    if not foundMatch and os.path.exists(otherFile):
+                        otherFile = file(otherFile)
+                        if [line for line in otherFile if testRe.match(line)]:
+                            foundMatch = True
+                if not foundMatch:
+                    # greylist entry has no match, so this is a false
+                    # positive and needs to be removed from the set
+                    foundPaths.remove(foundPath)
+        return foundPaths
+
+
+class EnforceCMakeCacheBuildRequirements(_enforceLogRequirements):
+    """
+    NAME
+    ====
+
+    B{C{r.EnforceCMakeCacheBuildRequirements()}} - Ensures that components
+    mentioned in CMakeCache.txt files are listed as build requirements
+
+    SYNOPSIS
+    ========
+
+    C{r.EnforceCMakeCacheBuildRequirements([I{filterexp}] || [I{/path/to/file/found}] || [I{exceptions='I{pkg}:I{comp}'}])}
+
+    DESCRIPTION
+    ===========
+
+    The C{r.EnforceCMakeCacheBuildRequirements()} policy ensures that components
+    containing files mentioned in C{CMakeCache.txt} files are listed as build
+    requirements.
+
+    EXAMPLES
+    ========
+
+    C{r.EnforceCMakeCacheBuildRequirements(exceptions='flex:runtime')
+
+    This disables a requirement for flex:runtime; this would normally
+    be because the C{cmake} program checked for flex, but does not
+    actually need to run it because the program is shipped with a
+    prebuilt lexical analyzer.
+    """
+
+    filetree = policy.BUILDDIR
+    invariantinclusions = [ (r'.*/CMakeCache\.txt', 0400, stat.S_IFDIR), ]
+
+    foundRe = re.compile('^[^ ]+:FILEPATH=(/[^ ]+)\n$')
+
 
 class EnforceFlagBuildRequirements(_warnBuildRequirements):
     """

@@ -12,6 +12,10 @@ Changes in 1.0.12:
   o NormalizeInterpreterPaths now attempts to normalize more interpreter 
     paths - including those that look in /local/ for interpreters and 
     those that point to non-existant paths. (CNP-100)
+  o The new EnforceCMakeCacheBuildRequirements policy recognizes
+    potential buildRequirements based on CMakeCache.txt files as
+    produced by the cmake tool.  Thanks to Pavel Volkovitskiy for
+    implementing this feature. (CNP-67)
 
 Changes in 1.0.11:
   o Initial support for derived packages (experimental) has been added
