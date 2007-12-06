@@ -472,7 +472,7 @@ class NormalizeAppDefaults(policy.DestdirPolicy):
     SYNOPSIS
     ========
 
-    C{r.NormalizeAppDefaults([I{filterexp}] I{exceptions=filterexp}])}
+    C{r.NormalizeAppDefaults([I{filterexp}])}
 
     DESCRIPTION
     ===========
@@ -480,7 +480,7 @@ class NormalizeAppDefaults(policy.DestdirPolicy):
     The C{r.NormalizeAppDefaults()} policy locates X application defaults
     files.
 
-    No exceptions to this policy are recommended.
+    No exceptions to this policy are honored.
     """
     # not safe in this form for derived packages
     def do(self):

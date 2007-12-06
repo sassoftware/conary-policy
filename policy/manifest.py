@@ -29,7 +29,7 @@ class ParseManifest(policy.PackagePolicy):
     SYNOPSIS
     ========
 
-    C{r.ParseManifest([I{filterexp}] I{exceptions=filterexp}])}
+    C{r.ParseManifest([I{filterexp}])}
 
     DESCRIPTION
     ===========

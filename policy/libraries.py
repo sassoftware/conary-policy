@@ -388,11 +388,6 @@ class NormalizeLibrarySymlinks(policy.DestdirPolicy):
     B{C{r.NormalizeLibrarySymlinks()}} - Executes ldconfig in each system
     library directory
 
-    SYNOPSIS
-    ========
-
-    C{r.NormalizeLibrarySymlinks([I{filterexp}] I{exceptions=filterexp}])}
-
     DESCRIPTION
     ===========
 
