@@ -1,3 +1,12 @@
+Chagnes in 1.0.13:
+  o The EnforceCILBuildRequires policy now ensures that the build
+    requirements include 'mono:devel' if there are any CIL dependencies
+    found.  The mono:devel package is required to discover CIL
+    dependencies. (CNP-91)
+  o When determining build requirements based on dependencies, :devel
+    or :devellib components are preferred to :lib components for all
+    dependency types, not just soname: dependencies.
+
 Changes in 1.0.12:
   o The _enforceBuildRequirements superclass now handles correctly
     having multiple packages with different names provide the same

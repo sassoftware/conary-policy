@@ -40,7 +40,26 @@ class _enforceBuildRequirements(_warnBuildRequirements):
     enforce buildRequires population from runtime dependencies.
     """
     processUnmodified = False
-    def preProcess(self):
+
+    def test(self):
+	components = self.recipe.autopkg.components
+        reqDepSet = deps.DependencySet()
+        provDepSet = deps.DependencySet()
+        for pkg in components.values():
+            reqDepSet.union(pkg.requires)
+            provDepSet.union(pkg.provides)
+        self.depSet = deps.DependencySet()
+        self.depSet.union(reqDepSet - provDepSet)
+
+        depSetList = [ ]
+        for dep in self.depSet.iterDepsByClass(self.depClass):
+            depSet = deps.DependencySet()
+            depSet.addDep(self.depClass, dep)
+            depSetList.append(depSet)
+
+        if not depSetList:
+            return False
+
         self.compExceptions = set()
         self.compReExceptions = set()
         compRe = re.compile('[a-zA-Z0-9]+:[a-zA-Z0-9]+')
@@ -70,39 +89,23 @@ class _enforceBuildRequirements(_warnBuildRequirements):
         # For compatibility with older external policy that derives from this
         self.truncatedBuildRequires = self.transitiveBuildRequires
 
-	components = self.recipe.autopkg.components
-        reqDepSet = deps.DependencySet()
-        provDepSet = deps.DependencySet()
-        for pkg in components.values():
-            reqDepSet.union(pkg.requires)
-            provDepSet.union(pkg.provides)
-        self.depSet = deps.DependencySet()
-        self.depSet.union(reqDepSet - provDepSet)
-
         self.setTalk()
-
-    def test(self):
-        depSetList = [ ]
-        for dep in self.depSet.iterDepsByClass(self.depClass):
-            depSet = deps.DependencySet()
-            depSet.addDep(self.depClass, dep)
-            depSetList.append(depSet)
-
-        if not depSetList:
-            return False
 
         cfg = self.recipe.cfg
         self.db = database.Database(cfg.root, cfg.dbPath)
         self.systemProvides = self.db.getTrovesWithProvides(depSetList)
         self.unprovided = [x for x in depSetList if x not in self.systemProvides]
+        self.missingBuildRequires = set()
 
         return True
+
+    def addMissingBuildRequires(self, missingList):
+        self.missingBuildRequires.update(missingList)
 
     def postProcess(self):
         del self.db
 
     def do(self):
-        missingBuildRequires = set()
         missingBuildRequiresChoices = []
 
 	components = self.recipe.autopkg.components
@@ -163,9 +166,9 @@ class _enforceBuildRequirements(_warnBuildRequirements):
                         if candidateSet == foundCandidates:
                             found = True
                     if found == False:
-                        missingBuildRequiresChoices.append(foundCandidates)
+                        self.addMissingBuildRequires(foundCandidates)
                 else:
-                    missingBuildRequires.update(foundCandidates)
+                    self.addMissingBuildRequires(foundCandidates)
 
                 # Now give lots of specific information to help the packager
                 # in case things do not look so obvious...
@@ -204,7 +207,7 @@ class _enforceBuildRequirements(_warnBuildRequirements):
                     if interpreterTroveName not in self.transitiveBuildRequires:
                         self.talk('interpreter %s missing build requirement %s',
                                   interpreter, interpreterTroveName)
-                        missingBuildRequires.add(interpreterTroveName)
+                        self.addMissingBuildRequires((interpreterTroveName,))
 
         if pathReqMap:
             for path in pathReqMap:
@@ -213,11 +216,11 @@ class _enforceBuildRequirements(_warnBuildRequirements):
                              str(x) for x in
                                sorted(list(set(pathReqMap[path])))]))
 
-        if missingBuildRequires:
+        if self.missingBuildRequires:
             self.talk('add to buildRequires: %s',
-                       str(sorted(list(set(missingBuildRequires)))))
+                       str(sorted(list(set(self.missingBuildRequires)))))
             try:
-                self.recipe.reportMissingBuildRequires(missingBuildRequires)
+                self.recipe.reportMissingBuildRequires(self.missingBuildRequires)
             except AttributeError:
                 # it is OK if we are running with an earlier Conary that
                 # does not have reportMissingBuildRequires
@@ -241,7 +244,20 @@ class _enforceBuildRequirements(_warnBuildRequirements):
                            util.literalRegex(depStr))
 
     def providesNames(self, libname):
-        return [libname]
+        provideList = [libname]
+        if libname.endswith(':lib'):
+            # Instead of requiring the :lib component that satisfies
+            # the dependency, our first choice, if possible, is to
+            # require :devel, because that would include header files;
+            # if it does not exist, then :devellib for a soname link;
+            # finally if neither of those exists, then :lib (though
+            # that is a degenerate case).
+            provideList[0:0] = [
+                libname.replace(':lib', ':devel'),
+                libname.replace(':lib', ':devellib')
+            ]
+
+        return provideList
 
     def reduceCandidates(self, foundCandidates):
         # this may not be the most efficient algorithm, but almost
@@ -307,17 +323,6 @@ class EnforceSonameBuildRequirements(_enforceBuildRequirements):
 
     depClassType = deps.DEP_CLASS_SONAME
     depClass = deps.SonameDependencies
-
-    def providesNames(self, libname):
-        # Instead of requiring the :lib component that satisfies
-        # the dependency, our first choice, if possible, is to
-        # require :devel, because that would include header files;
-        # if it does not exist, then :devellib for a soname link;
-        # finally if neither of those exists, then :lib (though
-        # that is a degenerate case).
-        return [libname.replace(':lib', ':devel'),
-                libname.replace(':lib', ':devellib'),
-                libname]
 
 
 class EnforcePythonBuildRequirements(_enforceBuildRequirements):
@@ -435,6 +440,13 @@ class EnforceCILBuildRequirements(_enforceBuildRequirements):
 
     depClassType = deps.DEP_CLASS_CIL
     depClass = deps.CILDependencies
+
+    def test(self):
+        CILDeps = _enforceBuildRequirements.test(self)
+        if CILDeps:
+            if 'mono:devel' not in self.transitiveBuildRequires:
+                self.addMissingBuildRequires(('mono:devel',))
+        return CILDeps
 
 
 class EnforcePerlBuildRequirements(_enforceBuildRequirements):
