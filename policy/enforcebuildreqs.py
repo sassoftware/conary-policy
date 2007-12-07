@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2005-2006 rPath, Inc.
+# Copyright (c) 2005-2007 rPath, Inc.
 #
 # This program is distributed under the terms of the Common Public License,
 # version 1.0. A copy of this license should have been distributed with this
@@ -24,6 +24,50 @@ from conary.build import policy
 from conary.build import use
 
 
+def _providesNames(libname):
+    provideList = [libname]
+    if libname.endswith(':lib'):
+        # Instead of requiring the :lib component that satisfies
+        # the dependency, our first choice, if possible, is to
+        # require :devel, because that would include header files;
+        # if it does not exist, then :devellib for a soname link;
+        # finally if neither of those exists, then :lib (though
+        # that is a degenerate case).
+        provideList[0:0] = [
+            libname.replace(':lib', ':devel'),
+            libname.replace(':lib', ':devellib')
+        ]
+    return provideList
+
+def _reduceCandidates(db, foundCandidates):
+    # this may not be the most efficient algorithm, but almost
+    # every case will be two providers (:devel and :devellib)
+    # so it doesn't matter
+
+    def satisfies(a, b):
+        return db.getTrove(*a).getProvides().intersection(
+                   db.getTrove(*b).getRequires())
+
+    if len(foundCandidates) < 2:
+        return foundCandidates
+
+    a = foundCandidates[0]
+    b = foundCandidates[1]
+    c = foundCandidates[2:]
+
+    if satisfies(a, b):
+        return _reduceCandidates(db, [a] + c)
+    if satisfies(b, a):
+        return _reduceCandidates(db, [b] + c)
+
+    if c:
+        return sorted(list(set(
+            _reduceCandidates(db, [a] + c) +
+            _reduceCandidates(db, [b] + c))))
+
+    return [a, b]
+
+
 class _warnBuildRequirements(policy.EnforcementPolicy):
     def setTalk(self):
         # FIXME: remove "True or " when we are ready for errors
@@ -32,7 +76,6 @@ class _warnBuildRequirements(policy.EnforcementPolicy):
             self.talk = self.warn
         else:
             self.talk = self.error
-
 
 class _enforceBuildRequirements(_warnBuildRequirements):
     """
@@ -139,7 +182,7 @@ class _enforceBuildRequirements(_warnBuildRequirements):
 
             foundCandidates = set()
             for name in provideNameList:
-                for candidate in self.providesNames(name):
+                for candidate in _providesNames(name):
                     if self.db.hasTroveByName(candidate):
                         foundCandidates.add(candidate)
                         provideNameMap[candidate] = provideNameMap[name]
@@ -157,7 +200,7 @@ class _enforceBuildRequirements(_warnBuildRequirements):
                 if len(foundCandidates) > 1:
                     reduceTroves = sorted([provideNameMap[x]
                                           for x in foundCandidates])
-                    reduceTroves = self.reduceCandidates(reduceTroves)
+                    reduceTroves = _reduceCandidates(self.db, reduceTroves)
                     foundCandidates = set([x[0] for x in reduceTroves])
                     if len(foundCandidates) == 1:
                         break
@@ -242,50 +285,6 @@ class _enforceBuildRequirements(_warnBuildRequirements):
             for depStr in sorted(str(x) for x in self.unprovided):
                 self.talk("       r.Requires(exceptDeps=r'%s')" % 
                            util.literalRegex(depStr))
-
-    def providesNames(self, libname):
-        provideList = [libname]
-        if libname.endswith(':lib'):
-            # Instead of requiring the :lib component that satisfies
-            # the dependency, our first choice, if possible, is to
-            # require :devel, because that would include header files;
-            # if it does not exist, then :devellib for a soname link;
-            # finally if neither of those exists, then :lib (though
-            # that is a degenerate case).
-            provideList[0:0] = [
-                libname.replace(':lib', ':devel'),
-                libname.replace(':lib', ':devellib')
-            ]
-
-        return provideList
-
-    def reduceCandidates(self, foundCandidates):
-        # this may not be the most efficient algorithm, but almost
-        # every case will be two providers (:devel and :devellib)
-        # so it doesn't matter
-
-        def satisfies(a, b):
-            return self.db.getTrove(*a).getProvides().intersection(
-                       self.db.getTrove(*b).getRequires())
-
-        if len(foundCandidates) < 2:
-            return foundCandidates
-
-        a = foundCandidates[0]
-        b = foundCandidates[1]
-        c = foundCandidates[2:]
-
-        if satisfies(a, b):
-            return self.reduceCandidates([a] + c)
-        if satisfies(b, a):
-            return self.reduceCandidates([b] + c)
-
-        if c:
-            return sorted(list(set(
-                self.reduceCandidates([a] + c) +
-                self.reduceCandidates([b] + c))))
-
-        return [a, b]
 
 
 class EnforceSonameBuildRequirements(_enforceBuildRequirements):
