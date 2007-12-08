@@ -39,6 +39,7 @@ def _providesNames(libname):
         ]
     return provideList
 
+
 def _reduceCandidates(db, foundCandidates):
     # this may not be the most efficient algorithm, but almost
     # every case will be two providers (:devel and :devellib)
@@ -66,6 +67,23 @@ def _reduceCandidates(db, foundCandidates):
             _reduceCandidates(db, [b] + c))))
 
     return [a, b]
+
+
+def _getTransitiveBuildRequires(recipe, db):
+    try:
+        transitiveBuildRequires = recipe._getTransitiveBuildRequiresNames()
+    except AttributeError:
+        # Must be running with older Conary; fall back to manually
+        # doing the same thing locally
+        transitiveBuildRequires = set(
+            recipe.buildReqMap[spec].getName()
+            for spec in recipe.buildRequires)
+        depSetList = [ recipe.buildReqMap[spec].getRequires()
+                       for spec in recipe.buildRequires ]
+        d = db.getTransitiveProvidesClosure(depSetList)
+        for depSet in d:
+            transitiveBuildRequires.update(set(tup[0] for tup in d[depSet]))
+    return transitiveBuildRequires
 
 
 class _warnBuildRequirements(policy.EnforcementPolicy):
@@ -115,29 +133,17 @@ class _enforceBuildRequirements(_warnBuildRequirements):
                     self.compReExceptions.add(re.compile(exception))
         self.exceptions = None
 
-        try:
-            self.transitiveBuildRequires = self.recipe._getTransitiveBuildRequiresNames()
-        except AttributeError:
-            # Must be running with older Conary; fall back to manually
-            # doing the same thing locally
-            self.transitiveBuildRequires = set(
-                self.recipe.buildReqMap[spec].getName()
-                for spec in self.recipe.buildRequires)
-            depSetList = [ self.recipe.buildReqMap[spec].getRequires()
-                           for spec in self.recipe.buildRequires ]
-            d = db.getTransitiveProvidesClosure(depSetList)
-            for depSet in d:
-                self.transitiveBuildRequires.update(set(tup[0]
-                                                        for tup in d[depSet]))
-        # For compatibility with older external policy that derives from this
-        self.truncatedBuildRequires = self.transitiveBuildRequires
-
-        self.setTalk()
-
         cfg = self.recipe.cfg
         self.db = database.Database(cfg.root, cfg.dbPath)
         self.systemProvides = self.db.getTrovesWithProvides(depSetList)
         self.unprovided = [x for x in depSetList if x not in self.systemProvides]
+
+        self.transitiveBuildRequires = _getTransitiveBuildRequires(
+            self.recipe, self.db)
+        # For compatibility with older external policy that derives from this
+        self.truncatedBuildRequires = self.transitiveBuildRequires
+
+        self.setTalk()
         self.missingBuildRequires = set()
 
         return True
@@ -499,9 +505,9 @@ class _enforceLogRequirements(policy.EnforcementPolicy):
     foundRe = ''
 
     def test(self):
-        return not self.recipe.ignoreDeps
+        if self.recipe.ignoreDeps:
+            return False
 
-    def preProcess(self):
         self.foundPaths = set()
         self.greydict = {}
         # turn list into dictionary, interpolate macros, and compile regexps
@@ -522,6 +528,8 @@ class _enforceLogRequirements(policy.EnforcementPolicy):
         # never suggest a recursive buildRequires
         self.compExceptions.update(set(self.recipe.autopkg.components.keys()))
         self.exceptions = None
+
+        return True
 
     def foundPath(self, line):
         match = self.foundRe.match(line)
@@ -555,19 +563,7 @@ class _enforceLogRequirements(policy.EnforcementPolicy):
 
         # first, get all the trove names in the transitive buildRequires
         # runtime dependency closure
-        try:
-            transitiveBuildRequires = self.recipe._getTransitiveBuildRequiresNames()
-        except AttributeError:
-            # Must be running with older Conary; fall back to manually
-            # doing the same thing locally
-            transitiveBuildRequires = set(
-                self.recipe.buildReqMap[spec].getName()
-                for spec in self.recipe.buildRequires)
-            depSetList = [ self.recipe.buildReqMap[spec].getRequires()
-                           for spec in self.recipe.buildRequires ]
-            d = db.getTransitiveProvidesClosure(depSetList)
-            for depSet in d:
-                transitiveBuildRequires.update(set(tup[0] for tup in d[depSet]))
+        transitiveBuildRequires = _getTransitiveBuildRequires(self.recipe, db)
 
         # next, for each file found, report if it is not in the
         # transitive closure of runtime requirements of buildRequires
