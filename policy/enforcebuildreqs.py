@@ -26,16 +26,18 @@ from conary.build import use
 
 def _providesNames(libname):
     provideList = [libname]
-    if libname.endswith(':lib'):
-        # Instead of requiring the :lib component that satisfies
+    if libname.endswith(':lib') or libname.endswith(':devellib'):
+        # Instead of requiring the :lib or :devellib component that satisfies
         # the dependency, our first choice, if possible, is to
         # require :devel, because that would include header files;
         # if it does not exist, then :devellib for a soname link;
         # finally if neither of those exists, then :lib (though
         # that is a degenerate case).
-        provideList[0:0] = [
-            libname.replace(':lib', ':devel'),
-            libname.replace(':lib', ':devellib')
+        pkg=libname.split(':')[0]
+        provideList = [
+            pkg+':devel',
+            pkg+':devellib',
+            pkg+':lib',
         ]
     return provideList
 
@@ -551,14 +553,20 @@ class _enforceLogRequirements(policy.EnforcementPolicy):
         # transitive closure of runtime requirements of buildRequires
         fileReqs = set()
         for path in sorted(self.foundPaths):
-            thisFileReqs = set(trove.getName()
-                               for trove in db.iterTrovesByPath(path))
-            thisFileReqs -= self.compExceptions
-            missingReqs = thisFileReqs - transitiveBuildRequires
-            if missingReqs:
-                self.warn('path %s suggests buildRequires: %s',
-                          path, ', '.join((sorted(list(missingReqs)))))
-            fileReqs.update(thisFileReqs)
+            for pathReq in set(trove.getName()
+                               for trove in db.iterTrovesByPath(path)):
+                pathReqCandidates = _providesNames(pathReq)
+                # remove any recursive or non-existing buildreqs
+                pathReqCandidates = [x for x in pathReqCandidates 
+                                     if db.hasTroveByName(x) and
+                                        x not in self.compExceptions]
+                # display only the best choice
+                thisFileReq = set(pathReqCandidates[0:1])
+                missingReqs = thisFileReq - transitiveBuildRequires
+                if missingReqs:
+                    self.warn('path %s suggests buildRequires: %s',
+                              path, ', '.join((sorted(list(missingReqs)))))
+                fileReqs.update(thisFileReq)
 
         # finally, give the coalesced suggestion for cut and paste
         # into the recipe if all the individual messages make sense
