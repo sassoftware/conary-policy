@@ -69,23 +69,6 @@ def _reduceCandidates(db, foundCandidates):
     return [a, b]
 
 
-def _getTransitiveBuildRequires(recipe, db):
-    try:
-        transitiveBuildRequires = recipe._getTransitiveBuildRequiresNames()
-    except AttributeError:
-        # Must be running with older Conary; fall back to manually
-        # doing the same thing locally
-        transitiveBuildRequires = set(
-            recipe.buildReqMap[spec].getName()
-            for spec in recipe.buildRequires)
-        depSetList = [ recipe.buildReqMap[spec].getRequires()
-                       for spec in recipe.buildRequires ]
-        d = db.getTransitiveProvidesClosure(depSetList)
-        for depSet in d:
-            transitiveBuildRequires.update(set(tup[0] for tup in d[depSet]))
-    return transitiveBuildRequires
-
-
 class _warnBuildRequirements(policy.EnforcementPolicy):
     def setTalk(self):
         # FIXME: remove "True or " when we are ready for errors
@@ -138,8 +121,7 @@ class _enforceBuildRequirements(_warnBuildRequirements):
         self.systemProvides = self.db.getTrovesWithProvides(depSetList)
         self.unprovided = [x for x in depSetList if x not in self.systemProvides]
 
-        self.transitiveBuildRequires = _getTransitiveBuildRequires(
-            self.recipe, self.db)
+        self.transitiveBuildRequires = self.recipe._getTransitiveBuildRequiresNames()
         # For compatibility with older external policy that derives from this
         self.truncatedBuildRequires = self.transitiveBuildRequires
 
@@ -563,7 +545,7 @@ class _enforceLogRequirements(policy.EnforcementPolicy):
 
         # first, get all the trove names in the transitive buildRequires
         # runtime dependency closure
-        transitiveBuildRequires = _getTransitiveBuildRequires(self.recipe, db)
+        transitiveBuildRequires = self.recipe._getTransitiveBuildRequiresNames()
 
         # next, for each file found, report if it is not in the
         # transitive closure of runtime requirements of buildRequires
