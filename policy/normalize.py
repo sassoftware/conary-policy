@@ -702,7 +702,7 @@ class NormalizePythonInterpreterVersion(policy.DestdirPolicy):
     SYNOPSIS
     ========
 
-    C{r.NormalizePythonInterpreterVersion([I{filterexp}] I{exceptions=filterexp}])}
+    C{r.NormalizePythonInterpreterVersion([I{filterexp}], I{exceptions=filterexp}, I{versionMap=((from, to), ...)}])}
 
     DESCRIPTION
     ===========
@@ -710,13 +710,48 @@ class NormalizePythonInterpreterVersion(policy.DestdirPolicy):
     The C{r.NormalizePythonInterpreterVersion()} policy ensures that
     python script files have a version-specific path to the
     interpreter if possible.
+
+    KEYWORDS
+    ========
+
+    B{versionMap} : Specify mappings of interpreter version changes
+    to make for python scripts.
+
+    EXAMPLES
+    ========
+
+    C{r.NormalizePythonInterpreterVersion(versionMap=(
+        ('%(bindir)s/python', '%(bindir)s/python2.5'),
+        ('%(bindir)s/python25', '%(bindir)s/python2.5')
+    ))}
+
+    Specify that any scripts with an interpreter of C{/usr/bin/python}
+    or C{/usr/bin/python25} should be changed to C{/usr/bin/python2.5}.
     """
 
+    requires = (
+        ('NormalizeInterpreterPaths', policy.CONDITIONAL_PRIOR),
+    )
+
+    keywords = {'versionMap': {}}
+
     processUnmodified = False
+
+    def updateArgs(self, *args, **keywords):
+        if 'versionMap' in keywords:
+            versionMap = keywords.pop('versionMap')
+            if type(versionMap) in (list, tuple):
+                versionMap = dict(versionMap)
+            self.versionMap.update(versionMap)
+        policy.DestdirPolicy.updateArgs(self, *args, **keywords)
 
     def preProcess(self):
         self.interpreterRe = re.compile(".*python[-0-9.]+")
         self.interpMap = {}
+        versionMap = {}
+        for item in self.versionMap.items():
+            versionMap[item[0]%self.macros] = item[1]%self.macros
+        self.versionMap = versionMap
 
     def doFile(self, path):
         destdir = self.recipe.macros.destdir
@@ -731,7 +766,9 @@ class NormalizePythonInterpreterVersion(policy.DestdirPolicy):
             if '/python' not in interp:
                 # we handle only python scripts here
                 return
-            if not self._isNormalizedInterpreter(interp):
+            if interp in self.versionMap.keys():
+                normalized = self.versionMap[interp]
+            elif not self._isNormalizedInterpreter(interp):
                 # normalization
                 if self.interpMap.has_key(interp):
                     normalized = self.interpMap[interp]
@@ -743,22 +780,24 @@ class NormalizePythonInterpreterVersion(policy.DestdirPolicy):
                         self.warn('No version-specific python interpreter '
                                   'found for %s in %s', interp, path)
                         return
+            else:
+                return
 
-                # we need to be able to write the file
-                os.chmod(d, mode | 0600)
-                f = file(d, 'r+')
-                l = f.readlines()
-                l[0] = l[0].replace(interp, normalized)
-                # we may have shrunk the file, avoid garbage
-                f.seek(0)
-                f.truncate(0)
-                f.writelines(l)
-                f.close()
-                # revert any change to mode
-                os.chmod(d, mode)
+            # we need to be able to write the file
+            os.chmod(d, mode | 0600)
+            f = file(d, 'r+')
+            l = f.readlines()
+            l[0] = l[0].replace(interp, normalized)
+            # we may have shrunk the file, avoid garbage
+            f.seek(0)
+            f.truncate(0)
+            f.writelines(l)
+            f.close()
+            # revert any change to mode
+            os.chmod(d, mode)
 
-                self.info('changed %s to %s in %s', interp, normalized, path)
-                del self.recipe.magic[path]
+            self.info('changed %s to %s in %s', interp, normalized, path)
+            del self.recipe.magic[path]
 
     def _isNormalizedInterpreter(self, interp):
         return os.path.basename(interp).startswith('python') and self.interpreterRe.match(interp)

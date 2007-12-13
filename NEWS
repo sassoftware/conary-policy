@@ -12,6 +12,10 @@ Chagnes in 1.0.13:
   o Log-based buildRequires policies (for config.log and CMakeCache
     files) consider :devel, :devellib, and :lib as a set, choosing
     the best component to recommend in that order. (CNP-105)
+  o The NormalizePythonInterpreterVersion policy now can be told
+    to make specific version mappings that override its hueristics,
+    which is necessary in particular to build multiple python
+    versions which can co-exist on the same system. (CNP-104)
 
 Changes in 1.0.12:
   o The _enforceBuildRequirements superclass now handles correctly
