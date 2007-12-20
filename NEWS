@@ -1,4 +1,4 @@
-Chagnes in 1.0.13:
+Changes in 1.0.13:
   o The EnforceCILBuildRequires policy now ensures that the build
     requirements include 'mono:devel' if there are any CIL dependencies
     found.  The mono:devel package is required to discover CIL
