@@ -350,6 +350,10 @@ class FixObsoletePaths(policy.DestdirPolicy, _pathMap):
         d = self.recipe.macros.destdir
         for path, newPath in self.candidatePaths():
             try:
+                try:
+                    self.recipe.recordMove(d + path, d + newPath)
+                except AttributeError:
+                    pass
                 os.renames(d+path, d+newPath)
                 self.warn('Path %s should not exist, moving to %s instead',
                           path, newPath)

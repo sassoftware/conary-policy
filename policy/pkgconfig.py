@@ -64,3 +64,7 @@ class NormalizePkgConfig(policy.DestdirPolicy):
                 return
             util.mkdirChain(os.path.dirname(dest))
             util.rename(destdir+filename, dest)
+            try:
+                self.recipe.recordMove(destdir+filename, dest)
+            except AttributeError:
+                pass

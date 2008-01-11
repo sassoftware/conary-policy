@@ -138,8 +138,18 @@ class NormalizeManPages(policy.DestdirPolicy):
             path = dirname + os.sep + name
             if name.endswith('.gz') and util.isregular(path):
                 util.execute('gunzip ' + dirname + os.sep + name)
+                try:
+                    self.recipe.recordMove(util.joinPaths(dirname, name),
+                            util.joinPaths(dirname, name)[:-3])
+                except AttributeError:
+                    pass
             if name.endswith('.bz2') and util.isregular(path):
                 util.execute('bunzip2 ' + dirname + os.sep + name)
+                try:
+                    self.recipe.recordMove(util.joinPaths(dirname, name),
+                            util.joinPaths(dirname, name)[:-4])
+                except AttributeError:
+                    pass
 
     def _touchup(self, dirname, names):
         """
@@ -240,6 +250,11 @@ class NormalizeManPages(policy.DestdirPolicy):
             path = dirname + os.sep + name
             if util.isregular(path):
                 util.execute('gzip -f -n -9 ' + dirname + os.sep + name)
+                try:
+                    self.recipe.recordMove(dirname + os.sep + name,
+                            dirname + os.sep + name + '.gz')
+                except AttributeError:
+                    pass
 
     def _gzsymlink(self, dirname, names):
         for name in names:
@@ -319,7 +334,6 @@ class NormalizeInfoPages(policy.DestdirPolicy):
             infofiles = os.listdir(infofilespath)
             for file in infofiles:
                 self._moveToInfoRoot(file)
-            
             infofiles = os.listdir(infofilespath)
             for file in infofiles:
                 self._processInfoFile(file)
@@ -333,6 +347,12 @@ class NormalizeInfoPages(policy.DestdirPolicy):
             shutil.rmtree(fullfile)
         elif os.path.dirname(fullfile) != infofilespath:
             shutil.move(fullfile, infofilespath)
+            try:
+                self.recipe.recordMove(fullfile,
+                        util.joinPaths(infofilespath,
+                            os.path.basename(fullfile)))
+            except AttributeError:
+                pass
 
     def _processInfoFile(self, file):
         syspath = '%(destdir)s/%(infodir)s/' %self.macros + file
@@ -342,17 +362,26 @@ class NormalizeInfoPages(policy.DestdirPolicy):
             if not m:
                 # not compressed
                 util.execute('gzip -f -n -9 %s' %syspath)
+                try:
+                    self.recipe.recordMove(syspath, syspath + '.gz')
+                except AttributeError:
+                    pass
                 del self.recipe.magic[path]
             elif m.name == 'gzip' and \
                 (m.contents['compression'] != '9' or \
                 'name' in m.contents):
                 util.execute('gunzip %s; gzip -f -n -9 %s'
                             %(syspath, syspath[:-3]))
+                # filename didn't change, so don't record it in the manifest
                 del self.recipe.magic[path]
             elif m.name == 'bzip':
                 # should use gzip instead
                 util.execute('bunzip2 %s; gzip -f -n -9 %s'
                             %(syspath, syspath[:-4]))
+                try:
+                    self.recipe.recordMove(syspath, syspath[:-4] + '.gz')
+                except AttributeError:
+                    pass
                 del self.recipe.magic[path]
 
 
@@ -401,6 +430,11 @@ class NormalizeInitscriptLocation(policy.DestdirPolicy):
                         self.macros['initdir'])
         util.rename(self.macros['destdir'] + path,
                     self.macros['destdir'] + target)
+        try:
+            self.recipe.recordMove(self.macros['destdir'] + path,
+                    self.macros['destdir'] + target)
+        except AttributeError:
+            pass
 
 
 class NormalizeInitscriptContents(policy.DestdirPolicy):
@@ -497,6 +531,11 @@ class NormalizeAppDefaults(policy.DestdirPolicy):
         for file in os.listdir(e):
             util.rename(util.joinPaths(e, file),
                         util.joinPaths(x, file))
+            try:
+                self.recipe.recordMove(util.joinPaths(e, file),
+                        util.joinPaths(x, file))
+            except AttributeError:
+                pass
 
 
 class NormalizeInterpreterPaths(policy.DestdirPolicy):

@@ -206,12 +206,20 @@ class FixupMultilibPaths(policy.DestdirPolicy):
         util.mkdirChain(destdir + targetdir)
         if stat.S_ISREG(mode):
             util.rename(destdir + path, fulltarget)
+            try:
+                self.recipe.recordMove(destdir + path, fulltarget)
+            except AttributeError:
+                pass
         else:
             # we should have a symlink that may need the contents changed
             contents = os.readlink(fullpath)
             if contents.find('/') == -1:
                 # simply rename
                 util.rename(destdir + path, destdir + target)
+                try:
+                    self.recipe.recordMove(destdir + path, fulltarget)
+                except AttributeError:
+                    pass
             else:
                 # need to change the contents of the symlink to point to
                 # the new location of the real file

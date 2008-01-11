@@ -169,7 +169,7 @@ class FixupManpagePaths(policy.DestdirPolicy, FilesInMandir):
             stripped =  basename.split('.', 2)[-2]
 
         if '.' not in stripped:
-            self.logError(file)
+            self.logError(path)
             return
 
         num = stripped.split('.', 2)[-1]
@@ -178,8 +178,12 @@ class FixupManpagePaths(policy.DestdirPolicy, FilesInMandir):
             return
 
         newPath = util.joinPaths(d, mandir, 'man'+num, basename)
-        self.warn('Moving %s to %s', file, newPath)
+        self.warn('Moving %s to %s', path, newPath)
         os.renames(d+path, newPath)
+        try:
+            self.recipe.recordMove(d + path, newPath)
+        except AttributeError:
+            pass
 
 
 class BadInterpreterPaths(policy.EnforcementPolicy):
