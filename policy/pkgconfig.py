@@ -72,38 +72,11 @@ class NormalizePkgConfig(policy.DestdirPolicy):
             except AttributeError:
                 pass
 
-class PkgConfigRequires(packagepolicy.Requires):
-    requires = [
-        ('Requires', policy.REQUIRED_SUBSEQUENT)
-    ]
+class PkgConfigRequires(packagepolicy.BasePluggableRequires):
 
     invariantinclusions = [ r'(%(libdir)s|%(datadir)s)/pkgconfig/.*\.pc$' ]
 
-    def preProcess(self):
-        exceptions = self.recipe._policyMap['Requires'].exceptions
-        if exceptions:
-            packagepolicy.Requires.updateArgs(self, exceptions=exceptions)
-        exceptDeps = self.recipe._policyMap['Requires'].exceptDeps
-        if exceptDeps:
-            self.exceptDeps.extend(exceptDeps)
-
-        return packagepolicy.Requires.preProcess(self)
-
-    def doFile(self, path):
-        componentMap = self.recipe.autopkg.componentMap
-        if path not in componentMap:
-            return
-        pkg = componentMap[path]
-        f = pkg.getFile(path)
-        macros = self.recipe.macros
-        fullpath = macros.destdir + path
-
-        self._addPkgConfigRequirements(path, fullpath, pkg, macros)
-
-        self.whiteOut(path, pkg)
-        self.unionDeps(path, pkg, f)
-
-    def _addPkgConfigRequirements(self, path, fullpath, pkg, macros):
+    def addPluggableRequirements(self, path, fullpath, pkg, macros):
         # parse pkgconfig file
         variables = {}
         requirements = set()

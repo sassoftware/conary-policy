@@ -20,40 +20,16 @@ from conary.build import policy, packagepolicy
 from conary.deps import deps
 from conary.lib import util
 
-class XinetdConfigRequires(packagepolicy.Requires):
-    requires = [
-        ('Requires', policy.REQUIRED_SUBSEQUENT)
-    ]
+class XinetdConfigRequires(packagepolicy.BasePluggableRequires):
+    """
+    Pluggable Requires class for xinetd configuration files.
+    """
 
     invariantinclusions = [ r'%(sysconfdir)s/xinetd.d/.*$' ]
 
-    def preProcess(self):
-        exceptions = self.recipe._policyMap['Requires'].exceptions
-        if exceptions:
-            packagepolicy.Requires.updateArgs(self, exceptions=exceptions)
-        exceptDeps = self.recipe._policyMap['Requires'].exceptDeps
-        if exceptDeps:
-            self.exceptDeps.extend(exceptDeps)
+    def addPluggableRequirements(self, path, fullpath, pkg, macros):
 
-        return packagepolicy.Requires.preProcess(self)
-
-    def doFile(self, path):
-        componentMap = self.recipe.autopkg.componentMap
-        if path not in componentMap:
-            return
-        pkg = componentMap[path]
-        f = pkg.getFile(path)
-        macros = self.recipe.macros
-        fullpath = macros.destdir + path
-
-        self._addXinetdConfigRequirements(path, fullpath, pkg, macros)
-
-        self.whiteOut(path, pkg)
-        self.unionDeps(path, pkg, f)
-
-    def _addXinetdConfigRequirements(self, path, fullpath, pkg, macros):
-        # parse config file
-
+        # parse file
         fContents = [x.strip() for x in file(fullpath).readlines()]
         # Although the line says "disable", we use "enabled", so that if the
         # line is not present at all we don't generate the dep
