@@ -12,9 +12,12 @@
 # full details.
 #
 
+import itertools
 import os
+import re
 
-from conary.build import policy
+from conary.build import policy, packagepolicy
+from conary.deps import deps
 from conary.lib import util
 
 
@@ -68,3 +71,154 @@ class NormalizePkgConfig(policy.DestdirPolicy):
                 self.recipe.recordMove(destdir+filename, dest)
             except AttributeError:
                 pass
+
+class PkgConfigRequires(packagepolicy.Requires):
+    requires = [
+        ('Requires', policy.REQUIRED_SUBSEQUENT)
+    ]
+
+    invariantinclusions = [ r'(%(libdir)s|%(datadir)s)/pkgconfig/.*\.pc$' ]
+
+    def preProcess(self):
+        exceptions = self.recipe._policyMap['Requires'].exceptions
+        if exceptions:
+            packagepolicy.Requires.updateArgs(self, exceptions=exceptions)
+        exceptDeps = self.recipe._policyMap['Requires'].exceptDeps
+        if exceptDeps:
+            self.exceptDeps.extend(exceptDeps)
+
+        return packagepolicy.Requires.preProcess(self)
+
+    def doFile(self, path):
+        componentMap = self.recipe.autopkg.componentMap
+        if path not in componentMap:
+            return
+        pkg = componentMap[path]
+        f = pkg.getFile(path)
+        macros = self.recipe.macros
+        fullpath = macros.destdir + path
+
+        self._addPkgConfigRequirements(path, fullpath, pkg, macros)
+
+        self.whiteOut(path, pkg)
+        self.unionDeps(path, pkg, f)
+
+    def _addPkgConfigRequirements(self, path, fullpath, pkg, macros):
+        # parse pkgconfig file
+        variables = {}
+        requirements = set()
+        libDirs = []
+        libraries = set()
+        variableLineRe = re.compile('^[a-zA-Z0-9]+=')
+        filesRequired = []
+
+        pcContents = [x.strip() for x in file(fullpath).readlines()]
+        for pcLine in pcContents:
+            # interpolate variables: assume variables are interpreted
+            # line-by-line while processing
+            pcLineIter = pcLine
+            while True:
+                for var in variables:
+                    pcLineIter = pcLineIter.replace(var, variables[var])
+                if pcLine == pcLineIter:
+                    break
+                pcLine = pcLineIter
+            pcLine = pcLineIter
+
+            if variableLineRe.match(pcLine):
+                key, val = pcLine.split('=', 1)
+                variables['${%s}' %key] = val
+            else:
+                if (pcLine.startswith('Requires') or
+                    pcLine.startswith('Lib')) and ':' in pcLine:
+                    keyWord, args = pcLine.split(':', 1)
+                    # split on ',' and ' '
+                    argList = itertools.chain(*[x.split(',')
+                                                for x in args.split()])
+                    argList = [x for x in argList if x]
+                    if keyWord.startswith('Requires'):
+                        versionNext = False
+                        for req in argList:
+                            if [x for x in '<=>' if x in req]:
+                                versionNext = True
+                                continue
+                            if versionNext:
+                                versionNext = False
+                                continue
+                            requirements.add(req)
+                    elif keyWord.startswith('Lib'):
+                        for lib in argList:
+                            if lib.startswith('-L'):
+                                libDirs.append(lib[2:])
+                            elif lib.startswith('-l'):
+                                libraries.add(lib[2:])
+                            else:
+                                pass
+
+        # find referenced pkgconfig files and add requirements
+        for req in requirements:
+            candidateFileNames = [
+                '%(destdir)s%(libdir)s/pkgconfig/'+req+'.pc',
+                '%(destdir)s%(datadir)s/pkgconfig/'+req+'.pc',
+                '%(libdir)s/pkgconfig/'+req+'.pc',
+                '%(datadir)s/pkgconfig/'+req+'.pc',
+            ]
+            candidateFileNames = [ x % macros for x in candidateFileNames ]
+            candidateFiles = [ util.exists(x) for x in candidateFileNames ]
+            if True in candidateFiles:
+                filesRequired.append(
+                    (candidateFileNames[candidateFiles.index(True)], 'pkg-config'))
+            else:
+                self.warn('pkg-config file %s.pc not found', req)
+                continue
+
+        # find referenced library files and add requirements
+        libraryPaths = sorted(list(self.systemLibPaths))
+        for libDir in libDirs:
+            if libDir not in libraryPaths:
+                libraryPaths.append(libDir)
+        for library in libraries:
+            found = False
+            for libDir in libraryPaths:
+                candidateFileNames = [
+                    macros.destdir+libDir+'/lib'+library+'.so',
+                    macros.destdir+libDir+'/lib'+library+'.a',
+                    libDir+'/lib'+library+'.so',
+                    libDir+'/lib'+library+'.a',
+                ]
+                candidateFiles = [ util.exists(x) for x in candidateFileNames ]
+                if True in candidateFiles:
+                    filesRequired.append(
+                        (candidateFileNames[candidateFiles.index(True)], 'library'))
+                    found = True
+                    break
+
+            if not found:
+                self.warn('library file lib%s not found', library)
+                continue
+
+
+        for fileRequired, fileType in filesRequired:
+            if fileRequired.startswith(macros.destdir):
+                # find requirement in packaging
+                fileRequired = util.normpath(fileRequired)
+                fileRequired = fileRequired[len(util.normpath(macros.destdir)):]
+                autopkg = self.recipe.autopkg
+                troveName = autopkg.componentMap[fileRequired].name
+                package, component = troveName.split(':', 1)
+                if component in ('devellib', 'lib'):
+                    for preferredComponent in ('devel', 'devellib'):
+                        develTroveName = ':'.join((package, preferredComponent))
+                        if develTroveName in autopkg.components and autopkg.components[develTroveName]:
+                            # found a non-empty :devel compoment
+                            troveName = develTroveName
+                            break
+                self._addRequirement(path, troveName, [], pkg,
+                                     deps.TroveDependencies)
+            else:
+                troveName = self._enforceProvidedPath(fileRequired,
+                                                      fileType=fileType,
+                                                      unmanagedError=True)
+                if troveName:
+                    self._addRequirement(path, troveName, [], pkg,
+                                         deps.TroveDependencies)

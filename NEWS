@@ -1,6 +1,9 @@
 Changes in @NEW@:
   o Policies that move files in destdir now track path translations
     so files will end up in the correct package or component. (CNY-1679)
+  o A policy to enforce a requirement on xinetd when a configuration
+    file with "disabled = no" is deployed in /etc/xinetd.d/ has been
+    added. (CNP-93)
 
 Changes in 1.0.13:
   o The EnforceCILBuildRequires policy now ensures that the build
