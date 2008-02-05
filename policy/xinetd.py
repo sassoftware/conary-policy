@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2007 rPath, Inc.
+# Copyright (c) 2008 rPath, Inc.
 #
 # This program is distributed under the terms of the Common Public License,
 # version 1.0. A copy of this license should have been distributed with this
@@ -20,9 +20,39 @@ from conary.build import policy, packagepolicy
 from conary.deps import deps
 from conary.lib import util
 
-class XinetdConfigRequires(packagepolicy.BasePluggableRequires):
+class XinetdConfigRequires(packagepolicy._basePluggableRequires):
     """
-    Pluggable Requires class for xinetd configuration files.
+    NAME
+    ====
+
+    B{C{r.XinetdConfigRequires()}} - Automatically add a dependency on
+    C{xinetd:runtime} for packages containing an xinetd configuration file.
+
+    SYNOPSIS
+    ========
+
+    C{r.XinetdConfigRequires([I{filterexp}] || [I{exceptions=filterexp}])}
+
+    DESCRIPTION
+    ===========
+
+    The C{r.XinetdConfigRequires()} policy adds a dependency on
+    C{xinetd:runtime} for packages containing an xinetd configuration file.
+
+    The dependency is added only if the service is enabled by default.
+
+    This policy is a sub-policy of C{r.Requires}. It inherits the list
+    of exceptions from C{r.Requires}. Under normal circumstances, it is not
+    needed to invoke it explicitly. However, it may be necessary to exclude
+    some of the files from being scanned, in which case using
+    I{exceptions=filterexp} is possible.
+
+    EXAMPLES
+    ========
+
+    C{r.XinetdConfigRequires(exceptions='mylo')}
+
+    Disables the scanning of C{mylo}.
     """
 
     invariantinclusions = [ r'%(sysconfdir)s/xinetd.d/.*$' ]

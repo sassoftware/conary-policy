@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2007 rPath, Inc.
+# Copyright (c) 2007-2008 rPath, Inc.
 #
 # This program is distributed under the terms of the Common Public License,
 # version 1.0. A copy of this license should have been distributed with this
@@ -72,7 +72,38 @@ class NormalizePkgConfig(policy.DestdirPolicy):
             except AttributeError:
                 pass
 
-class PkgConfigRequires(packagepolicy.BasePluggableRequires):
+class PkgConfigRequires(packagepolicy._basePluggableRequires):
+    """
+    NAME
+    ====
+
+    B{C{r.PkgConfigRequires()}} - Extract dependency information out of
+    pkg-config files.
+
+    SYNOPSIS
+    ========
+
+    C{r.PkgConfigRequires([I{filterexp}] || [I{exceptions=filterexp}])}
+
+    DESCRIPTION
+    ===========
+
+    The C{r.PkgConfigRequires()} policy parses pkg-config files and extracts
+    dependency information.
+
+    This policy is a sub-policy of C{r.Requires}. It inherits the list
+    of exceptions from C{r.Requires}. Under normal circumstances, it is not
+    needed to invoke it explicitly. However, it may be necessary to exclude
+    some of the files from being scanned, in which case using
+    I{exceptions=filterexp} is possible.
+
+    EXAMPLES
+    ========
+
+    C{r.PkgConfigRequires(exceptions='mylo.pc')}
+
+    Disables the requirement extraction for C{mylo.pc}.
+    """
 
     invariantinclusions = [ r'(%(libdir)s|%(datadir)s)/pkgconfig/.*\.pc$' ]
 
