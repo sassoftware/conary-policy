@@ -71,7 +71,7 @@ class XinetdConfigRequires(_basePluggableRequires):
         # line is not present at all we don't generate the dep
         enabled = None
         for fLine in fContents:
-            if fLine or fLine[0] == '#':
+            if not fLine or fLine[0] == '#':
                 continue
             arr = [x.strip() for x in fLine.split('=', 1) ]
             if len(arr) != 2:
