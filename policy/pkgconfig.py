@@ -72,7 +72,13 @@ class NormalizePkgConfig(policy.DestdirPolicy):
             except AttributeError:
                 pass
 
-class PkgConfigRequires(packagepolicy._basePluggableRequires):
+if hasattr(packagepolicy, '_basePluggableRequires'):
+    _basePluggableRequires = packagepolicy._basePluggableRequires
+else:
+    # Older Conary. Make the class inherit from object
+    _basePluggableRequires = object
+
+class PkgConfigRequires(_basePluggableRequires):
     """
     NAME
     ====

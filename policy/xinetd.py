@@ -20,7 +20,13 @@ from conary.build import policy, packagepolicy
 from conary.deps import deps
 from conary.lib import util
 
-class XinetdConfigRequires(packagepolicy._basePluggableRequires):
+if hasattr(packagepolicy, '_basePluggableRequires'):
+    _basePluggableRequires = packagepolicy._basePluggableRequires
+else:
+    # Older Conary. Make the class inherit from object
+    _basePluggableRequires = object
+
+class XinetdConfigRequires(_basePluggableRequires):
     """
     NAME
     ====
