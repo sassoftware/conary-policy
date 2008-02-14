@@ -1,4 +1,4 @@
-Changes in @NEW@:
+Changes in 1.0.14:
   o Policies that move files in destdir now track path translations
     so files will end up in the correct package or component. (CNY-1679)
   o A policy to enforce a requirement on xinetd when a configuration
