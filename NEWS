@@ -1,3 +1,8 @@
+Changes in @NEW@:
+  o The AutoSharedLibrary was created. Files in /etc/ld.so.conf.d whose
+    name ends with .conf will be parsed. Each line of those files will
+    be marked as SharedLibrary. (CNP-108)
+
 Changes in 1.0.14:
   o Policies that move files in destdir now track path translations
     so files will end up in the correct package or component. (CNY-1679)

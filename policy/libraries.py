@@ -17,6 +17,7 @@ import stat
 
 from conary.lib import util
 from conary.build import policy
+from conary.local import database
 
 
 # probably needs to migrate to some form of configuration
@@ -34,6 +35,72 @@ librarydirs = [
     '%(prefix)s/local/lib/',
 ]
 
+class AutoSharedLibrary(policy.DestdirPolicy):
+    """
+    NAME
+    ====
+
+    B{C{r.AutoSharedLibrary()}} - Automatically determine SharedLibrary
+    subtrees based on contents of /etc/ld.so.conf.d/*.conf files
+
+    SYNOPSIS
+    ========
+
+    C{r.AutoSharedLibrary([I{filterexp}] I{exceptions=filterexp}])}
+
+    DESCRIPTION
+    ===========
+
+    The C{r.AutoSharedLibrary()} policy automatically determines directories
+    that should be marked as SharedLibrary based on the contents of
+    /etc/ld.so.conf.d/*.conf files. This policy checks system files as well
+    as destdir files.
+
+    Note: Do not invoke C{r.AutoSharedLibrary()} directly from recipes.
+    If you need to mark a directory as containing shared libraries,
+    use r.SharedLibrary.
+    """
+
+    requires = (
+        ('ExecutableLibraries', policy.CONDITIONAL_SUBSEQUENT),
+        ('CheckSonames', policy.CONDITIONAL_SUBSEQUENT),
+        ('NormalizeLibrarySymlinks', policy.CONDITIONAL_SUBSEQUENT),
+        ('Provides', policy.CONDITIONAL_SUBSEQUENT),
+        ('Requires', policy.CONDITIONAL_SUBSEQUENT),
+    )
+
+    def _managedFile(self, path):
+        db = database.Database(self.recipe.cfg.root, self.recipe.cfg.dbPath)
+        return bool(db.iterTrovesByPath(path))
+
+    def _iterSharedlibList(self):
+        destdir = self.recipe.macros.destdir
+        basePath = os.path.join(os.path.sep, 'etc', 'ld.so.conf.d')
+        root = self.recipe.cfg.root
+        for checkManaged, ldConfPath in \
+                ((True, util.joinPaths(root, basePath)),
+                (False, util.joinPaths(destdir, basePath))):
+            if not os.path.exists(ldConfPath):
+                # if the dir doesn't exist, there's nothing to do
+                continue
+            for ldConfFile in os.listdir(ldConfPath):
+                if not ldConfFile.endswith('.conf'):
+                    # skip files that don't end with exactly .conf. A side
+                    # effect of this is to prevent checking .conflicts
+                    # or backup files.
+                    continue
+                fullpath = os.path.join(ldConfPath, ldConfFile)
+                # skip all unmanaged files if necessary
+                if checkManaged and not self._managedFile( \
+                        util.joinPaths(basePath, ldConfFile)):
+                    continue
+                f = open(fullpath)
+                for path in f:
+                    yield path.strip()
+
+    def doProcess(self, recipe):
+        for path in self._iterSharedlibList():
+            self.recipe.SharedLibrary(subtrees = path)
 
 class SharedLibrary(policy.PackagePolicy):
     """
