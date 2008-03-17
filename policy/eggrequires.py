@@ -106,7 +106,7 @@ class EggRequires(packagepolicy._basePluggableRequires):
             troveName = None
             if fileRequired.startswith(macros.destdir):
                 # find requirement in packaging
-                fileRequired = util.normpath(fileRequired)
+                fileRequired = util.normpath(os.path.realpath(fileRequired))
                 fileRequired = fileRequired[len(util.normpath(macros.destdir)):]
                 autopkg = self.recipe.autopkg
                 troveName = autopkg.componentMap[fileRequired].name
