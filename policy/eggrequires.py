@@ -14,7 +14,6 @@
 
 import itertools
 import os
-import pkg_resources
 
 from conary.build import packagepolicy
 from conary.deps import deps
@@ -64,13 +63,43 @@ class EggRequires(packagepolicy._basePluggableRequires):
     invariantinclusions = [r'%(libdir)s/python.*\.egg-info/requires.txt',
             r'%(prefix)s/lib/python.*\.egg-info/requires.txt']
 
-    def _parseEggRequires(self, fullpath):
+    def __init__(self, *args, **kw):
+        self._checkedForPythonSetupTools = False
+        packagepolicy._basePluggableRequires.__init__(self, *args, **kw)
+
+    def _checkForPythonSetupTools(self, fullpath):
+        self.transitiveBuildRequires = self.recipe._getTransitiveBuildRequiresNames()
+        if 'python-setuptools:python' not in self.transitiveBuildRequires:
+            self.recipe.reportMissingBuildRequires('python-setuptools:python')
+            if 'local@local' in self.recipe.macros.buildlabel:
+                logFn = self.warn
+            else:
+                logFn = self.error
+            logFn("add 'python-setuptools:python' to buildRequires to inspect %s", fullpath)
+            return False
+        return True
+
+    def _parseEggRequires(self, path, fullpath):
+        if not self._checkedForPythonSetupTools:
+            if not self._checkForPythonSetupTools(path):
+                try:
+                    import pkg_resources
+                except ImportError:
+                    self.pkg_resources = None
+                    return [], []
+            else:
+                import pkg_resources
+            self.pkg_resources = pkg_resources
+            self._checkedForPythonSetupTools = True
+        elif self.pkg_resources is None:
+            # we checked and could not import pkg_resources
+            return [], []
         eggDir = os.path.dirname(fullpath)
         baseDir = os.path.dirname(eggDir)
-        metadata = pkg_resources.PathMetadata(baseDir, eggDir)
+        metadata = self.pkg_resources.PathMetadata(baseDir, eggDir)
         distName = os.path.splitext(os.path.basename(eggDir))[0]
-        dist = pkg_resources.Distribution(baseDir,
-                project_name = distName, metadata = metadata)
+        dist = self.pkg_resources.Distribution(baseDir,
+                                project_name = distName, metadata = metadata)
 
 
         mandatoryReqs = [x.project_name for x in dist.requires()]
@@ -79,7 +108,7 @@ class EggRequires(packagepolicy._basePluggableRequires):
         return mandatoryReqs, optionalReqs
 
     def addPluggableRequirements(self, path, fullpath, pkg, macros):
-        mandatoryReqs, optionalReqs = self._parseEggRequires(fullpath)
+        mandatoryReqs, optionalReqs = self._parseEggRequires(path, fullpath)
         filesRequired = []
         for req in itertools.chain(mandatoryReqs, optionalReqs):
             candidatePrefs = [
