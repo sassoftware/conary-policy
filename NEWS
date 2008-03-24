@@ -1,10 +1,16 @@
 Changes in @NEW@:
-  o The AutoSharedLibrary was created. Files in /etc/ld.so.conf.d whose
-    name ends with .conf will be parsed. Each line of those files will
-    be marked as SharedLibrary. (CNP-108)
-  o Python eggs are now inspected for suggested buildRequires. (CNP-102)
+  o The AutoSharedLibrary policy finds /etc/ld.so.conf.d/*.conf files
+    and tells the SharedLibrary policy that the directories mentioned in
+    those files contain shared libraries. (CNP-108)
+  o Python *egg-info/requires.txt files are now inspected for suggested
+    buildRequires additions. (CNP-102)
   o An error causing PkgConfigRequires to traceback when handling
     requirement paths involving symlinks has been fixed. (CNP-119)
+  o The new EnforceStaticLibBuildRequirements policy examines the output
+    of the build process for linking to libraries that are not included
+    among the shared libraries required by the package but are included
+    on the system, and suggests additional buildRequires for those
+    libraries. (CNP-120)
 
 Changes in 1.0.14:
   o Policies that move files in destdir now track path translations

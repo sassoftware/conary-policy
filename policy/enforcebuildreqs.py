@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2005-2007 rPath, Inc.
+# Copyright (c) 2005-2008 rPath, Inc.
 #
 # This program is distributed under the terms of the Common Public License,
 # version 1.0. A copy of this license should have been distributed with this
@@ -80,6 +80,36 @@ class _warnBuildRequirements(policy.EnforcementPolicy):
         else:
             self.talk = self.error
 
+    def _initComponentExceptions(self):
+        self.compExceptions = set()
+        self.compReExceptions = set()
+        compRe = re.compile('[a-zA-Z0-9]+:[a-zA-Z0-9]+')
+        if self.exceptions:
+            for exception in self.exceptions:
+                exception = exception % self.recipe.macros
+                if compRe.match(exception):
+                    self.compExceptions.add(exception)
+                else:
+                    self.compReExceptions.add(re.compile(exception))
+        self.exceptions = None
+
+    def _removeExceptions(self, candidates):
+        candidates = candidates - self.compExceptions
+        for compRe in self.compReExceptions:
+            candidates -= set(x for x in candidates if compRe.match(x))
+        return candidates
+
+    def _removeExceptionsFromList(self, candidates):
+        candidateList = []
+        for item in candidates:
+            if item not in self.compExceptions and not [compRe
+                for compRe in self.compReExceptions
+                if compRe.match(item)]:
+                candidateList.append(item)
+        return candidateList
+
+
+
 class _enforceBuildRequirements(_warnBuildRequirements):
     """
     Pure virtual base class from which classes are derived that
@@ -88,7 +118,7 @@ class _enforceBuildRequirements(_warnBuildRequirements):
     processUnmodified = False
 
     def test(self):
-	components = self.recipe.autopkg.components
+        components = self.recipe.autopkg.components
         reqDepSet = deps.DependencySet()
         provDepSet = deps.DependencySet()
         for pkg in components.values():
@@ -106,17 +136,7 @@ class _enforceBuildRequirements(_warnBuildRequirements):
         if not depSetList:
             return False
 
-        self.compExceptions = set()
-        self.compReExceptions = set()
-        compRe = re.compile('[a-zA-Z0-9]+:[a-zA-Z0-9]+')
-        if self.exceptions:
-            for exception in self.exceptions:
-                exception = exception % self.recipe.macros
-                if compRe.match(exception):
-                    self.compExceptions.add(exception)
-                else:
-                    self.compReExceptions.add(re.compile(exception))
-        self.exceptions = None
+        self._initComponentExceptions()
 
         cfg = self.recipe.cfg
         self.db = database.Database(cfg.root, cfg.dbPath)
@@ -141,7 +161,7 @@ class _enforceBuildRequirements(_warnBuildRequirements):
     def do(self):
         missingBuildRequiresChoices = []
 
-	components = self.recipe.autopkg.components
+        components = self.recipe.autopkg.components
         pathMap = self.recipe.autopkg.pathMap
         pathReqMap = {}
         interpreterSet = set()
@@ -177,10 +197,7 @@ class _enforceBuildRequirements(_warnBuildRequirements):
                         foundCandidates.add(candidate)
                         provideNameMap[candidate] = provideNameMap[name]
                         break
-            foundCandidates -= self.compExceptions
-            for compRe in self.compReExceptions:
-                foundCandidates -= set(x for x in foundCandidates
-                                       if compRe.match(x))
+            foundCandidates = self._removeExceptions(foundCandidates)
 
             missingCandidates = foundCandidates - self.transitiveBuildRequires
             if foundCandidates and missingCandidates == foundCandidates:
@@ -283,7 +300,7 @@ class EnforceSonameBuildRequirements(_enforceBuildRequirements):
     ====
 
     B{C{r.EnforceSonameBuildRequirements()}} - Ensure package requires
-    dependencies match elements in r.buildRequires list
+    shared library dependencies match elements in r.buildRequires list
 
     SYNOPSIS
     ========
@@ -338,14 +355,15 @@ class EnforcePythonBuildRequirements(_enforceBuildRequirements):
 
     Any trove names wrongly suggested should be eliminated from consideration
     by using C{r.Requires(exceptDeps='python: ...')}
+
+    Note that python requirements cannot be calculated unless the
+    providing packages are actually installed on the system.  For
+    this reason, exceptions to the C{r.EnforcePythonBuildRequirements()}
+    policy are strongly discouraged.
     """
 
     depClassType = deps.DEP_CLASS_PYTHON
     depClass = deps.PythonDependencies
-
-    # FIXME: remove this when we are ready to enforce Python dependencies
-    def setTalk(self):
-        self.talk = self.warn
 
 
 class EnforceJavaBuildRequirements(_enforceBuildRequirements):
@@ -377,16 +395,20 @@ class EnforceJavaBuildRequirements(_enforceBuildRequirements):
     C{r.EnforceJavaBuildRequirements(exceptions='.*')}
 
     This turns off all enforcement of Java build requirements, which is
-    particularly useful when packaging pre-built Java applications.
-
-    If you are packaging an application that includes Java files that
-    are never executed on the system on which they are installed, but
-    are only provided to other systems (likely via HTTP to a remote
+    particularly useful when packaging pre-built Java applications
+    that are not executed on the system on which they are installed,
+    but are instead provided to other systems (likely via HTTP to a remote
     web browser), then you should instead remove the runtime requirements
     entirely with C{r.Requires(exceptions='.*\.(java|jar|zip)')} (the
     fastest approach) or C{r.Requires(exceptDeps='java:.*')} (slower
     but more accurate).
-    """
+
+    Note that Java requirements satisfied neither on the system
+    nor within the package are automatically eliminated from
+    package requirements, so you should provide exceptions only
+    for components that are likely to be installed on the system
+    at build time but not actually required at run time.
+"""
 
     depClassType = deps.DEP_CLASS_JAVA
     depClass = deps.JavaDependencies
@@ -466,10 +488,6 @@ class EnforcePerlBuildRequirements(_enforceBuildRequirements):
 
     depClassType = deps.DEP_CLASS_PERL
     depClass = deps.PerlDependencies
-
-    # FIXME: remove this when we are ready to enforce Perl dependencies
-    def setTalk(self):
-        self.talk = self.warn
 
 
 class _enforceLogRequirements(policy.EnforcementPolicy):
@@ -741,3 +759,194 @@ class EnforceFlagBuildRequirements(_warnBuildRequirements):
             self.talk('add to buildRequires: %s',
                        str(sorted(list(set(missingBuildRequires)))))
             self.recipe.reportMissingBuildRequires(missingBuildRequires)
+
+
+class EnforceStaticLibBuildRequirements(_warnBuildRequirements):
+    """
+    NAME
+    ====
+
+    B{C{r.EnforceStaticLibBuildRequirements()}} - Ensures that components
+    which provide static libraries mentioned in compile or link commands
+    are listed as build requirements.
+
+    SYNOPSIS
+    ========
+
+    C{r.EnforceStaticLibBuildRequirements([I{exceptions='I{pkg}:I{comp}'}])}
+
+    DESCRIPTION
+    ===========
+
+    The C{r.EnforceStaticLibBuildRequirements()} policy looks at
+    output from the build process for lines that start with a compiler
+    or linker invocation and include a C{-llibname} command-line
+    argument where no shared library build requirement has been
+    found via C{soname:} requirements.
+
+    EXAMPLES
+    ========
+
+    C{r.EnforceStaticLibBuildRequirements(exceptions='acl:devel')
+
+    This disables a requirement for acl:devel; this would normally
+    be because a line of output included "-lacl" without the package
+    having a file that is linked to the libacl.so shared library,
+    possibly due to unusual output from a configure script.
+    """
+    # processUnmodified doesn't apply at all because this policy
+    # does not walk packages
+    requires = (
+        # We don't want this policy to suggest anything already suggested
+        # by EnforceSonamebuildRequirements
+        ('EnforceSonameBuildRequirements', policy.CONDITIONAL_SUBSEQUENT),
+    )
+    regexp = r'^(\+ )?(%(cc)s|%(cxx)s|ld)( | .* )-l[a-zA-Z]+($| )'
+
+    def postInit(self):
+        self.runnable = True
+        # subscribe to necessary build log entries
+        if hasattr(self.recipe, 'subscribeLogs'):
+            macros = {'cc': re.escape(self.recipe.macros.cc),
+                      'cxx': re.escape(self.recipe.macros.cxx)}
+            regexp = self.regexp % macros
+            self.recipe.subscribeLogs(regexp)
+            self.r = re.compile(regexp)
+            macros = self.recipe.macros
+            cfg = self.recipe.cfg
+            self.libDirs = {'%s%s' %(cfg.root, macros.libdir): macros.libdir,
+                            '%s%s'%(cfg.root, macros.lib): '/%s' %macros.lib}
+            self._initComponentExceptions()
+        else:
+            # disable this policy
+            self.runnable = False
+
+    def test(self):
+        if not self.runnable:
+            return False
+        if self.recipe.getSubscribeLogPath() is None:
+            return False
+
+        try:
+            self.transitiveBuildRequires = self.recipe._getTransitiveBuildRequiresNames()
+        except AttributeError:
+            return False
+        self.setTalk()
+        return True
+
+    def do(self):
+        transitiveBuildRequires = self.transitiveBuildRequires
+        cfg = self.recipe.cfg
+        db = database.Database(cfg.root, cfg.dbPath)
+
+        foundLibs = set()
+        missingBuildRequires = set()
+        destdir = self.recipe.macros.destdir
+
+        components = self.recipe.autopkg.components
+        pathMap = self.recipe.autopkg.pathMap
+        reqDepSet = deps.DependencySet()
+        sharedLibraryRequires = set()
+        for pkg in components.values():
+            reqDepSet.union(pkg.requires)
+        for dep in reqDepSet.iterDepsByClass(deps.SonameDependencies):
+            soname = os.path.basename(dep.name).split('.')[0]
+            sharedLibraryRequires.add(soname)
+            if soname.startswith('lib'):
+                sharedLibraryRequires.add(soname[3:])
+            else:
+                sharedLibraryRequires.add('lib%s' %soname)
+        troveLibraries = set()
+        for path in pathMap.iterkeys():
+            basename = os.path.basename(path)
+            if basename.startswith('lib') and basename.find('.') >= 0:
+                troveLibraries.add(basename[3:].split('.')[0])
+
+        self.recipe.synchronizeLogs()
+        f = file(self.recipe.getSubscribeLogPath())
+
+        libRe = re.compile('^-l[a-zA-Z]+$')
+        libDirRe = re.compile('^-L..*$')
+
+        def logLineTokens():
+            for logLine in f:
+                logLine = logLine.strip()
+                if not self.r.match(logLine):
+                    continue
+                yield(logLine.split())
+
+        def pathSetToTroveSet(pathSet):
+            troveSet = set()
+            for path in pathSet:
+                for pathReq in set(trove.getName()
+                                   for trove in db.iterTrovesByPath(path)):
+                    pathReqCandidates = _providesNames(pathReq)
+                    # remove any recursive or non-existing buildreqs
+                    pathReqCandidates = [x for x in pathReqCandidates 
+                                         if db.hasTroveByName(x)]
+                    if not pathReqCandidates:
+                        continue
+                    # only the best option
+                    pathReqCandidates = pathReqCandidates[0:1]
+                    # now apply exceptions
+                    pathReqCandidates = self._removeExceptionsFromList(
+                        pathReqCandidates)
+                    troveSet.add(pathReqCandidates[0])
+            return troveSet
+
+        for tokens in logLineTokens():
+            libNames = set(x[2:] for x in tokens if libRe.match(x))
+            # Add to this set, for this line only, system library dirs,
+            # nothing in destdir or builddir
+            libDirs = self.libDirs.copy()
+            for libDir in set(x[2:].rstrip('/') for x in tokens
+                              if libDirRe.match(x) and
+                                 x[2] == '/' and
+                                 not x[2:].startswith(destdir)):
+                libDirs.setdefault('%s%s' %(cfg.root, libDir), libDir)
+            for libName in sorted(list(libNames)):
+                if libName not in foundLibs:
+                    foundLibs.add(libName)
+                    if libName in sharedLibraryRequires:
+                        continue
+                    if libName in troveLibraries:
+                        continue
+                    foundLibs = set()
+                    for libDirRoot, libDir in libDirs.iteritems():
+                        if util.exists('%s/lib%s.a' %(libDirRoot, libName)):
+                            foundLibs.add('%s/lib%s.a' %(libDir, libName))
+                    troveSet = pathSetToTroveSet(foundLibs)
+                    if len(troveSet) == 1:
+                        # found just one, we can confidently recommend it
+                        recommended = list(troveSet)[0]
+                        self.info("Add '%s' to buildRequires for -l%s (%s)",
+                                  recommended, libName,
+                                  ', '.join(sorted(list(foundLibs))))
+                        missingBuildRequires.add(recommended)
+                    elif len(troveSet):
+                        # found more, we have to recommend a choice
+                        # Note: perhaps someday this can become an error
+                        # when we have a better sense of how frequently
+                        # it is wrong...
+                        self.warn('Multiple troves match files %s for -l%s:'
+                                  ' choose one of the following entries'
+                                  " for buildRequires: '%s'",
+                                  ' '.join(sorted(list(foundLibs))),
+                                  libName,
+                                  "', '".join(sorted(list(troveSet))))
+                    elif foundLibs:
+                        self.info('No trove found matching any of files'
+                                  ' %s for -l%s:'
+                                  ' possible missing buildRequires',
+                                  ' '.join(sorted(list(foundLibs))),
+                                  libName)
+                    else:
+                        self.info('No files found matching -l%s:'
+                                  ' possible missing buildRequires', libName)
+                            
+        if missingBuildRequires:
+            self.talk('add to buildRequires: %s',
+                       str(sorted(list(missingBuildRequires))))
+            self.recipe.reportMissingBuildRequires(missingBuildRequires)
+
+        f.close()
