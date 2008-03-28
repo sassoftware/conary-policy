@@ -155,6 +155,16 @@ class _enforceBuildRequirements(_warnBuildRequirements):
     def addMissingBuildRequires(self, missingList):
         self.missingBuildRequires.update(missingList)
 
+    def reportMissingBuildRequires(self):
+        self.talk('add to buildRequires: %s',
+                   str(sorted(list(set(self.missingBuildRequires)))))
+        try:
+            self.recipe.reportMissingBuildRequires(self.missingBuildRequires)
+        except AttributeError:
+            # it is OK if we are running with an earlier Conary that
+            # does not have reportMissingBuildRequires
+            pass
+
     def postProcess(self):
         del self.db
 
@@ -267,14 +277,8 @@ class _enforceBuildRequirements(_warnBuildRequirements):
                                sorted(list(set(pathReqMap[path])))]))
 
         if self.missingBuildRequires:
-            self.talk('add to buildRequires: %s',
-                       str(sorted(list(set(self.missingBuildRequires)))))
-            try:
-                self.recipe.reportMissingBuildRequires(self.missingBuildRequires)
-            except AttributeError:
-                # it is OK if we are running with an earlier Conary that
-                # does not have reportMissingBuildRequires
-                pass
+            self.reportMissingBuildRequires()
+
         if missingBuildRequiresChoices:
             for candidateSet in missingBuildRequiresChoices:
                 self.talk('add to buildRequires one of: %s',
@@ -329,6 +333,11 @@ class EnforceSonameBuildRequirements(_enforceBuildRequirements):
 
     depClassType = deps.DEP_CLASS_SONAME
     depClass = deps.SonameDependencies
+
+    def reportMissingBuildRequires(self):
+        _enforceBuildRequirements.reportMissingBuildRequires(self)
+        self.recipe.EnforceStaticLibBuildRequirements(
+            warnedSoNames=self.missingBuildRequires)
 
 
 class EnforcePythonBuildRequirements(_enforceBuildRequirements):
@@ -798,13 +807,14 @@ class EnforceStaticLibBuildRequirements(_warnBuildRequirements):
     # does not walk packages
     requires = (
         # We don't want this policy to suggest anything already suggested
-        # by EnforceSonamebuildRequirements
+        # by EnforceSonameBuildRequirements
         ('EnforceSonameBuildRequirements', policy.CONDITIONAL_SUBSEQUENT),
     )
     regexp = r'^(\+ )?(%(cc)s|%(cxx)s|ld)( | .* )-l[a-zA-Z]+($| )'
 
     def postInit(self):
         self.runnable = True
+        self.warnedSoNames = set()
         # subscribe to necessary build log entries
         if hasattr(self.recipe, 'subscribeLogs'):
             macros = {'cc': re.escape(self.recipe.macros.cc),
@@ -815,11 +825,15 @@ class EnforceStaticLibBuildRequirements(_warnBuildRequirements):
             macros = self.recipe.macros
             cfg = self.recipe.cfg
             self.libDirs = {'%s%s' %(cfg.root, macros.libdir): macros.libdir,
-                            '%s%s'%(cfg.root, macros.lib): '/%s' %macros.lib}
+                            util.normpath('%s/%s'%(cfg.root, macros.lib)): '/%s' %macros.lib}
             self._initComponentExceptions()
         else:
             # disable this policy
             self.runnable = False
+
+    def updateArgs(self, *args, **keywords):
+        self.warnedSoNames = list(keywords.pop('warnedSoNames', set()))
+        _warnBuildRequirements.updateArgs(self, *args, **keywords)
 
     def test(self):
         if not self.runnable:
@@ -835,13 +849,22 @@ class EnforceStaticLibBuildRequirements(_warnBuildRequirements):
         return True
 
     def do(self):
-        transitiveBuildRequires = self.transitiveBuildRequires
+        # For the purposes of this policy, the transitive buildRequires
+        # includes suggestions already made for handling shared libraries,
+        # since this policy is explicitly a fallback for the unusual
+        # case of static linking outside of the package being built.
+        transitiveBuildRequires = self.transitiveBuildRequires.union(self.warnedSoNames)
         cfg = self.recipe.cfg
         db = database.Database(cfg.root, cfg.dbPath)
 
-        foundLibs = set()
+        foundLibNames = set()
         missingBuildRequires = set()
+        self.buildDirLibNames = None
         destdir = self.recipe.macros.destdir
+        builddir = self.recipe.macros.builddir
+        tooManyChoices = {}
+        noTroveFound = {}
+        noLibraryFound = set()
 
         components = self.recipe.autopkg.components
         pathMap = self.recipe.autopkg.pathMap
@@ -866,7 +889,7 @@ class EnforceStaticLibBuildRequirements(_warnBuildRequirements):
         f = file(self.recipe.getSubscribeLogPath())
 
         libRe = re.compile('^-l[a-zA-Z]+$')
-        libDirRe = re.compile('^-L..*$')
+        libDirRe = re.compile('^-L/..*$')
 
         def logLineTokens():
             for logLine in f:
@@ -894,6 +917,19 @@ class EnforceStaticLibBuildRequirements(_warnBuildRequirements):
                     troveSet.add(pathReqCandidates[0])
             return troveSet
 
+        def buildDirContains(libName):
+            # If we can find this library built somewhere in the
+            # builddir, chances are that the internal library is
+            # what is being linked to in any case.
+            if self.buildDirLibNames is None:
+                # walk builddir once, the first time this is called
+                self.buildDirLibNames = set()
+                for dirpath, dirnames, filenames in os.walk(builddir):
+                    for fileName in filenames:
+                        if fileName.startswith('lib') and '.' in fileName:
+                            self.buildDirLibNames.add(fileName[3:].split('.')[0])
+            return libName in self.buildDirLibNames
+
         for tokens in logLineTokens():
             libNames = set(x[2:] for x in tokens if libRe.match(x))
             # Add to this set, for this line only, system library dirs,
@@ -901,49 +937,92 @@ class EnforceStaticLibBuildRequirements(_warnBuildRequirements):
             libDirs = self.libDirs.copy()
             for libDir in set(x[2:].rstrip('/') for x in tokens
                               if libDirRe.match(x) and
-                                 x[2] == '/' and
-                                 not x[2:].startswith(destdir)):
-                libDirs.setdefault('%s%s' %(cfg.root, libDir), libDir)
+                                 not x[2:].startswith(destdir) and
+                                 not x[2:].startswith(builddir)):
+                libDir = util.normpath(libDir)
+                libDirs.setdefault(util.normpath('%s%s' %(cfg.root, libDir)), libDir)
+                libDirs.setdefault(libDir, libDir)
             for libName in sorted(list(libNames)):
-                if libName not in foundLibs:
-                    foundLibs.add(libName)
+                if libName not in foundLibNames:
                     if libName in sharedLibraryRequires:
+                        foundLibNames.add(libName)
                         continue
                     if libName in troveLibraries:
+                        foundLibNames.add(libName)
                         continue
+                    if buildDirContains(libName):
+                        foundLibNames.add(libName)
+                        continue
+
                     foundLibs = set()
                     for libDirRoot, libDir in libDirs.iteritems():
                         if util.exists('%s/lib%s.a' %(libDirRoot, libName)):
                             foundLibs.add('%s/lib%s.a' %(libDir, libName))
                     troveSet = pathSetToTroveSet(foundLibs)
+
                     if len(troveSet) == 1:
                         # found just one, we can confidently recommend it
                         recommended = list(troveSet)[0]
-                        self.info("Add '%s' to buildRequires for -l%s (%s)",
-                                  recommended, libName,
-                                  ', '.join(sorted(list(foundLibs))))
-                        missingBuildRequires.add(recommended)
+                        if recommended not in transitiveBuildRequires:
+                            self.info("Add '%s' to buildRequires for -l%s (%s)",
+                                      recommended, libName,
+                                      ', '.join(sorted(list(foundLibs))))
+                            missingBuildRequires.add(recommended)
+                            foundLibNames.add(libName)
+
                     elif len(troveSet):
-                        # found more, we have to recommend a choice
-                        # Note: perhaps someday this can become an error
-                        # when we have a better sense of how frequently
-                        # it is wrong...
-                        self.warn('Multiple troves match files %s for -l%s:'
-                                  ' choose one of the following entries'
-                                  " for buildRequires: '%s'",
+                        # found more, we might need to recommend a choice
+                        tooManyChoices.setdefault(libName, [
                                   ' '.join(sorted(list(foundLibs))),
-                                  libName,
-                                  "', '".join(sorted(list(troveSet))))
+                                  "', '".join(sorted(list(troveSet)))])
+
                     elif foundLibs:
-                        self.info('No trove found matching any of files'
-                                  ' %s for -l%s:'
-                                  ' possible missing buildRequires',
-                                  ' '.join(sorted(list(foundLibs))),
-                                  libName)
+                        # found files on system, but no troves providing them
+                        noTroveFound.setdefault(libName,
+                                  ' '.join(sorted(list(foundLibs))))
+                        
                     else:
-                        self.info('No files found matching -l%s:'
-                                  ' possible missing buildRequires', libName)
+                        # note that this does not prevent us from
+                        # *looking* again, because the next time
+                        # there might be a useful -L in the link line
+                        noLibraryFound.add(libName)
                             
+        if tooManyChoices:
+            for libName in sorted(list(tooManyChoices.keys())):
+                if libName not in foundLibNames:
+                    # Found multiple choices for libName, and never came
+                    # up with a better recommendation, so recommend a choice.
+                    # Note: perhaps someday this can become an error
+                    # when we have a better sense of how frequently
+                    # it is wrong...
+                    foundLibNames.add(libName)
+                    foundLibs, troveSet = tooManyChoices[libName]
+                    self.warn('Multiple troves match files %s for -l%s:'
+                              ' choose one of the following entries'
+                              " for buildRequires: '%s'",
+                              foundLibs, libName, troveSet)
+
+        if noTroveFound:
+            for libName in sorted(list(noTroveFound.keys())):
+                if libName not in foundLibNames:
+                    # Never found any trove containing these libraries,
+                    # not even a file in the builddir
+                    foundLibNames.add(libName)
+                    foundLibs = noTroveFound[libName]
+                    self.info('No trove found matching any of files'
+                              ' %s for -l%s:'
+                              ' possible missing buildRequires',
+                              foundLibs, libName)
+
+        if noLibraryFound:
+            for libName in sorted(list(noLibraryFound)):
+                if libName not in foundLibNames:
+                    # Note: perhaps someday this can become an error
+                    # when we have a better sense of how frequently
+                    # it is wrong...
+                    self.info('No files found matching -l%s:'
+                              ' possible missing buildRequires', libName)
+
         if missingBuildRequires:
             self.talk('add to buildRequires: %s',
                        str(sorted(list(missingBuildRequires))))
