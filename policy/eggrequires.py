@@ -27,7 +27,7 @@ else:
     # Older Conary. Make the class inherit from object
     _basePluggableRequires = object
 
-class EggRequires(packagepolicy._basePluggableRequires):
+class EggRequires(_basePluggableRequires):
     """
     NAME
     ====
