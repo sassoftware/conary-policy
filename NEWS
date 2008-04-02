@@ -1,4 +1,4 @@
-Changes in @NEW@:
+Changes in 1.0.15:
   o The AutoSharedLibrary policy finds /etc/ld.so.conf.d/*.conf files
     and tells the SharedLibrary policy that the directories mentioned in
     those files contain shared libraries. (CNP-108)
