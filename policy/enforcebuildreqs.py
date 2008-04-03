@@ -70,6 +70,26 @@ def _reduceCandidates(db, foundCandidates):
 
     return [a, b]
 
+def reportFoundBuildRequires(recipe, reqList):
+    # Report FOUND build requirements to the 
+    # reportExcessBuildRequires policy so that it
+    # can determine which of the requirements were
+    # not found
+    try:
+        recipe.reportExcessBuildRequires(reqList)
+    except AttributeError:
+        # it is OK if we are running with an earlier Conary that
+        # does not have reportExcessBuildRequires
+        pass
+
+def reportMissingBuildRequires(recipe, reqList):
+    try:
+        recipe.reportMissingBuildRequires(reqList)
+    except AttributeError:
+        # it is OK if we are running with an earlier Conary that
+        # does not have reportMissingBuildRequires
+        pass
+
 
 class _warnBuildRequirements(policy.EnforcementPolicy):
     def setTalk(self):
@@ -107,7 +127,6 @@ class _warnBuildRequirements(policy.EnforcementPolicy):
                 if compRe.match(item)]:
                 candidateList.append(item)
         return candidateList
-
 
 
 class _enforceBuildRequirements(_warnBuildRequirements):
@@ -158,12 +177,7 @@ class _enforceBuildRequirements(_warnBuildRequirements):
     def reportMissingBuildRequires(self):
         self.talk('add to buildRequires: %s',
                    str(sorted(list(set(self.missingBuildRequires)))))
-        try:
-            self.recipe.reportMissingBuildRequires(self.missingBuildRequires)
-        except AttributeError:
-            # it is OK if we are running with an earlier Conary that
-            # does not have reportMissingBuildRequires
-            pass
+        reportMissingBuildRequires(self.recipe, self.missingBuildRequires)
 
     def postProcess(self):
         del self.db
@@ -207,6 +221,8 @@ class _enforceBuildRequirements(_warnBuildRequirements):
                         foundCandidates.add(candidate)
                         provideNameMap[candidate] = provideNameMap[name]
                         break
+            # report before exceptions
+            reportFoundBuildRequires(self.recipe, foundCandidates)
             foundCandidates = self._removeExceptions(foundCandidates)
 
             missingCandidates = foundCandidates - self.transitiveBuildRequires
@@ -587,6 +603,8 @@ class _enforceLogRequirements(policy.EnforcementPolicy):
                 pathReqCandidates = [x for x in pathReqCandidates 
                                      if db.hasTroveByName(x) and
                                         x not in self.compExceptions]
+                # do not warn about any of these candidates being excessive
+                reportFoundBuildRequires(self.recipe, pathReqCandidates)
                 # display only the best choice
                 thisFileReq = set(pathReqCandidates[0:1])
                 missingReqs = thisFileReq - transitiveBuildRequires
@@ -601,12 +619,7 @@ class _enforceLogRequirements(policy.EnforcementPolicy):
         if missingReqs:
             self.warn('Probably add to buildRequires: %s',
                       str(sorted(list(missingReqs))))
-            try:
-                self.recipe.reportMissingBuildRequires(missingReqs)
-            except AttributeError:
-                # it is OK if we are running with an earlier Conary that
-                # does not have reportMissingBuildRequires
-                pass
+            reportMissingBuildRequires(self.recipe, missingReqs)
 
 
 class EnforceConfigLogBuildRequirements(_enforceLogRequirements):
@@ -747,6 +760,7 @@ class EnforceFlagBuildRequirements(_warnBuildRequirements):
 
     def do(self):
         missingBuildRequires = set()
+        foundBuildRequires = set()
         for flag in use.iterUsed():
             if (hasattr(self.recipe, '_isDerived')
                 and self.recipe._isDerived == True):
@@ -759,7 +773,9 @@ class EnforceFlagBuildRequirements(_warnBuildRequirements):
             path = flag._path
             for trove in self.db.iterTrovesByPath(path):
                 flagTroveName = trove.getName()
-                if flagTroveName not in self.transitiveBuildRequires:
+                if flagTroveName in self.transitiveBuildRequires:
+                    foundBuildRequires.add(flagTroveName)
+                else:
                     self.talk('flag %s missing build requirement %s',
                               flag._name, flagTroveName)
                     missingBuildRequires.add(flagTroveName)
@@ -767,7 +783,10 @@ class EnforceFlagBuildRequirements(_warnBuildRequirements):
         if missingBuildRequires:
             self.talk('add to buildRequires: %s',
                        str(sorted(list(set(missingBuildRequires)))))
-            self.recipe.reportMissingBuildRequires(missingBuildRequires)
+            reportMissingBuildRequires(self.recipe, missingBuildRequires)
+
+        if foundBuildRequires:
+            reportFoundBuildRequires(self.recipe, foundBuildRequires)
 
 
 class EnforceStaticLibBuildRequirements(_warnBuildRequirements):
@@ -811,6 +830,7 @@ class EnforceStaticLibBuildRequirements(_warnBuildRequirements):
         ('EnforceSonameBuildRequirements', policy.CONDITIONAL_SUBSEQUENT),
     )
     regexp = r'^(\+ )?(%(cc)s|%(cxx)s|ld)( | .* )-l[a-zA-Z]+($| )'
+    filetree = policy.NO_FILES
 
     def postInit(self):
         self.runnable = True
@@ -858,6 +878,7 @@ class EnforceStaticLibBuildRequirements(_warnBuildRequirements):
         db = database.Database(cfg.root, cfg.dbPath)
 
         foundLibNames = set()
+        allPossibleProviders = set()
         missingBuildRequires = set()
         self.buildDirLibNames = None
         destdir = self.recipe.macros.destdir
@@ -909,6 +930,7 @@ class EnforceStaticLibBuildRequirements(_warnBuildRequirements):
                                          if db.hasTroveByName(x)]
                     if not pathReqCandidates:
                         continue
+                    allPossibleProviders.update(pathReqCandidates)
                     # only the best option
                     pathReqCandidates = pathReqCandidates[0:1]
                     # now apply exceptions
@@ -1026,6 +1048,63 @@ class EnforceStaticLibBuildRequirements(_warnBuildRequirements):
         if missingBuildRequires:
             self.talk('add to buildRequires: %s',
                        str(sorted(list(missingBuildRequires))))
-            self.recipe.reportMissingBuildRequires(missingBuildRequires)
+            reportMissingBuildRequires(self.recipe, missingBuildRequires)
+
+        if allPossibleProviders:
+            reportFoundBuildRequires(self.recipe, allPossibleProviders)
 
         f.close()
+
+
+class EnforceLocalizationBuildRequirements(_warnBuildRequirements):
+    """
+    NAME
+    ====
+
+    B{C{r.EnforceLocalizationBuildRequirements()}} - Ensures that
+    internationalization tools are required by packages that have
+    C{POTFILES.in} files in their source archives.
+
+    SYNOPSIS
+    ========
+
+    C{r.EnforceLocalizationBuildRequirements([I{exceptions='path/to/POTFILES.in'}])}
+
+    DESCRIPTION
+    ===========
+
+    The C{r.EnforceLocalizationBuildRequirements()} policy ensures
+    that internationalization tools are included in the build
+    requirements if a C{POTFILES.in} file is found.
+
+    EXAMPLES
+    ========
+
+    C{r.EnforceLocalizationBuildRequirements(exceptions='.*')
+    
+    Since this policy is essentially binary -- you either find one
+    or more C{POTFILES.in} or you don't find any -- the only
+    reasonable exception is if there are some C{POTFILES.in}
+    files that you know are not used or that you do not wish
+    to use, you can disable this policy.
+    """
+    # processUnmodified doesn't apply at all because this policy
+    # does not walk packages
+    filetree = policy.BUILDDIR
+    invariantinclusions = [ (r'.*/POTFILES\.in', 0400, stat.S_IFDIR), ]
+    intltools = set(('gettext:runtime', 'intltool:runtime'))
+    runOnce = False
+
+    def doFile(self, path):
+        if self.runOnce:
+            return
+        self.runOnce = True
+
+        reportFoundBuildRequires(self.recipe, self.intltools)
+        transitiveBuildRequires = self.recipe._getTransitiveBuildRequiresNames()
+        foundReqs = self.intltools.intersection(transitiveBuildRequires)
+        if foundReqs != self.intltools:
+            missingReqs = self.intltools - foundReqs
+            self.warn('missing buildRequires %s for file %s',
+                      str(sorted(list(missingReqs))), path[1:])
+            reportMissingBuildRequires(self.recipe, missingReqs)

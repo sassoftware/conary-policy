@@ -20,6 +20,29 @@ import stat
 from conary.lib import util
 from conary.build import macros, policy
 from conary.build.use import Use
+from conary.local import database
+
+
+def _findProgPath(prog, db, recipe):
+    # ignore arguments
+    prog = prog.split(' ')[0]
+    if prog.startswith('/'):
+        progPath = prog
+    else:
+        macros = recipe.macros
+        progPath = util.findFile(prog, (macros.essentialbindir,
+                                        macros.bindir,
+                                        macros.essentialsbindir,
+                                        macros.sbindir))
+    progTroveName =  [ x.getName() for x in db.iterTrovesByPath(progPath) ]
+    if progTroveName:
+        progTroveName = progTroveName[0]
+        if progTroveName in recipe._getTransitiveBuildRequiresNames():
+            recipe.reportExcessBuildRequires(progTroveName)
+        else:
+            recipe.reportMisingBuildRequires(progTroveName)
+
+    return progPath
 
 
 class Strip(policy.DestdirPolicy):
@@ -76,6 +99,7 @@ class Strip(policy.DestdirPolicy):
     def __init__(self, *args, **keywords):
         policy.DestdirPolicy.__init__(self, *args, **keywords)
         self.tryDebuginfo = True
+        self.db = None
 
     def updateArgs(self, *args, **keywords):
         self.debuginfo = False
@@ -112,6 +136,11 @@ class Strip(policy.DestdirPolicy):
             self.debugfiles = set()
             self.dm.topbuilddir = topbuilddir
 
+    def _openDb(self):
+        if not self.db:
+            self.db = database.Database(self.recipe.cfg.root,
+                                   self.recipe.cfg.dbPath)
+
     def doFile(self, path):
         m = self.recipe.magic[path]
         if not m:
@@ -142,6 +171,9 @@ class Strip(policy.DestdirPolicy):
                 if os.path.exists(debuglibpath):
                     return
 
+                self._openDb()
+                _findProgPath(self.macros.debugedit, self.db, self.recipe)
+
                 # null-separated AND terminated list, so we need to throw
                 # away the last (empty) item before updating self.debugfiles
                 self.debugfiles |= set(util.popen(
@@ -153,12 +185,15 @@ class Strip(policy.DestdirPolicy):
                     self.dm.strip, debuglibpath, fullpath))
 
             else:
+                self._openDb()
                 if m.name == 'ar' or path.endswith('.o'):
                     # just in case strip is eu-strip, which segfaults
                     # whenever it touches an ar archive, and seems to
                     # break some .o files
+                    _findProgPath(self.macros.strip_archive, self.db, self.recipe)
                     util.execute('%(strip_archive)s ' %self.dm +fullpath)
                 else:
+                    _findProgPath(self.macros.strip, self.db, self.recipe)
                     util.execute('%(strip)s ' %self.dm +fullpath)
 
             del self.recipe.magic[path]

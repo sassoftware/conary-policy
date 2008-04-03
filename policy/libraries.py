@@ -504,7 +504,22 @@ class NormalizeLibrarySymlinks(policy.DestdirPolicy):
                            ' %s is not a directory', path)
                 continue
             oldfiles = set(os.listdir(fullpath))
-            util.execute('%(essentialsbindir)s/ldconfig -n '%macros + fullpath)
+            ldConfigPath = '%(essentialsbindir)s/ldconfig'%macros
+            util.execute('%s -n '%ldConfigPath + fullpath)
+
+            db = database.Database(self.recipe.cfg.root, self.recipe.cfg.dbPath)
+            ldConfigTroveName = [ x.getName() for x in
+                                  db.iterTrovesByPath(ldConfigPath) ]
+            if ldConfigTroveName:
+                ldConfigTroveName = ldConfigTroveName[0]
+            else:
+                ldConfigTroveName = 'glibc:runtime'
+
+            if ldConfigTroveName in self.recipe._getTransitiveBuildRequiresNames():
+                self.recipe.reportExcessBuildRequires(ldConfigTroveName)
+            else:
+                self.recipe.reportMissingBuildRequires(ldConfigTroveName)
+
             newfiles = set(os.listdir(fullpath))
             addedfiles = newfiles - oldfiles
             removedfiles = oldfiles - newfiles

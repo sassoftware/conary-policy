@@ -24,6 +24,23 @@ from conary.build import policy
 from conary.local import database
 
 
+def _findProgPath(prog, db, recipe):
+    macros = recipe.macros
+    progPath = util.findFile(prog, (macros.essentialbindir,
+                                    macros.bindir,
+                                    macros.essentialsbindir,
+                                    macros.sbindir))
+    progTroveName =  [ x.getName() for x in db.iterTrovesByPath(progPath) ]
+    if progTroveName:
+        progTroveName = progTroveName[0]
+        if progTroveName in recipe._getTransitiveBuildRequiresNames():
+            recipe.reportExcessBuildRequires(progTroveName)
+        else:
+            recipe.reportMisingBuildRequires(progTroveName)
+
+    return progPath
+
+
 class NormalizeCompression(policy.DestdirPolicy):
     """
     NAME
@@ -64,6 +81,10 @@ class NormalizeCompression(policy.DestdirPolicy):
     invariantinclusions = [
         ('.*\.(gz|bz2)', None, stat.S_IFDIR),
     ]
+    db = None
+    gzip = None
+    bzip = None
+
     def doFile(self, path):
         m = self.recipe.magic[path]
         if not m:
@@ -81,18 +102,28 @@ class NormalizeCompression(policy.DestdirPolicy):
             os.chmod(tmppath, os.lstat(fullpath).st_mode)
             os.rename(tmppath, fullpath)
 
+        def _findProg(prog):
+            if not self.db:
+                self.db = database.Database(self.recipe.cfg.root,
+                                       self.recipe.cfg.dbPath)
+            return _findProgPath(prog, self.db, self.recipe)
+
         fullpath = self.macros.destdir+path
         if m.name == 'gzip' and \
            (m.contents['compression'] != '9' or 'name' in m.contents):
             tmppath = _mktmp(fullpath)
-            util.execute('/bin/gzip -dc %s | /bin/gzip -f -n -9 > %s'
-                         %(fullpath, tmppath))
+            if not self.gzip:
+                self.gzip = _findProg('gzip')
+            util.execute('%s -dc %s | %s -f -n -9 > %s'
+                         %(self.gzip, fullpath, self.gzip, tmppath))
             _move(tmppath, fullpath)
             del self.recipe.magic[path]
         if m.name == 'bzip' and m.contents['compression'] != '9':
             tmppath = _mktmp(fullpath)
-            util.execute('/usr/bin/bzip2 -dc %s | /usr/bin/bzip2 -9 > %s'
-                         %(fullpath, tmppath))
+            if not self.bzip:
+                self.bzip = _findProg('bzip2')
+            util.execute('%s -dc %s | %s -9 > %s'
+                         %(self.bzip, fullpath, self.bzip, tmppath))
             _move(tmppath, fullpath)
             del self.recipe.magic[path]
 
@@ -131,12 +162,21 @@ class NormalizeManPages(policy.DestdirPolicy):
     requires = (
         ('ReadableDocs', policy.CONDITIONAL_SUBSEQUENT),
     )
+
+    def _findProg(self, prog):
+        if not self.db:
+            self.db = database.Database(self.recipe.cfg.root,
+                                        self.recipe.cfg.dbPath)
+        return _findProgPath(prog, self.db, self.recipe)
+
     # Note: not safe for derived packages; needs to check in each
     # internal function for unmodified files
     def _uncompress(self, dirname, names):
         for name in names:
             path = dirname + os.sep + name
             if name.endswith('.gz') and util.isregular(path):
+                if not self.gunzip:
+                    self.gunzip = self._findProg('gunzip')
                 util.execute('gunzip ' + dirname + os.sep + name)
                 try:
                     self.recipe.recordMove(util.joinPaths(dirname, name),
@@ -144,6 +184,8 @@ class NormalizeManPages(policy.DestdirPolicy):
                 except AttributeError:
                     pass
             if name.endswith('.bz2') and util.isregular(path):
+                if not self.bunzip:
+                    self.bunzip = self._findProg('bunzip2')
                 util.execute('bunzip2 ' + dirname + os.sep + name)
                 try:
                     self.recipe.recordMove(util.joinPaths(dirname, name),
@@ -249,6 +291,8 @@ class NormalizeManPages(policy.DestdirPolicy):
         for name in names:
             path = dirname + os.sep + name
             if util.isregular(path):
+                if not self.gzip:
+                    self.gzip = self._findProg('gzip')
                 util.execute('gzip -f -n -9 ' + dirname + os.sep + name)
                 try:
                     self.recipe.recordMove(dirname + os.sep + name,
@@ -273,6 +317,10 @@ class NormalizeManPages(policy.DestdirPolicy):
         policy.DestdirPolicy.__init__(self, *args, **keywords)
         self.soexp = re.compile(r'^\.so (.*\...*)$')
         self.commentexp = re.compile(r'^\.\\"')
+        self.db = None
+        self.gzip = None
+        self.gunzip = None
+        self.bunzip = None
 
     def do(self):
         for manpath in sorted(list(set((
@@ -338,6 +386,19 @@ class NormalizeInfoPages(policy.DestdirPolicy):
             for file in infofiles:
                 self._processInfoFile(file)
 
+    def __init__(self, *args, **keywords):
+        policy.DestdirPolicy.__init__(self, *args, **keywords)
+        self.db = None
+        self.gzip = None
+        self.gunzip = None
+        self.bunzip = None
+
+    def _findProg(self, prog):
+        if not self.db:
+            self.db = database.Database(self.recipe.cfg.root,
+                                        self.recipe.cfg.dbPath)
+        return _findProgPath(prog, self.db, self.recipe)
+
     def _moveToInfoRoot(self, file):
         infofilespath = '%(destdir)s/%(infodir)s' %self.macros
         fullfile = '/'.join((infofilespath, file))
@@ -361,6 +422,8 @@ class NormalizeInfoPages(policy.DestdirPolicy):
             m = self.recipe.magic[path]
             if not m:
                 # not compressed
+                if not self.gzip:
+                    self.gzip = self._findProg('gzip')
                 util.execute('gzip -f -n -9 %s' %syspath)
                 try:
                     self.recipe.recordMove(syspath, syspath + '.gz')
@@ -370,12 +433,20 @@ class NormalizeInfoPages(policy.DestdirPolicy):
             elif m.name == 'gzip' and \
                 (m.contents['compression'] != '9' or \
                 'name' in m.contents):
+                if not self.gzip:
+                    self.gzip = self._findProg('gzip')
+                if not self.gunzip:
+                    self.gunzip = self._findProg('gunzip')
                 util.execute('gunzip %s; gzip -f -n -9 %s'
                             %(syspath, syspath[:-3]))
                 # filename didn't change, so don't record it in the manifest
                 del self.recipe.magic[path]
             elif m.name == 'bzip':
                 # should use gzip instead
+                if not self.gzip:
+                    self.gzip = self._findProg('gzip')
+                if not self.bunzip:
+                    self.bunzip = self._findProg('bunzip2')
                 util.execute('bunzip2 %s; gzip -f -n -9 %s'
                             %(syspath, syspath[:-4]))
                 try:

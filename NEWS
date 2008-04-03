@@ -1,3 +1,12 @@
+Changes in @NEW@:
+  o Policies now work with more recent versions of Conary (2.0.12
+    and later) so that Conary can warn about possibly excessive
+    buildRequires elements. (CNY-2232)
+  o The new EnforceLocalizationBuildRequirements policy warns that
+    gettext:devel and intltool:runtime are required if POTFILES.in
+    exists. (CNP-115)
+
+
 Changes in 1.0.15:
   o The AutoSharedLibrary policy finds /etc/ld.so.conf.d/*.conf files
     and tells the SharedLibrary policy that the directories mentioned in
