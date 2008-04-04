@@ -515,10 +515,16 @@ class NormalizeLibrarySymlinks(policy.DestdirPolicy):
             else:
                 ldConfigTroveName = 'glibc:runtime'
 
-            if ldConfigTroveName in self.recipe._getTransitiveBuildRequiresNames():
-                self.recipe.reportExcessBuildRequires(ldConfigTroveName)
-            else:
-                self.recipe.reportMissingBuildRequires(ldConfigTroveName)
+            try:
+                if ldConfigTroveName in self.recipe._getTransitiveBuildRequiresNames():
+                    self.recipe.reportExcessBuildRequires(ldConfigTroveName)
+                else:
+                    self.recipe.reportMissingBuildRequires(ldConfigTroveName)
+            except AttributeError:
+                # it is OK if we are running with an earlier Conary that does
+                # not have reportExcessBuildRequires or even the older
+                # reportMissingBuildRequires or _getTransitiveBuildRequiresNames
+                pass
 
             newfiles = set(os.listdir(fullpath))
             addedfiles = newfiles - oldfiles
