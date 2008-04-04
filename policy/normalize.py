@@ -33,10 +33,14 @@ def _findProgPath(prog, db, recipe):
     progTroveName =  [ x.getName() for x in db.iterTrovesByPath(progPath) ]
     if progTroveName:
         progTroveName = progTroveName[0]
-        if progTroveName in recipe._getTransitiveBuildRequiresNames():
-            recipe.reportExcessBuildRequires(progTroveName)
-        else:
-            recipe.reportMisingBuildRequires(progTroveName)
+        try:
+            if progTroveName in recipe._getTransitiveBuildRequiresNames():
+                recipe.reportExcessBuildRequires(progTroveName)
+            else:
+                recipe.reportMisingBuildRequires(progTroveName)
+        except AttributeError:
+            # older conary
+            pass
 
     return progPath
 

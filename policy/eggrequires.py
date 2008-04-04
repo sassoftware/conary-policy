@@ -78,7 +78,11 @@ class EggRequires(_basePluggableRequires):
             logFn("add 'python-setuptools:python' to buildRequires to inspect %s", fullpath)
             return False
         # do not recommend removing 'python-setuptools:python' from buildReqs
-        self.recipe.reportExcessBuildRequires('python-setuptools:python')
+        try:
+            self.recipe.reportExcessBuildRequires('python-setuptools:python')
+        except AttributeError:
+            # older conary
+            pass
         return True
 
     def _parseEggRequires(self, path, fullpath):
