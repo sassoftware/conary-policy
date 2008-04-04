@@ -504,27 +504,34 @@ class NormalizeLibrarySymlinks(policy.DestdirPolicy):
                            ' %s is not a directory', path)
                 continue
             oldfiles = set(os.listdir(fullpath))
-            ldConfigPath = '%(essentialsbindir)s/ldconfig'%macros
+            bootStrapLdConfig = True
+            ldConfigPath = '%(destdir)s%(essentialsbindir)s/ldconfig'%macros
+            if not (os.path.exists(ldConfigPath)):
+                bootStrapLdConfig = False
+                ldConfigPath = '%(essentialsbindir)s/ldconfig'%macros
             util.execute('%s -n '%ldConfigPath + fullpath)
 
-            db = database.Database(self.recipe.cfg.root, self.recipe.cfg.dbPath)
-            ldConfigTroveName = [ x.getName() for x in
-                                  db.iterTrovesByPath(ldConfigPath) ]
-            if ldConfigTroveName:
-                ldConfigTroveName = ldConfigTroveName[0]
-            else:
-                ldConfigTroveName = 'glibc:runtime'
-
-            try:
-                if ldConfigTroveName in self.recipe._getTransitiveBuildRequiresNames():
-                    self.recipe.reportExcessBuildRequires(ldConfigTroveName)
+            if not bootStrapLdConfig:
+                db = database.Database(self.recipe.cfg.root,
+                                       self.recipe.cfg.dbPath)
+                ldConfigTroveName = [ x.getName() for x in
+                                      db.iterTrovesByPath(ldConfigPath) ]
+                if ldConfigTroveName:
+                    ldConfigTroveName = ldConfigTroveName[0]
                 else:
-                    self.recipe.reportMissingBuildRequires(ldConfigTroveName)
-            except AttributeError:
-                # it is OK if we are running with an earlier Conary that does
-                # not have reportExcessBuildRequires or even the older
-                # reportMissingBuildRequires or _getTransitiveBuildRequiresNames
-                pass
+                    ldConfigTroveName = 'glibc:runtime'
+
+                try:
+                    if ldConfigTroveName in self.recipe._getTransitiveBuildRequiresNames():
+                        self.recipe.reportExcessBuildRequires(ldConfigTroveName)
+                    else:
+                        self.recipe.reportMissingBuildRequires(ldConfigTroveName)
+                except AttributeError:
+                    # older Conary that does not have
+                    # reportExcessBuildRequires or even the older
+                    # reportMissingBuildRequires or
+                    # _getTransitiveBuildRequiresNames
+                    pass
 
             newfiles = set(os.listdir(fullpath))
             addedfiles = newfiles - oldfiles
