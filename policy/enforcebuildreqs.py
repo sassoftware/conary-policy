@@ -517,7 +517,7 @@ class EnforcePerlBuildRequirements(_enforceBuildRequirements):
 
 class _enforceLogRequirements(policy.EnforcementPolicy):
     """
-        Virtual base class
+    Abstract base class
     """
 
     filetree = policy.BUILDDIR
@@ -539,7 +539,7 @@ class _enforceLogRequirements(policy.EnforcementPolicy):
         self.greydict = {}
         # turn list into dictionary, interpolate macros, and compile regexps
         for greyTup in self.greylist:
-            self.greydict[greyTup[0] % self.macros] = (
+            self.greydict[greyTup[0] % self.macros] = tuple(
                 (x, re.compile(y % self.macros)) for x, y in greyTup[1])
         # process exceptions differently; user can specify either the
         # source (found path) or destination (found component) to ignore
@@ -576,9 +576,8 @@ class _enforceLogRequirements(policy.EnforcementPolicy):
            if path and path not in self.pathExceptions)
 
         # now remove false positives using the greylist
-        # copy() for copy because modified
         if self.greydict:
-            foundPaths = self.greylistFilter(foundPaths.copy(), fullpath)
+            foundPaths = set(self.greylistFilter(foundPaths, fullpath))
 
         self.foundPaths.update(foundPaths)
 
@@ -673,10 +672,12 @@ class EnforceConfigLogBuildRequirements(_enforceLogRequirements):
     foundRe = re.compile('^[^ ]+: found (/([^ ]+)?bin/[^ ]+)\n$')
 
     def greylistFilter(self, foundPaths, fullpath):
-        # now remove false positives using the greylist
-        # copy() for copy because modified
-        for foundPath in foundPaths.copy():
-            if foundPath in self.greydict:
+        # remove false positives using the greylist
+        for foundPath in foundPaths:
+            if foundPath not in self.greydict:
+                # do not even consider removing from the set
+                yield foundPath
+            else:
                 foundMatch = False
                 for otherFile, testRe in self.greydict[foundPath]:
                     otherFile = fullpath.replace('config.log', otherFile)
@@ -684,11 +685,10 @@ class EnforceConfigLogBuildRequirements(_enforceLogRequirements):
                         otherFile = file(otherFile)
                         if [line for line in otherFile if testRe.match(line)]:
                             foundMatch = True
-                if not foundMatch:
-                    # greylist entry has no match, so this is a false
-                    # positive and needs to be removed from the set
-                    foundPaths.remove(foundPath)
-        return foundPaths
+                if foundMatch:
+                    # greylist has found a confirming entry in another
+                    # file that indicates that this entry is real
+                    yield foundPath
 
 
 class EnforceCMakeCacheBuildRequirements(_enforceLogRequirements):
