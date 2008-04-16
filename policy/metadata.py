@@ -122,7 +122,8 @@ class Description(_BaseMetadata):
         itemTups = ((x, getattr(self, x)) for x in
                                     ['shortDesc', 'longDesc', 'language'])
         if self.applymacros:
-            itemDict = dict((x, y % self.recipe.macros) for (x, y) in itemTups)
+            itemDict = dict((x, y % self.recipe.macros) for (x, y) in itemTups
+                            if y is not None)
         else:
             itemDict = dict(itemTups)
         self.recipe._addMetadataItem(troveNames, itemDict)
@@ -179,6 +180,10 @@ class Licenses(_BaseMetadata):
     will set the licenses for the I{prk-client:runtime} and
     I{prk-server:runtime} troves.
     """
+
+    def __init__(self, recipe, *args, **keywords):
+        _BaseMetadata.__init__(self, recipe, *args, **keywords)
+        self.licenses = []
 
     def updateArgs(self, *args, **keywords):
         self.licenses = args
