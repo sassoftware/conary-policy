@@ -1,3 +1,9 @@
+Changes in @NEW@:
+  o Description and Licenses policies can now be used to set
+    metadata information for troves. (CNY-2715)
+  o The RequireChkconfig policy now accepts empty lines in the
+    chkconfig header. (CNP-81)
+
 Changes in 1.0.16:
   o Policies now work with more recent versions of Conary (2.0.12
     and later) so that Conary can warn about possibly excessive
