@@ -118,6 +118,9 @@ class Description(_BaseMetadata):
     })
 
     def do(self):
+        if not hasattr(self.recipe, '_addMetadataItem'):
+            # Old Conary
+            return
         troveNames = self._getTroveNames()
         itemTups = ((x, getattr(self, x)) for x in
                                     ['shortDesc', 'longDesc', 'language'])
@@ -190,6 +193,9 @@ class Licenses(_BaseMetadata):
         _BaseMetadata.updateArgs(self, **keywords)
 
     def do(self):
+        if not hasattr(self.recipe, '_addMetadataItem'):
+            # Old Conary
+            return
         troveNames = self._getTroveNames()
         if self.applymacros:
             licenses = [x % self.recipe.macros for x in self.licenses]
