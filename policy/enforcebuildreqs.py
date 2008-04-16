@@ -527,6 +527,10 @@ class _enforceLogRequirements(policy.EnforcementPolicy):
     # entry to be ignored unless a related strings is found in
     # another named file (empty tuple is unconditional blacklist)
     greylist = []
+    # list of (handler, startRe, stopRe) tuples defining sets
+    # of lines that should be provided to a handler to do
+    # something about.  If stopRe is None, handler takes one line
+    stanzaList = []
 
     # Regexp to search dependencies
     foundRe = ''
@@ -537,10 +541,18 @@ class _enforceLogRequirements(policy.EnforcementPolicy):
 
         self.foundPaths = set()
         self.greydict = {}
-        # turn list into dictionary, interpolate macros, and compile regexps
-        for greyTup in self.greylist:
-            self.greydict[greyTup[0] % self.macros] = tuple(
-                (x, re.compile(y % self.macros)) for x, y in greyTup[1])
+        # interpolate macros, compile regexps
+        macros = self.macros
+        for greyPath, greyTup in self.greylist:
+            self.greydict[greyPath % macros] = tuple(
+                (x, re.compile(y % macros)) for x, y in greyTup)
+        stanzaList = []
+        for handler, startRe, stopRe in self.stanzaList:
+            stanzaList.append((handler,
+                               re.compile(startRe%macros),
+                               re.compile(stopRe%macros)))
+        self.stanzaList = stanzaList
+
         # process exceptions differently; user can specify either the
         # source (found path) or destination (found component) to ignore
         self.pathExceptions = set()
@@ -558,22 +570,83 @@ class _enforceLogRequirements(policy.EnforcementPolicy):
 
         return True
 
+    def greylistFilter(self, foundPaths, fullpath):
+        pass
+
     def foundPath(self, line):
         match = self.foundRe.match(line)
         if match:
             return match.group(1)
         return False
 
-    def greylistFilter(self, foundPaths, fullpath):
-        pass
 
     def doFile(self, path):
+
         fullpath = self.macros.builddir + path
+
+        # A stanza is any portion of a config file that can be
+        # recognized by regular expressions for start and optionally
+        # end lines.  Multiple stanzas can overlap (improper nesting is
+        # allowed), but only one stanza of any type can be collected
+        # at once (any particular stanza type does not nest) to avoid
+        # collecting long, useless lists due to insufficient specification
+        # in the regular expressions.
+        # Also, there are regular expressions (foundRe) just for
+        # quickly finding individual paths in individual lines
+        # lines to be emitted that aren't part of stanzas but
+        # just represent paths that are known to have to exist;
+        # it's just faster to process the file once instead of twice.
+
+        def foundStanzaStart(line):
+            for handler, startRe, stopRe in self.stanzaList:
+                match = startRe.match(line)
+                if match:
+                    yield handler, stopRe, match.groups(), 
+
+        def iterConfigStanzas(lines, fullpath):
+            openStanzas = {}
+            openStanzaLines = {}
+            for line in (x.rstrip('\n') for x in lines):
+
+                # the trivial case of the known-needed path on one line
+                foundPath = self.foundPath(line)
+                if foundPath:
+                    yield foundPath
+
+                # do this before checking for startStanzas so that if
+                # the start and stop regexp are the same, you return
+                # the lines of the file segmented by that regexp
+                for handler in openStanzas.keys(): # not iterkeys()
+                    openStanzaLines[handler].append(line)
+                    stopRe, startGroups = openStanzas[handler]
+                    match = stopRe.match(line)
+                    if match:
+                        openStanzas.pop(handler)
+                        handler(startGroups, match.groups(),
+                                openStanzaLines[handler], fullpath)
+
+                for handler, stopRe, startGroups in foundStanzaStart(line):
+                    if handler in openStanzas:
+                        # report partial stanza
+                        handler(startGroups, None, openStanzaLines[handler],
+                                fullpath)
+                    if stopRe is None:
+                        handler(startGroups, line, fullpath)
+                    else:
+                        openStanzas[handler] = (stopRe, startGroups)
+                        openStanzaLines[handler] = [line]
+
+            # handle any open stanzas after reading the file
+            for handler in openStanzas.iterkeys():
+                stopRe, startGroups = openStanzas[handler]
+                handler(startGroups, None, openStanzaLines[handler], fullpath)
+
+
         # iterator to avoid reading in the whole file at once;
         # nested iterators to avoid matching regexp twice
-        foundPaths = set(path for path in
-           (self.foundPath(line) for line in file(fullpath))
-           if path and path not in self.pathExceptions)
+        foundPaths = set(path for path in iterConfigStanzas(
+                            file(fullpath), fullpath)
+                         if path not in self.pathExceptions)
 
         # now remove false positives using the greylist
         if self.greydict:
@@ -669,7 +742,89 @@ class EnforceConfigLogBuildRequirements(_enforceLogRequirements):
              ('configure.in', r'\s*(AC_PROG_YACC|YACC=)'))),
     ]
 
-    foundRe = re.compile('^[^ ]+: found (/([^ ]+)?bin/[^ ]+)\n$')
+    foundRe = re.compile('^[^ ]+: found (/([^ ]+)?bin/[^ ]+)$')
+    # we do not find sys/wait.h in
+    # "sys/wait.h that is POSIX.1 compatible"
+    # because we do not want to be confused by
+    # "checking whether time.h and sys/time.h may both be included"
+    headerRe = re.compile(r'^[^/].*\.h$')
+    # "checking for foo in -lbar" success implies found -lbar
+    libRe = re.compile(r'.* -l([-a-zA-Z_]*)$')
+
+    def __init__(self, *args, **kw):
+        self.stanzaList = [
+            (self.handleCheck, 'configure:[0-9]+: checking for (.*)',
+                               'configure:[0-9]+: result: (.*)')
+        ]
+        _enforceLogRequirements.__init__(self, *args, **kw)
+
+    def handleCheck(self, startGroups, stopGroups, lines, fullpath):
+        def parseSuccess(token):
+            if token == 'yes':
+                return True
+            if token.split()[0] in set(('no', 'not', 'done', 'failed',
+                                        'none', 'disabled',)):
+                return False
+            return token
+
+        if stopGroups is None:
+            # we lost sync, don't start guessing because we care about
+            # the result of the check
+            return
+        sought = startGroups[0]
+        success = parseSuccess(stopGroups[0])
+        includeDirs = [ '%(includedir)s/' %self.macros]
+        root = self.recipe.cfg.root
+
+        if success:
+            if self.headerRe.match(sought):
+                # look for header files
+                for tokens in (x.split() for x in lines):
+                    for token in tokens:
+                        if token.startswith('-I/') and len(token) > 3:
+                            includeDirs.append(token[2:])
+                for dirName in includeDirs:
+                    seekPath = util.normpath('%s/%s' %(dirName, sought))
+                    if util.exists('%s%s' %(root, seekPath)):
+                        self.foundPaths.add(seekPath)
+                        break
+
+            libName = self.libRe.match(sought)
+            if libName:
+                libName = libName.group(0)
+                # Take advantage of the fact that the actual test will
+                # include running the compiler with the library in the
+                # link line in such a way that the
+                # EnforceStaticLibBuildRequirements policy knows how
+                # to understand it.
+                # EnforceStaticLibBuildRequirements does not handle the
+                # leading "configure:01234: " portion of the output,
+                # so give it every line that has further content and
+                # let it find the lines that it cares about
+                logLines = (x.split(': ', 1) for x in lines)
+                logLines = (x[1] for x in logLines if len(x) > 1)
+                self.recipe.EnforceStaticLibBuildRequirements(logLines=logLines)
+
+            candidate = None
+            if sought.startswith('/'):
+                candidate = sought
+            elif type(success) is str and success.startswith('/'):
+                candidate = success
+            if candidate:
+                # configure:2345: checking for /bin/sought
+                # configure:6543: result: yes
+                # configure:4441: checking for egrep
+                # configure:4519: result: /bin/grep -E
+                # configure:4535: checking for ld used by gcc
+                # configure:4602: result: /usr/bin/ld
+                seekPath = candidate.split()[0]
+                if util.exists(util.normpath('%s%s' %(root, seekPath))):
+                    self.foundPaths.update(set(
+                        self.greylistFilter(set((seekPath,)), fullpath)))
+
+            # Anything we do not specifically recognize is ignored
+        # all failed cases are ignored
+
 
     def greylistFilter(self, foundPaths, fullpath):
         # remove false positives using the greylist
@@ -725,7 +880,7 @@ class EnforceCMakeCacheBuildRequirements(_enforceLogRequirements):
     filetree = policy.BUILDDIR
     invariantinclusions = [ (r'.*/CMakeCache\.txt', 0400, stat.S_IFDIR), ]
 
-    foundRe = re.compile('^[^ ]+:FILEPATH=(/[^ ]+)\n$')
+    foundRe = re.compile('^[^ ]+:FILEPATH=(/[^ ]+)$')
 
 
 class EnforceFlagBuildRequirements(_warnBuildRequirements):
@@ -835,6 +990,7 @@ class EnforceStaticLibBuildRequirements(_warnBuildRequirements):
     def postInit(self):
         self.runnable = True
         self.warnedSoNames = set()
+        self.logLines = []
         # subscribe to necessary build log entries
         if hasattr(self.recipe, 'subscribeLogs'):
             macros = {'cc': re.escape(self.recipe.macros.cc),
@@ -853,6 +1009,11 @@ class EnforceStaticLibBuildRequirements(_warnBuildRequirements):
 
     def updateArgs(self, *args, **keywords):
         self.warnedSoNames = list(keywords.pop('warnedSoNames', set()))
+        logLines = keywords.pop('logLines', [])
+        if logLines:
+            for line in logLines:
+                if self.r.match(line):
+                    self.logLines.append(line)
         _warnBuildRequirements.updateArgs(self, *args, **keywords)
 
     def test(self):
@@ -917,7 +1078,9 @@ class EnforceStaticLibBuildRequirements(_warnBuildRequirements):
                 logLine = logLine.strip()
                 if not self.r.match(logLine):
                     continue
-                yield(logLine.split())
+                yield logLine.split()
+            for logLine in self.logLines:
+                yield logLine.split()
 
         def pathSetToTroveSet(pathSet):
             troveSet = set()

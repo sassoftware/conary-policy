@@ -1,10 +1,13 @@
-Changes in @NEW@:
+Changes in 1.0.16:
   o Policies now work with more recent versions of Conary (2.0.12
     and later) so that Conary can warn about possibly excessive
     buildRequires elements. (CNY-2232)
   o The new EnforceLocalizationBuildRequirements policy warns that
     gettext:devel and intltool:runtime are required if POTFILES.in
     exists. (CNP-115)
+  o The EnforceConfigLogBuildRequirements has been expanded to look
+    for header files and static libraries mentioned in config.log
+    files, as well as more binaries. (CNP-35)
 
 
 Changes in 1.0.15:
