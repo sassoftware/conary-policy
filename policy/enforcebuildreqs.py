@@ -760,6 +760,9 @@ class EnforceConfigLogBuildRequirements(_enforceLogRequirements):
 
     def handleCheck(self, startGroups, stopGroups, lines, fullpath):
         def parseSuccess(token):
+            if not token:
+                # empty string, such as looking for executable suffix
+                return False
             if token == 'yes':
                 return True
             if token.split()[0] in set(('no', 'not', 'done', 'failed',

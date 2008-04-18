@@ -7,7 +7,7 @@ Changes in 1.0.16:
     exists. (CNP-115)
   o The EnforceConfigLogBuildRequirements has been expanded to look
     for header files and static libraries mentioned in config.log
-    files, as well as more binaries. (CNP-35)
+    files, as well as more binaries. (CNP-35, CNP-123)
 
 
 Changes in 1.0.15:
