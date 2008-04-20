@@ -509,7 +509,7 @@ class NormalizeLibrarySymlinks(policy.DestdirPolicy):
             if not (os.path.exists(ldConfigPath)):
                 bootStrapLdConfig = False
                 ldConfigPath = '%(essentialsbindir)s/ldconfig'%macros
-            util.execute('%s -n '%(ldConfigPath + fullpath))
+            util.execute('%s -n %s' %(ldConfigPath, fullpath))
 
             if not bootStrapLdConfig:
                 db = database.Database(self.recipe.cfg.root,
