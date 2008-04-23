@@ -24,7 +24,8 @@ from conary.lib import fixedglob
 if hasattr(packagepolicy, '_basePluggableRequires'):
     _basePluggableRequires = packagepolicy._basePluggableRequires
 else:
-    # Older Conary. Make the class inherit from object
+    # Older Conary. Make the class inherit from object; this policy
+    # will then be ignored.
     _basePluggableRequires = object
 
 class EggRequires(_basePluggableRequires):
@@ -46,11 +47,12 @@ class EggRequires(_basePluggableRequires):
     The C{r.EggRequires()} policy parses pkg-config files and extracts
     dependency information.
 
-    This policy is a sub-policy of C{r.Requires}. It inherits the list
-    of exceptions from C{r.Requires}. Under normal circumstances, it is not
-    needed to invoke it explicitly. However, it may be necessary to exclude
-    some of the files from being scanned, in which case using
-    I{exceptions=filterexp} is possible.
+    This policy is a sub-policy of C{r.Requires}. It inherits
+    the list of exceptions from C{r.Requires}. Under normal
+    circumstances, it is not necessary to invoke this policy
+    explicitly; call C{r.Requires} instead. However, it may be useful
+    to exclude some of the files from being scanned only by this
+    policy, in which case using I{exceptions=filterexp} is possible.
 
     EXAMPLES
     ========

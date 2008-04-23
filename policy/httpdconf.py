@@ -18,7 +18,6 @@ import re
 
 from conary.build import policy, packagepolicy
 from conary.deps import deps
-from conary.lib import util
 
 if hasattr(packagepolicy, '_basePluggableRequires'):
     _basePluggableRequires = packagepolicy._basePluggableRequires
@@ -27,26 +26,27 @@ else:
     # will then be ignored.
     _basePluggableRequires = object
 
-class XinetdConfigRequires(_basePluggableRequires):
+class HttpdConfigRequires(_basePluggableRequires):
     """
     NAME
     ====
 
-    B{C{r.XinetdConfigRequires()}} - Automatically add a requirement of
-    C{xinetd:runtime} for packages containing an xinetd configuration file.
+    B{C{r.HttpdConfigRequires()}} - Automatically add a requirement of
+    C{httpd:runtime} for packages containing an httpd configuration file.
 
     SYNOPSIS
     ========
 
-    C{r.XinetdConfigRequires([I{filterexp}] || [I{exceptions=filterexp}])}
+    C{r.HttpdConfigRequires([I{filterexp}] || [I{exceptions=filterexp}])}
 
     DESCRIPTION
     ===========
 
-    The C{r.XinetdConfigRequires()} policy adds a requirement of
-    C{xinetd:runtime} for packages containing an xinetd configuration file.
-
-    The dependency is added only if the service is enabled by default.
+    The C{r.HttpdConfigRequires()} policy adds a requirement of
+    C{httpd:runtime} for packages containing an httpd configuration file.
+    It adds this only if the configuration file contains non-empty,
+    non-comment lines, so that commented-out example files do not
+    generate this dependency.
 
     This policy is a sub-policy of C{r.Requires}. It inherits
     the list of exceptions from C{r.Requires}. Under normal
@@ -58,33 +58,27 @@ class XinetdConfigRequires(_basePluggableRequires):
     EXAMPLES
     ========
 
-    C{r.XinetdConfigRequires(exceptions='mylo')}
+    C{r.HttpdConfigRequires(exceptions='foo.conf')}
 
-    Disables adding xinetd requirements for the C{/etc/xinetd.d/mylo}
-    file.
+    Disables adding an httpd:runtime requirement for the
+    C{/etc/httpd/conf.d/foo.conf} file.  This is normally used
+    when the configuration file provided is meant only to enable
+    web services if the web server is installed, but not if
+    a web server is not installed; an additional, optional
+    feature.
     """
 
-    invariantinclusions = [ r'%(sysconfdir)s/xinetd.d/' ]
+    invariantinclusions = [ r'%(sysconfdir)s/httpd/conf.d/.*\.conf' ]
 
     def addPluggableRequirements(self, path, fullpath, pkg, macros):
-
-        # parse file
-        fContents = [x.strip() for x in file(fullpath).readlines()]
-        # Although the line says "disable", we use "enabled", so that if the
-        # line is not present at all we don't generate the dep
-        enabled = None
-        for fLine in fContents:
-            if not fLine or fLine[0] == '#':
-                continue
-            arr = [x.strip() for x in fLine.split('=', 1) ]
-            if len(arr) != 2:
-                continue
-            if arr[0] != 'disable':
-                continue
-            enabled = ((arr[1] == 'no') and True) or False
-            break
-
-        if not enabled:
+        # test stripped lines to ignore all leading and trailing whitespace
+        # so that indented comments and lines with only whitespace are
+        # not counted as having configuration information in them
+        conflines = [y for y in (x.strip() for x in file(fullpath).readlines())
+                     if y and not y.startswith('#')]
+        if not conflines:
+            # All lines are blank or commented
             return
-        self._addRequirement(path, "xinetd:runtime", [], pkg,
+
+        self._addRequirement(path, "httpd:runtime", [], pkg,
                              deps.TroveDependencies)

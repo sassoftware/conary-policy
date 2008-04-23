@@ -1,3 +1,7 @@
+Changes in @NEW@:
+  o The new HttpdConfigRequires policy adds dependencies on
+    httpd:runtime for all /etc/httpd/conf.d/*.conf files. (CNP-110)
+
 Changes in 1.0.16:
   o Policies now work with more recent versions of Conary (2.0.12
     and later) so that Conary can warn about possibly excessive
