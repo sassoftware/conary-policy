@@ -1,4 +1,8 @@
 Changes in @NEW@:
+  o Description and Licenses policies can now be used to set
+    metadata information for troves. (CNY-2715)
+  o The RequireChkconfig policy now accepts empty lines in the
+    chkconfig header. (CNP-81)
   o The new HttpdConfigRequires policy adds dependencies on
     httpd:runtime for all /etc/httpd/conf.d/*.conf files. (CNP-110)
 

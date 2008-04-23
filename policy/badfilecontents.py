@@ -409,6 +409,9 @@ class RequireChkconfig(policy.EnforcementPolicy):
         f.close()
         foundChkconfig = False
         for line in lines:
+            line = line.strip()
+            if not line:
+                continue
             if not line.startswith('#'):
                 # chkconfig tag must come before any uncommented lines
                 break
