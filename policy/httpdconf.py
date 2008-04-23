@@ -32,7 +32,7 @@ class HttpdConfigRequires(_basePluggableRequires):
     ====
 
     B{C{r.HttpdConfigRequires()}} - Automatically add a requirement of
-    C{httpd:runtime} for packages containing an httpd configuration file.
+    C{/usr/sbin/httpd} for packages containing an httpd configuration file.
 
     SYNOPSIS
     ========
@@ -43,7 +43,7 @@ class HttpdConfigRequires(_basePluggableRequires):
     ===========
 
     The C{r.HttpdConfigRequires()} policy adds a requirement of
-    C{httpd:runtime} for packages containing an httpd configuration file.
+    C{/usr/sbin/httpd} for packages containing an httpd configuration file.
     It adds this only if the configuration file contains non-empty,
     non-comment lines, so that commented-out example files do not
     generate this dependency.
@@ -60,7 +60,7 @@ class HttpdConfigRequires(_basePluggableRequires):
 
     C{r.HttpdConfigRequires(exceptions='foo.conf')}
 
-    Disables adding an httpd:runtime requirement for the
+    Disables adding an /usr/sbin/httpd requirement for the
     C{/etc/httpd/conf.d/foo.conf} file.  This is normally used
     when the configuration file provided is meant only to enable
     web services if the web server is installed, but not if
@@ -80,5 +80,5 @@ class HttpdConfigRequires(_basePluggableRequires):
             # All lines are blank or commented
             return
 
-        self._addRequirement(path, "httpd:runtime", [], pkg,
-                             deps.TroveDependencies)
+        self._addRequirement(path, "/usr/sbin/httpd", [], pkg,
+                             deps.FileDependencies)
