@@ -336,7 +336,7 @@ class FixObsoletePaths(policy.DestdirPolicy, _pathMap):
     """
     
     requires = (
-        ('ExcludeDirectories', policy.REQUIRED_PRIOR),
+        ('AutoDoc', policy.REQUIRED_SUBSEQUENT),
     )
     processUnmodified = False
 
@@ -349,6 +349,11 @@ class FixObsoletePaths(policy.DestdirPolicy, _pathMap):
     def do(self):
         d = self.recipe.macros.destdir
         for path, newPath in self.candidatePaths():
+            if os.path.isdir(d + path) and not os.listdir(d + path):
+                self.warn("Path %s should not exist, but is empty. removing." \
+                        % path)
+                os.rmdir(d + path)
+                continue
             try:
                 try:
                     self.recipe.recordMove(d + path, d + newPath)

@@ -5,6 +5,9 @@ Changes in @NEW@:
     chkconfig header. (CNP-81)
   o The new HttpdConfigRequires policy adds dependencies on
     /usr/sbin/httpd for all /etc/httpd/conf.d/*.conf files. (CNP-110)
+  o The FixObsoletePaths policy has been modified to run before
+    AutoDoc. It will now delete empty Obsolete paths rather than
+    attempting to move them. (CNP-70)
 
 Changes in 1.0.16:
   o Policies now work with more recent versions of Conary (2.0.12
