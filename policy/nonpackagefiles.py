@@ -45,6 +45,16 @@ class RemoveNonPackageFiles(policy.DestdirPolicy):
     """
     requires = (
         ('Strip', policy.CONDITIONAL_PRIOR),
+        ('NormalizeManPages', policy.CONDITIONAL_SUBSEQUENT),
+        ('NormalizeAppDefaults', policy.CONDITIONAL_SUBSEQUENT),
+        ('NormalizeCompression', policy.CONDITIONAL_SUBSEQUENT),
+        ('NormalizeInfoPages', policy.CONDITIONAL_SUBSEQUENT),
+        ('NormalizeInitscriptLocation', policy.CONDITIONAL_SUBSEQUENT),
+        ('NormalizeInitscriptContents', policy.CONDITIONAL_SUBSEQUENT),
+        ('NormalizeInterpreterPaths', policy.CONDITIONAL_SUBSEQUENT),
+        ('NormalizePamConfig', policy.CONDITIONAL_SUBSEQUENT),
+        ('NormalizePkgConfig', policy.CONDITIONAL_SUBSEQUENT),
+        ('NormalizePythonInterpreterVersion', policy.CONDITIONAL_SUBSEQUENT),
     )
     processUnmodified = False
     invariantinclusions = [
