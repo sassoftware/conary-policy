@@ -14,7 +14,16 @@
 
 from conary.build import policy
 
-class VersionConflicts(policy.ImageGroupEnforcementPolicy):
+# copied from pkgconfig.py
+if hasattr(policy, 'ImageGroupEnforcementPolicy'):
+    _ImageGroupEnforcementPolicy = policy.ImageGroupEnforcementPolicy
+else:
+    # Older Conary. Make the class inherit from object; this policy
+    # will then be ignored.
+    _ImageGroupEnforcementPolicy = object
+
+
+class VersionConflicts(_ImageGroupEnforcementPolicy):
     """
     NAME
     ====
