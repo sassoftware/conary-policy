@@ -1,4 +1,4 @@
-Changes in @NEW@:
+Changes in 1.0.17:
   o Description and Licenses policies can now be used to set
     metadata information for troves. (CNY-2715)
   o The RequireChkconfig policy now accepts empty lines in the
