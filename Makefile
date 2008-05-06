@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2004-2007 rPath, Inc.
+# Copyright (c) 2004-2008 rPath, Inc.
 #
 # This program is distributed under the terms of the Common Public License,
 # version 1.0. A copy of this license should have been distributed with this
@@ -12,7 +12,7 @@
 # full details.
 #
 
-VERSION=1.0.17
+VERSION=1.0.18
 NAMEVER=conary-policy-$(VERSION)
 DESTDIR=/
 POLICYDIR=/usr/lib/conary/policy/
