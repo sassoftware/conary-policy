@@ -1,3 +1,8 @@
+Changes in 1.0.18:
+  o ConfigLogBuildRequirements caused builds to fail when encountering
+    a line ending in "result:  " (two or more trailing spaces)
+    while processing a config.log file.  This is corrected. (CNP-128)
+
 Changes in 1.0.17:
   o Description and Licenses policies can now be used to set
     metadata information for troves. (CNY-2715)

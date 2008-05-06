@@ -753,29 +753,30 @@ class EnforceConfigLogBuildRequirements(_enforceLogRequirements):
 
     def __init__(self, *args, **kw):
         self.stanzaList = [
-            (self.handleCheck, 'configure:[0-9]+: checking for (.*)',
-                               'configure:[0-9]+: result: (.*)')
+            (self.handleCheck, 'configure:[0-9]+: checking for  *(.*)',
+                               'configure:[0-9]+: result:  *(.*)')
         ]
         _enforceLogRequirements.__init__(self, *args, **kw)
 
+    def parseSuccess(self, token):
+        if not token:
+            # empty string, such as looking for executable suffix
+            return False
+        if token == 'yes':
+            return True
+        if token.split()[0] in set(('no', 'not', 'done', 'failed',
+                                    'none', 'disabled',)):
+            return False
+        return token
+
     def handleCheck(self, startGroups, stopGroups, lines, fullpath):
-        def parseSuccess(token):
-            if not token:
-                # empty string, such as looking for executable suffix
-                return False
-            if token == 'yes':
-                return True
-            if token.split()[0] in set(('no', 'not', 'done', 'failed',
-                                        'none', 'disabled',)):
-                return False
-            return token
 
         if stopGroups is None:
             # we lost sync, don't start guessing because we care about
             # the result of the check
             return
         sought = startGroups[0]
-        success = parseSuccess(stopGroups[0])
+        success = self.parseSuccess(stopGroups[0])
         includeDirs = [ '%(includedir)s/' %self.macros]
         root = self.recipe.cfg.root
 
