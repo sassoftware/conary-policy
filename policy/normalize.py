@@ -541,6 +541,7 @@ class NormalizeInitscriptContents(policy.DestdirPolicy):
     requires = (
         # for invariantsubtree to be sufficient
         ('NormalizeInitscriptLocation', policy.REQUIRED_PRIOR),
+        ('RelativeSymlinks', policy.REQUIRED_PRIOR),
         # for adding requirements
         ('Requires', policy.REQUIRED_SUBSEQUENT),
     )
@@ -554,9 +555,17 @@ class NormalizeInitscriptContents(policy.DestdirPolicy):
         if os.path.islink(fullpath):
             linkpath = os.readlink(fullpath)
             if m.destdir not in linkpath:
-                newpath = '/'.join((m.destdir, linkpath))
+                # RelativeSymlinks has already run. linkpath is relative to
+                # fullpath
+                newpath = util.joinPaths(os.path.dirname(fullpath), linkpath)
                 if os.path.exists(newpath):
                     fullpath = newpath
+                else:
+                    # If the target of an init script is not present, don't
+                    # error, DanglingSymlinks will address this situation.
+                    self.warn('%s is a symlink to %s, which does not exist.' % \
+                            (path, linkpath))
+                    return
 
         contents = file(fullpath).read()
         modified = False

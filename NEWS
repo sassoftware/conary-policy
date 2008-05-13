@@ -1,3 +1,7 @@
+Changes in @NEW@:
+  o A bug causing NormalizeInitscriptContents to fail if the target of
+    a symlink didn't exist has been fixed. (CNP-129)
+
 Changes in 1.0.18:
   o ConfigLogBuildRequirements caused builds to fail when encountering
     a line ending in "result:  " (two or more trailing spaces)
