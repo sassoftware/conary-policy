@@ -1,6 +1,8 @@
 Changes in @NEW@:
   o A bug causing NormalizeInitscriptContents to fail if the target of
     a symlink didn't exist has been fixed. (CNP-129)
+  o A bug causing PkgConfigRequires to fail if the destdir is a symlink
+    has been fixed (CNP-131).
 
 Changes in 1.0.18:
   o ConfigLogBuildRequirements caused builds to fail when encountering

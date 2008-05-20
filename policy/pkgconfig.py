@@ -212,7 +212,7 @@ class PkgConfigRequires(_basePluggableRequires):
             if fileRequired.startswith(macros.destdir):
                 # find requirement in packaging
                 fileRequired = util.normpath(os.path.realpath(fileRequired))
-                fileRequired = fileRequired[len(util.normpath(macros.destdir)):]
+                fileRequired = fileRequired[len(util.normpath(os.path.realpath(macros.destdir))):]
                 autopkg = self.recipe.autopkg
                 troveName = autopkg.componentMap[fileRequired].name
                 package, component = troveName.split(':', 1)
