@@ -418,5 +418,8 @@ class RequireChkconfig(policy.EnforcementPolicy):
             if line.find('chkconfig:') != -1:
                 foundChkconfig = True
                 break
+            if line.find('### BEGIN INIT INFO') != -1:
+                foundChkconfig = True
+                break
         if not foundChkconfig:
-            self.error("initscript %s must contain chkconfig information before any uncommented lines", path)
+            self.warn("initscript %s must contain chkconfig information before any uncommented lines", path)
