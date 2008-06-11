@@ -6,6 +6,8 @@ Changes in @NEW@:
   o RequireChkconfig has been modified to handle new style init scripts.
     It now warns instead of errors on failure. (CNP-109)
   o FixupMultilibPaths now handles python files. (CNP-121)
+  o NormalizeInfoPages handles file magic better to cover corner cases.
+    (CNP-135)
 
 Changes in 1.0.18:
   o ConfigLogBuildRequirements caused builds to fail when encountering
