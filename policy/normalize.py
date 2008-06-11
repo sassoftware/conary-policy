@@ -424,7 +424,7 @@ class NormalizeInfoPages(policy.DestdirPolicy):
         path = '%(infodir)s/' %self.macros + file
         if not self.policyException(path):
             m = self.recipe.magic[path]
-            if not m:
+            if not m or m.name not in ('gzip', 'bzip'):
                 # not compressed
                 if not self.gzip:
                     self.gzip = self._findProg('gzip')
