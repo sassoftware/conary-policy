@@ -25,11 +25,22 @@ from conary.local import database
 
 
 def _findProgPath(prog, db, recipe):
-    macros = recipe.macros
-    progPath = util.findFile(prog, (macros.essentialbindir,
-                                    macros.bindir,
-                                    macros.essentialsbindir,
-                                    macros.sbindir))
+    # ignore arguments
+    prog = prog.split(' ')[0]
+    if prog.startswith('/'):
+        progPath = prog
+    else:
+        macros = recipe.macros
+        searchPath = [macros.essentialbindir,
+                      macros.bindir,
+                      macros.essentialsbindir,
+                      macros.sbindir]
+        searchPath.extend([x for x in ['/bin', '/usr/bin', '/sbin', '/usr/sbin']
+                           if x not in searchPath])
+        searchPath.extend([x for x in os.getenv('PATH', '').split(os.path.pathsep)
+                           if x not in searchPath])
+        progPath = util.findFile(prog, searchPath)
+
     progTroveName =  [ x.getName() for x in db.iterTrovesByPath(progPath) ]
     if progTroveName:
         progTroveName = progTroveName[0]
