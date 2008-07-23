@@ -215,7 +215,6 @@ class FixupMultilibPaths(policy.DestdirPolicy):
     processUnmodified = False
     invariantinclusions = [
         '.*\.(so.*|a)$',
-        '.*\.py[co]?$'
     ]
 
     def __init__(self, *args, **keywords):
@@ -239,12 +238,8 @@ class FixupMultilibPaths(policy.DestdirPolicy):
         fullpath = util.joinPaths(destdir, path)
         mode = os.lstat(fullpath)[stat.ST_MODE]
         m = self.recipe.magic[path]
-        pythonFile = False
-        for suffix in ('.py', '.pyc', '.pyo'):
-            if path.endswith(suffix):
-                pythonFile = True
         if stat.S_ISREG(mode) and (
-            not pythonFile and (not m or (m.name != "ELF" and m.name != "ar"))):
+            not m or (m.name != "ELF" and m.name != "ar")):
             self.warn("non-object file with library name %s", path)
             return
         basename = os.path.basename(path)

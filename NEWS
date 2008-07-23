@@ -5,7 +5,6 @@ Changes in @NEW@:
     has been fixed (CNP-131).
   o RequireChkconfig has been modified to handle new style init scripts.
     It now warns instead of errors on failure. (CNP-109)
-  o FixupMultilibPaths now handles python files. (CNP-121)
   o NormalizeInfoPages handles file magic better to cover corner cases.
     (CNP-135)
   o Setting a different prefix will no longer cause the Strip policy
