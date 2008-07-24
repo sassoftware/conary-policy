@@ -9,6 +9,9 @@ Changes in @NEW@:
     (CNP-135)
   o Setting a different prefix will no longer cause the Strip policy
     and several Normalize policies to traceback. (CNP-141)
+  o The NormalizeLibrarySymlinks policy no longer attemps to run
+    ldconfig from inside the package when cross-compiling. (CNP-140)
+
 
 Changes in 1.0.18:
   o ConfigLogBuildRequirements caused builds to fail when encountering

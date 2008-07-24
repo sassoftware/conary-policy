@@ -506,7 +506,7 @@ class NormalizeLibrarySymlinks(policy.DestdirPolicy):
             oldfiles = set(os.listdir(fullpath))
             bootStrapLdConfig = True
             ldConfigPath = '%(destdir)s%(essentialsbindir)s/ldconfig'%macros
-            if not (os.path.exists(ldConfigPath)):
+            if (not os.path.exists(ldConfigPath)) or self.recipe.isCrossCompiling():
                 bootStrapLdConfig = False
                 ldConfigPath = '%(essentialsbindir)s/ldconfig'%macros
             util.execute('%s -n %s' %(ldConfigPath, fullpath))
