@@ -16,7 +16,6 @@ Changes in @NEW@:
     a library existing, but only a shared library exists and no packaged
     file is linked against the shared library. (CNP-132)
 
-
 Changes in 1.0.18:
   o ConfigLogBuildRequirements caused builds to fail when encountering
     a line ending in "result:  " (two or more trailing spaces)
