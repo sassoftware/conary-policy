@@ -11,6 +11,10 @@ Changes in @NEW@:
     and several Normalize policies to traceback. (CNP-141)
   o The NormalizeLibrarySymlinks policy no longer attemps to run
     ldconfig from inside the package when cross-compiling. (CNP-140)
+  o The EnforceStaticLibBuildRequirements policy now falls back to
+    looking at shared libraries for cases where configure depends on
+    a library existing, but only a shared library exists and no packaged
+    file is linked against the shared library. (CNP-132)
 
 
 Changes in 1.0.18:

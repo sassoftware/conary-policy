@@ -1145,8 +1145,13 @@ class EnforceStaticLibBuildRequirements(_warnBuildRequirements):
 
                     foundLibs = set()
                     for libDirRoot, libDir in libDirs.iteritems():
-                        if util.exists('%s/lib%s.a' %(libDirRoot, libName)):
-                            foundLibs.add('%s/lib%s.a' %(libDir, libName))
+                        for ext in ('a', 'so'):
+                            # If there is no .a, look for the .so in case
+                            # no shared library dependency is found from
+                            # packaged files (CNP-132)
+                            if util.exists('%s/lib%s.%s' %(libDirRoot, libName, ext)):
+                                foundLibs.add('%s/lib%s.%s' %(libDir, libName, ext))
+                                break
                     troveSet = pathSetToTroveSet(foundLibs)
 
                     if len(troveSet) == 1:
