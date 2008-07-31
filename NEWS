@@ -15,6 +15,8 @@ Changes in @NEW@:
     looking at shared libraries for cases where configure depends on
     a library existing, but only a shared library exists and no packaged
     file is linked against the shared library. (CNP-132)
+  o The Strip policy no longer traces back if an ELF file is found but
+    strip or eu-strip is not installed. (CNP-143)
 
 Changes in 1.0.18:
   o ConfigLogBuildRequirements caused builds to fail when encountering

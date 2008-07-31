@@ -23,7 +23,7 @@ from conary.build.use import Use
 from conary.local import database
 
 
-def _findProgPath(prog, db, recipe):
+def _findProgPath(prog, db, recipe, error=True):
     # ignore arguments
     prog = prog.split(' ')[0]
     if prog.startswith('/'):
@@ -38,7 +38,10 @@ def _findProgPath(prog, db, recipe):
                            if x not in searchPath])
         searchPath.extend([x for x in os.getenv('PATH', '').split(os.path.pathsep)
                            if x not in searchPath])
-        progPath = util.findFile(prog, searchPath)
+        progPath = util.searchFile(prog, searchPath, error=error)
+
+    if not progPath and not error:
+        return None
 
     progTroveName =  [ x.getName() for x in db.iterTrovesByPath(progPath) ]
     if progTroveName:
@@ -182,17 +185,20 @@ class Strip(policy.DestdirPolicy):
                     return
 
                 self._openDb()
-                _findProgPath(self.macros.debugedit, self.db, self.recipe)
+                if (_findProgPath(self.macros.debugedit, self.db,
+                                  self.recipe, error=False) and
+                    _findProgPath(self.macros.strip, self.db,
+                                  self.recipe, error=False)):
 
-                # null-separated AND terminated list, so we need to throw
-                # away the last (empty) item before updating self.debugfiles
-                self.debugfiles |= set(util.popen(
-                    '%(debugedit)s -b %(topbuilddir)s -d %(debugsrcdir)s'
-                    ' -l /dev/stdout '%self.dm
-                    +fullpath).read().split('\x00')[:-1])
-                util.mkdirChain(debuglibdir)
-                util.execute('%s -f %s %s' %(
-                    self.dm.strip, debuglibpath, fullpath))
+                    # null-separated AND terminated list, so we need to throw
+                    # away the last (empty) item before updating self.debugfiles
+                    self.debugfiles |= set(util.popen(
+                        '%(debugedit)s -b %(topbuilddir)s -d %(debugsrcdir)s'
+                        ' -l /dev/stdout '%self.dm
+                        +fullpath).read().split('\x00')[:-1])
+                    util.mkdirChain(debuglibdir)
+                    util.execute('%s -f %s %s' %(
+                        self.dm.strip, debuglibpath, fullpath))
 
             else:
                 self._openDb()
@@ -200,11 +206,11 @@ class Strip(policy.DestdirPolicy):
                     # just in case strip is eu-strip, which segfaults
                     # whenever it touches an ar archive, and seems to
                     # break some .o files
-                    _findProgPath(self.macros.strip_archive, self.db, self.recipe)
-                    util.execute('%(strip_archive)s ' %self.dm +fullpath)
+                    if _findProgPath(self.macros.strip_archive, self.db, self.recipe, error=False):
+                        util.execute('%(strip_archive)s ' %self.dm +fullpath)
                 else:
-                    _findProgPath(self.macros.strip, self.db, self.recipe)
-                    util.execute('%(strip)s ' %self.dm +fullpath)
+                    if _findProgPath(self.macros.strip, self.db, self.recipe, error=False):
+                        util.execute('%(strip)s ' %self.dm +fullpath)
 
             del self.recipe.magic[path]
             if oldmode is not None:
