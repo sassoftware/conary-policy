@@ -17,6 +17,8 @@ Changes in @NEW@:
     file is linked against the shared library. (CNP-132)
   o The Strip policy no longer traces back if an ELF file is found but
     strip or eu-strip is not installed. (CNP-143)
+  o The TagLocale policy has been added to tag locale files with a
+    special path-derived tag of the form locale(localename). (CNP-138)
 
 Changes in 1.0.18:
   o ConfigLogBuildRequirements caused builds to fail when encountering
