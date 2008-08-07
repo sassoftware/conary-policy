@@ -1,4 +1,4 @@
-Changes in @NEW@:
+Changes in 1.0.19:
   o A bug causing NormalizeInitscriptContents to fail if the target of
     a symlink didn't exist has been fixed. (CNP-129)
   o A bug causing PkgConfigRequires to fail if the destdir is a symlink
