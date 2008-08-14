@@ -44,12 +44,13 @@ class PHPRequires(_basePluggableRequires):
     DESCRIPTION
     ===========
 
-    The C{r.PHPRequires()} policy identifies php files and adds a
-    requirement for the version of php from the system, buildReqs
+    The C{r.PHPRequires()} policy identifies PHP files and adds a
+    requirement for the appropriate trove containing the correct
+    version of the php interpreter from the system, buildRequires,
     or installLabelPath.
 
-    This policy is a sub-policy of C{r.Requires}. It inherits
-    the list of exceptions from C{r.Requires}. Under normal
+    This policy is a sub-policy of C{r.Requires}.  It inherits
+    the list of exceptions from C{r.Requires}.  Under normal
     circumstances, it is not necessary to invoke this policy
     explicitly; call C{r.Requires} instead. However, it may be useful
     to exclude some of the files from being scanned only by this
@@ -60,13 +61,13 @@ class PHPRequires(_basePluggableRequires):
 
     C{r.PHPRequires(exceptions='.*')}
 
-    Disables the requirement extraction for all files
+    Disables the PHP requirement determination for all files.
     """
 
     invariantinclusions = [r'.*\.php']
 
     def _isPHPFile(self, fullPath):
-        # identify a php file by the presence of the <?php marker
+        # confirm identity of a PHP file by the presence of the <?php marker
         marker = '<?php'
         f = open(fullPath)
         f.seek(0, 2)
