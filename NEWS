@@ -1,7 +1,8 @@
 Changes in @NEW@:
-  o The PHPRequires has been added. It identifies php files and
-    requires the most appropriate PHP interpreter based on your
-    system, buildReqs or installLabelPath. (CNY-145)
+  o The PHPRequires policy has been added.  It identifies PHP files and
+    when possible automatically adds an appropriate requirement based
+    on the most appropriate PHP interpreter found on your system,
+    buildRequires, or installLabelPath. (CNY-145)
 
 Changes in 1.0.19:
   o A bug causing NormalizeInitscriptContents to fail if the target of
