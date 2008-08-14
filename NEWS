@@ -1,3 +1,8 @@
+Changes in @NEW@:
+  o The PHPRequires has been added. It identifies php files and
+    requires the most appropriate PHP interpreter based on your
+    system, buildReqs or installLabelPath. (CNY-145)
+
 Changes in 1.0.19:
   o A bug causing NormalizeInitscriptContents to fail if the target of
     a symlink didn't exist has been fixed. (CNP-129)
