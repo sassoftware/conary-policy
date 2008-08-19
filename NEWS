@@ -1,4 +1,4 @@
-Changes in @NEW@:
+Changes in 1.0.20:
   o The PHPRequires policy has been added.  It identifies PHP files and
     when possible automatically adds an appropriate requirement based
     on the most appropriate PHP interpreter found on your system,
