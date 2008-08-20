@@ -66,6 +66,10 @@ class PHPRequires(_basePluggableRequires):
 
     invariantinclusions = [r'.*\.php']
 
+    def __init__(self, *args, **kwargs):
+        _basePluggableRequires.__init__(self, *args, **kwargs)
+        self.phpTrove = None
+
     def _isPHPFile(self, fullPath):
         # confirm identity of a PHP file by the presence of the <?php marker
         marker = '<?php'
@@ -96,15 +100,15 @@ class PHPRequires(_basePluggableRequires):
             defPath = defPath % macros
             if defPath not in phpPathList:
                 phpPathList.append(defPath)
-        phpTrove = None
-        for phpPath in phpPathList:
-            # first, do a direct check of the filesystem.
-            if db.pathIsOwned(phpPath):
-                troveList = db.iterTrovesByPath(phpPath)
-                phpTrove = troveList[0].getName()
-                break
+        if not self.phpTrove:
+            for phpPath in phpPathList:
+                # first, do a direct check of the filesystem.
+                if db.pathIsOwned(phpPath):
+                    troveList = db.iterTrovesByPath(phpPath)
+                    self.phpTrove = troveList[0].getName()
+                    break
 
-        if not phpTrove:
+        if not self.phpTrove:
             # then check the buildReqs. we'll drill down to specific files
             # from the package level to ensure we don't introduce conflicting
             # deps for different versions of PHP
@@ -117,16 +121,21 @@ class PHPRequires(_basePluggableRequires):
             trvs = repos.getTroves(list(itertools.chain(*troveDict.values())))
             trvs = dict([(x.getName(), x) for x in trvs])
             for pkgName in pkgNames:
+                if self.phpTrove:
+                    break
                 pkgTrv = trvs[pkgName]
                 for pkgComp in repos.getTroves(list(pkgTrv.iterTroveList( \
                         strongRefs = True, weakRefs = True))):
                     if [x[1] for x in pkgComp.iterFileList() if x[1] in phpPathList]:
-                        phpTrove = pkgComp.getName()
+                        self.phpTrove = pkgComp.getName()
+                        break
 
-        if not phpTrove:
+        if not self.phpTrove:
+            # nothing in buildRequires specifies any particular php
+            # package.
             # last resort: check for php on the installLabelPath from the repo
             for lbl in cfg.installLabelPath:
-                if phpTrove:
+                if self.phpTrove:
                     # we found a satisfactory trove on phpPathList. quit looking
                     break
                 pathDict = repos.getTroveLeavesByPath(phpPathList, lbl)
@@ -135,7 +144,7 @@ class PHPRequires(_basePluggableRequires):
                     # provides a path to php. warn on multiple matches.
                     phpPkgList = list(set(x[0] for x in pathDict[phpPath]))
                     if len(phpPkgList) == 1:
-                        phpTrove = phpPkgList[0]
+                        self.phpTrove = phpPkgList[0]
                         break
                     elif len(phpPkgList):
                         self.warn("'%s' requires PHP, which is provided by " \
@@ -145,8 +154,8 @@ class PHPRequires(_basePluggableRequires):
                                 (path, "', '".join(phpPkgList)))
                         return
 
-        if phpTrove:
-            self._addRequirement(path, phpTrove, [], pkg,
+        if self.phpTrove:
+            self._addRequirement(path, self.phpTrove, [], pkg,
                                  deps.TroveDependencies)
         else:
             self.warn("'%s' requires PHP, which is not provided by any " \
