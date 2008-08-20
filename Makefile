@@ -12,7 +12,7 @@
 # full details.
 #
 
-VERSION=1.0.20
+VERSION=1.0.21
 NAMEVER=conary-policy-$(VERSION)
 DESTDIR=/
 POLICYDIR=/usr/lib/conary/policy/
