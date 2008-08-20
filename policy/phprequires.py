@@ -111,7 +111,7 @@ class PHPRequires(_basePluggableRequires):
             # for example assume php5:lib is in the buildReqs. clearly
             # php5:devel is the correct trove to require
             pkgNames = [x.split(':')[0] for x in self.recipe.buildRequires]
-            troveDict = repos.findTroves(cfg.installLabel,
+            troveDict = repos.findTroves(cfg.installLabelPath,
                     [(x, None, cfg.buildFlavor) for x in pkgNames],
                     allowMissing = True)
             trvs = repos.getTroves(list(itertools.chain(*troveDict.values())))
