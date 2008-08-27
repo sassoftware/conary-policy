@@ -1,5 +1,7 @@
 Changes in @NEW@:
   o A bug causing PHPRequires to fail in rMake has been fixed. (CNP-154)
+  o A bug causing PHPRequires to fail if buildReqs aren't present
+    in the repository has been fixed. (CNP-160)
 
 Changes in 1.0.20:
   o The PHPRequires policy has been added.  It identifies PHP files and
