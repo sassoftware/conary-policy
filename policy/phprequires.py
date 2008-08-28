@@ -123,7 +123,9 @@ class PHPRequires(_basePluggableRequires):
             for pkgName in pkgNames:
                 if self.phpTrove:
                     break
-                pkgTrv = trvs[pkgName]
+                pkgTrv = trvs.get(pkgName)
+                if not pkgTrv:
+                    continue
                 for pkgComp in repos.getTroves(list(pkgTrv.iterTroveList( \
                         strongRefs = True, weakRefs = True))):
                     if [x[1] for x in pkgComp.iterFileList() if x[1] in phpPathList]:
