@@ -18,8 +18,9 @@ import stat
 import tempfile
 import filecmp
 import shutil
+import zipfile
 
-from conary.lib import util
+from conary.lib import magic, util
 from conary.build import policy
 from conary.local import database
 
@@ -977,5 +978,29 @@ class NormalizePythonInterpreterVersion(policy.DestdirPolicy):
                 return path[0]
 
         return None
+
+class NormalizePythonEggs(policy.DestdirPolicy):
+    invariantinclusions = [
+        ('.*/python[^/]*/site-packages/.*\.egg', stat.S_IFREG),
+    ]
+
+    requires = (
+        ('RemoveNonPackageFiles', policy.CONDITIONAL_PRIOR),
+    )
+
+    def doFile(self, path):
+        dir = self.recipe.macros.destdir
+        fullPath = util.joinPaths(dir, path)
+        m = magic.magic(fullPath)
+        if not (m and m.name == 'ZIP'):
+            # if it's not a zip, we can't unpack it, PythonEggs will raise
+            # an error on this path
+            return
+        tmpPath = tempfile.mkdtemp(dir = self.recipe.macros.builddir)
+        util.execute("unzip -q -o -d '%s' '%s'" % (tmpPath, fullPath))
+        self._addActionPathBuildRequires(['unzip'])
+        os.unlink(fullPath)
+        shutil.move(tmpPath, fullPath)
+
 
 # Note: NormalizeLibrarySymlinks is in libraries.py

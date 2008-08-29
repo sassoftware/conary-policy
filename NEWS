@@ -1,6 +1,11 @@
 Changes in @NEW@:
   o A bug causing PHPRequires to fail if buildRequires are not present
     in the repository has been fixed. (CNP-160)
+  o PythonEggs now allows directories that end in .egg to be packaged.
+    (CNP-148)
+  o The NormalizePythonEggs has been added. It automatically unpacks
+    python .egg files that are placed in standard python module locations.
+    The resulting directory is put in place of the .egg file. (CNP-149)
 
 Changes in 1.0.21:
   o A bug causing PHPRequires to fail in rMake has been fixed. (CNP-154)

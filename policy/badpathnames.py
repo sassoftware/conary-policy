@@ -16,7 +16,7 @@ import os
 import re
 import stat
 
-from conary.lib import util
+from conary.lib import magic, util
 from conary.build import policy
 
 
@@ -439,10 +439,15 @@ class PythonEggs(policy.EnforcementPolicy):
     """
     processUnmodified = False
     invariantinclusions = [
-        '.*/python[^/]*/site-packages/.*\.egg',
+        ('.*/python[^/]*/site-packages/.*\.egg', stat.S_IFREG),
     ]
 
     def doFile(self, path):
-        self.error('Python .egg %s exists; use'
-                   ' --single-version-externally-managed argument'
-                   ' to setup.py or use r.PythonSetup()', path)
+        fullPath = util.joinPaths(self.recipe.macros.destdir, path)
+        m = magic.magic(fullPath)
+        if not (m and m.name == 'ZIP'):
+            self.error("%s exists but isn't a valid Python .egg", path)
+        else:
+            self.error('Python .egg %s exists; use'
+                       ' --single-version-externally-managed argument'
+                       ' to setup.py or use r.PythonSetup()', path)
