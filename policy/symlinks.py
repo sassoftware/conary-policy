@@ -13,11 +13,20 @@
 #
 
 import os
+import stat
 
-from conary.build import filter, policy
+from conary.build import filter, policy, packagepolicy
 from conary.deps import deps
 from conary.lib import util
+from conary.local import database
 
+# copied from pkgconfig.py
+if hasattr(packagepolicy, '_basePluggableRequires'): 
+    _basePluggableRequires = packagepolicy._basePluggableRequires
+else:
+    # Older Conary. Make the class inherit from object; this policy
+    # will then be ignored.
+    _basePluggableRequires = object
 
 class FixBuilddirSymlink(policy.DestdirPolicy):
     """
@@ -67,6 +76,95 @@ class FixBuilddirSymlink(policy.DestdirPolicy):
                       path, contents, newContents)
             os.unlink(f)
             os.symlink(newContents, f)
+
+class SymlinkTargetRequires(_basePluggableRequires):
+    """
+    NAME
+    ====
+
+    B{C{r.SymlinkTargetRequires()}} - Create requirements to satisfy dangling
+    symlinks
+
+    SYNOPSIS
+    ========
+
+    C{r.SymlinkTargetRequires([filterexp])}
+
+    DESCRIPTION
+    ===========
+
+    The C{r.SymlinkTargetRequires()} policy searches for the system for the
+    target of dangling symlinks. If one is located, the DanglingSymlinks
+    policy is supressed in favor of adding a Requirement instead. If the
+    file is explicitly provided by the target, a file requirement is used.
+    Otherwise, a trove requirement is added.
+    """
+    requires = _basePluggableRequires.requires + [
+        # DanglingSymlinks will announce an error for symlinks not covered
+        # by this policy
+        ('DanglingSymlinks', policy.REQUIRED_SUBSEQUENT),
+    ]
+    processUnmodified = False
+
+    def __init__(self, *args, **keywords):
+        _basePluggableRequires.__init__(self, *args, **keywords)
+        self.db = None
+
+    def _openDb(self):
+        if not self.db:
+            self.db = database.Database(self.recipe.cfg.root,
+                                   self.recipe.cfg.dbPath)
+
+    def addPluggableRequirements(self, path, fullpath, pkg, macros):
+        d = macros.destdir
+        f = util.joinPaths(d, path)
+        if not os.path.islink(f):
+            return
+        self._openDb()
+
+        fullpath = util.joinPaths(d, path)
+        contents = os.readlink(fullpath)
+        if not contents.startswith(os.path.sep):
+            # contents is normally a relative symlink thanks to
+            # the RelativeSymlinks policy. if it's not, then we have an
+            # absolute symlink, and we'll just use it directly
+            contents = util.joinPaths(os.path.dirname(fullpath), contents)
+        if contents.startswith(d):
+            contents = contents[len(d):]
+        if os.path.exists(util.joinPaths(d, contents)):
+            # the file is provided by the destdir, don't search for it
+            return
+
+        troves = self.db.iterTrovesByPath(contents)
+        if not troves:
+            # If there's a file, conary doesn't own it. either way,
+            # DanglingSymlinks will fire an error.
+            return
+        trv = troves[0]
+
+        fileDep = deps.parseDep('file: %s' % contents)
+        troveDep = deps.parseDep('trove: %s' % trv.getName())
+
+        provides = trv.getProvides()
+        if provides.satisfies(fileDep):
+            self._addRequirement(path, contents, [], pkg,
+                    deps.FileDependencies)
+            self.recipe.DanglingSymlinks(exceptions = path,
+                    allowUnusedFilters = True)
+            if trv.getName() not in self.recipe.buildRequires:
+                self.recipe.reportMissingBuildRequires(trv.getName())
+        elif provides.satisfies(troveDep):
+            self._addRequirement(path, trv.getName(), [], pkg,
+                    deps.TroveDependencies)
+            # warn that a file dep would be better, but we'll settle for a
+            # dep on the trove that contains the file
+            self.warn("'%s' does not provide '%s', so a requirement on the " \
+                    "trove itself was used to satisfy dangling symlink: %s"  %\
+                    (trv.getName(), fileDep, path))
+            self.recipe.DanglingSymlinks(exceptions = path,
+                    allowUnusedFilters = True)
+            if trv.getName() not in self.recipe.buildRequires:
+                self.recipe.reportMissingBuildRequires(trv.getName())
 
 
 class RelativeSymlinks(policy.DestdirPolicy):

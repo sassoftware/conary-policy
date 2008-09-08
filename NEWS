@@ -6,6 +6,9 @@ Changes in @NEW@:
   o The NormalizePythonEggs has been added. It automatically unpacks
     python .egg files that are placed in standard python module locations.
     The resulting directory is put in place of the .egg file. (CNP-149)
+  o The SymlinkTargetRequires policy has been added. This policy will
+    supress the DanglingSymlinks policy in favor of adding requires when
+    appropriate. (CNP-130)
 
 Changes in 1.0.21:
   o A bug causing PHPRequires to fail in rMake has been fixed. (CNP-154)
