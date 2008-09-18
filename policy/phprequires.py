@@ -72,7 +72,7 @@ class PHPRequires(_basePluggableRequires):
         self.phpPathList = []
 
         self.cfg = self.recipe.cfg
-        self.repos = self.recipe.getRepos()
+        self.repos = None # Delay fetching repository until it is available
 
     def _isPHPFile(self, fullPath):
         # confirm identity of a PHP file by the presence of the <?php marker
@@ -160,6 +160,8 @@ class PHPRequires(_basePluggableRequires):
     def addPluggableRequirements(self, path, fullpath, pkg, macros):
         if not self._isPHPFile(fullpath):
             return
+        if self.repos is None:
+            self.repos = self.recipe.getRepos()
 
         if self.phpTrove is None:
             self._getPHPPathCandidateList()
