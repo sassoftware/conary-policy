@@ -203,3 +203,44 @@ class Licenses(_BaseMetadata):
             licenses = self.licenses
         itemDict = dict(licenses = licenses, language = self.language)
         self.recipe._addMetadataItem(troveNames, itemDict)
+
+class ResetKeyValueMetadata(policy.PackagePolicy):
+    """
+    NAME
+    ====
+
+    B{C{r.ResetKeyValueMetadata()}} - Selectively reset key-value metadata
+    fields.
+
+    SYNOPSIS
+    ========
+
+    C{r.ResetKeyValueMetadata(I{key}, [I{key}, ...]}
+
+    DESCRIPTION
+    ===========
+
+    The C{r.ResetKeyValueMetadata()} class can be used for selectively
+    resetting (deleting) keys from the key-value metadata.
+
+    EXAMPLES
+    ========
+
+    C{r.ResetKeyValueMetadata('target-platform', 'target-architecture')}
+
+    will unset two (hypothetical) keys, I{target-platform} and
+    I{target-architecture}.
+    """
+
+    def updateArgs(self, *args, **keywords):
+        self._filteredKeyValues = set(args)
+        policy.PackagePolicy.updateArgs(self, **keywords)
+
+    def do(self):
+        if not hasattr(self.recipe, '_filteredKeyValueMetadata'):
+            # Old Conary
+            return
+        if not hasattr(self, '_filteredKeyValues'):
+            # Policy not invoked
+            return
+        self.recipe._filteredKeyValueMetadata.update(self._filteredKeyValues)

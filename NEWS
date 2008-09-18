@@ -13,6 +13,8 @@ Changes in @NEW@:
   o The PHPRequires policy now looks for binaries named "php5" as well
     as "php".  Previous PHP5 handling looked only for packages named
     "php5" but still expected to see binaries named "php". (CNP-165)
+  o The ResetKeyValueMetadata policy has been added. It selectively
+    deletes certain key-value metadata fields. (CNY-2983)
 
 Changes in 1.0.21:
   o A bug causing PHPRequires to fail in rMake has been fixed. (CNP-154)
