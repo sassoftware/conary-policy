@@ -9,6 +9,10 @@ Changes in @NEW@:
   o The SymlinkTargetRequires policy has been added. This policy will
     supress the DanglingSymlinks policy in favor of adding requires when
     appropriate. (CNP-130)
+  o The PHPRequires policy now caches negative results. (CNP-164)
+  o The PHPRequires policy now looks for binaries named "php5" as well
+    as "php".  Previous PHP5 handling looked only for packages named
+    "php5" but still expected to see binaries named "php". (CNP-165)
 
 Changes in 1.0.21:
   o A bug causing PHPRequires to fail in rMake has been fixed. (CNP-154)

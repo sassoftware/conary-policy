@@ -69,6 +69,10 @@ class PHPRequires(_basePluggableRequires):
     def __init__(self, *args, **kwargs):
         _basePluggableRequires.__init__(self, *args, **kwargs)
         self.phpTrove = None
+        self.phpPathList = []
+
+        self.cfg = self.recipe.cfg
+        self.repos = self.recipe.getRepos()
 
     def _isPHPFile(self, fullPath):
         # confirm identity of a PHP file by the presence of the <?php marker
@@ -86,80 +90,98 @@ class PHPRequires(_basePluggableRequires):
             # add the last 5 chars to the end to ensure we don't break a marker
             buf = buf[-5:] + f.read(4096)
 
+    def _getPHPPathCandidateList(self):
+        phpBinNames = ('php', 'php5')
+        macroPaths = [ x % self.recipe.macros for x in
+                        ('%(bindir)s', '%(essentialbindir)s') ]
+        for path in os.getenv('PATH', '').split(os.pathsep) + macroPaths:
+            for bin in phpBinNames:
+                binPath = os.path.join(path, bin)
+                if binPath not in self.phpPathList:
+                    self.phpPathList.append(binPath)
+
+    def _checkLocalSystem(self, path):
+        db = database.Database(self.cfg.root,
+                               self.cfg.dbPath)
+        for phpPath in self.phpPathList:
+            # first, do a direct check of the filesystem.
+            if db.pathIsOwned(phpPath):
+                troveList = db.iterTrovesByPath(phpPath)
+                return troveList[0].getName()
+
+    def _checkBuildRequires(self, path):
+        # then check the buildReqs. we'll drill down to specific files
+        # from the package level to ensure we don't introduce conflicting
+        # deps for different versions of PHP
+        # for example assume php5:devel is in the buildReqs. clearly
+        # php5:lib is the correct trove to require
+        pkgNames = [ x.split(':')[0] for x in self.recipe.buildRequires ]
+
+        troveDict = self.repos.findTroves(
+            self.cfg.installLabelPath,
+            [ (x, None, self.cfg.buildFlavor) for x in pkgNames ],
+            allowMissing = True
+        )
+
+        trvs = self.repos.getTroves(list(itertools.chain(*troveDict.values())))
+        trvs = dict([ (x.getName(), x) for x in trvs ])
+
+        for pkgName in pkgNames:
+            pkgTrv = trvs.get(pkgName)
+            if not pkgTrv:
+                continue
+
+            for pkgComp in self.repos.getTroves(list(pkgTrv.iterTroveList(
+                    strongRefs = True, weakRefs = True))):
+                if [ x[1] for x in pkgComp.iterFileList()
+                          if x[1] in self.phpPathList ]:
+                    return pkgComp.getName()
+
+    def _checkRepository(self, path):
+        # nothing in buildRequires specifies any particular php
+        # package.
+        # last resort: check for php on the installLabelPath from the repo
+        for lbl in self.cfg.installLabelPath:
+            pathDict = self.repos.getTroveLeavesByPath(self.phpPathList, lbl)
+            for phpPath in self.phpPathList:
+                # find the first trove on the installLabelPath that
+                # provides a path to php. warn on multiple matches.
+                phpPkgList = set(x[0] for x in pathDict[phpPath])
+                if len(phpPkgList) == 1:
+                    return phpPkgList.pop()
+                elif len(phpPkgList):
+                    self.warn("'%s' requires PHP, which is provided by " \
+                            "multiple troves. Add one of the following " \
+                            "troves to the recipe's buildRequires to " \
+                            "satisfy this dependency: ('%s')" % \
+                            (path, "', '".join(phpPkgList)))
+                    return False
+
     def addPluggableRequirements(self, path, fullpath, pkg, macros):
         if not self._isPHPFile(fullpath):
             return
-        cfg = self.recipe.cfg
-        db = database.Database(cfg.root, cfg.dbPath)
-        repos = self.recipe.getRepos()
 
-        phpPathList = [os.path.join(x, 'php') \
-                for x in os.getenv('PATH', '').split(os.pathsep)]
-        # add some sane fallback candidates
-        for defPath in ('%(bindir)s/php', '%(essentialbindir)s/php'):
-            defPath = defPath % macros
-            if defPath not in phpPathList:
-                phpPathList.append(defPath)
-        if not self.phpTrove:
-            for phpPath in phpPathList:
-                # first, do a direct check of the filesystem.
-                if db.pathIsOwned(phpPath):
-                    troveList = db.iterTrovesByPath(phpPath)
-                    self.phpTrove = troveList[0].getName()
+        if self.phpTrove is None:
+            self._getPHPPathCandidateList()
+
+            for check in (self._checkLocalSystem,
+                          self._checkBuildRequires,
+                          self._checkRepository):
+
+                result = check(path)
+                if result:
+                    self.phpTrove = result
                     break
 
-        if not self.phpTrove:
-            # then check the buildReqs. we'll drill down to specific files
-            # from the package level to ensure we don't introduce conflicting
-            # deps for different versions of PHP
-            # for example assume php5:lib is in the buildReqs. clearly
-            # php5:devel is the correct trove to require
-            pkgNames = [x.split(':')[0] for x in self.recipe.buildRequires]
-            troveDict = repos.findTroves(cfg.installLabelPath,
-                    [(x, None, cfg.buildFlavor) for x in pkgNames],
-                    allowMissing = True)
-            trvs = repos.getTroves(list(itertools.chain(*troveDict.values())))
-            trvs = dict([(x.getName(), x) for x in trvs])
-            for pkgName in pkgNames:
-                if self.phpTrove:
-                    break
-                pkgTrv = trvs.get(pkgName)
-                if not pkgTrv:
-                    continue
-                for pkgComp in repos.getTroves(list(pkgTrv.iterTroveList( \
-                        strongRefs = True, weakRefs = True))):
-                    if [x[1] for x in pkgComp.iterFileList() if x[1] in phpPathList]:
-                        self.phpTrove = pkgComp.getName()
-                        break
-
-        if not self.phpTrove:
-            # nothing in buildRequires specifies any particular php
-            # package.
-            # last resort: check for php on the installLabelPath from the repo
-            for lbl in cfg.installLabelPath:
-                if self.phpTrove:
-                    # we found a satisfactory trove on phpPathList. quit looking
-                    break
-                pathDict = repos.getTroveLeavesByPath(phpPathList, lbl)
-                for phpPath in phpPathList:
-                    # find the first trove on the installLabelPath that
-                    # provides a path to php. warn on multiple matches.
-                    phpPkgList = list(set(x[0] for x in pathDict[phpPath]))
-                    if len(phpPkgList) == 1:
-                        self.phpTrove = phpPkgList[0]
-                        break
-                    elif len(phpPkgList):
-                        self.warn("'%s' requires PHP, which is provided by " \
-                                "multiple troves. Add one of the following " \
-                                "troves to the recipe's buildRequires to " \
-                                "satisfy this dependency: ('%s')" % \
-                                (path, "', '".join(phpPkgList)))
-                        return
+                # check for errors
+                elif result == False:
+                    return
 
         if self.phpTrove:
             self._addRequirement(path, self.phpTrove, [], pkg,
                                  deps.TroveDependencies)
         else:
+            self.phpTrove = False
             self.warn("'%s' requires PHP, which is not provided by any " \
                     "troves. Please add a trove that provides the PHP " \
                     "interpreter to your buildRequires." % path)
