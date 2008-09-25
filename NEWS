@@ -1,4 +1,4 @@
-Changes in @NEW@:
+Changes in 1.0.22:
   o A bug causing PHPRequires to fail if buildRequires are not present
     in the repository has been fixed. (CNP-160)
   o PythonEggs now allows directories that end in .egg to be packaged.
