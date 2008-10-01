@@ -99,9 +99,11 @@ Changes in 1.0.15:
 Changes in 1.0.14:
   o Policies that move files in destdir now track path translations
     so files will end up in the correct package or component. (CNY-1679)
-  o A policy to enforce a requirement on xinetd when a configuration
-    file with "disabled = no" is deployed in /etc/xinetd.d/ has been
-    added. (CNP-93)
+  o The XinetdConfigRequires policy has been added to enforce a requirement
+    on xinetd when a configuration file with "disabled = no" is deployed
+    in the /etc/xinetd.d/ directory. (CNP-93)
+  o The PkgConfigRequires policy has been added to represent the
+    internal dependencies expressed by pkg-config files. (CNP-93)
 
 Changes in 1.0.13:
   o The EnforceCILBuildRequires policy now ensures that the build
@@ -118,7 +120,7 @@ Changes in 1.0.13:
     files) consider :devel, :devellib, and :lib as a set, choosing
     the best component to recommend in that order. (CNP-105)
   o The NormalizePythonInterpreterVersion policy now can be told
-    to make specific version mappings that override its hueristics,
+    to make specific version mappings that override its heuristics,
     which is necessary in particular to build multiple python
     versions which can co-exist on the same system. (CNP-104)
 
