@@ -13,6 +13,7 @@
 #
 
 import os
+import re
 import stat
 
 from conary.build import filter, policy, packagepolicy
@@ -149,7 +150,7 @@ class SymlinkTargetRequires(_basePluggableRequires):
         if provides.satisfies(fileDep):
             self._addRequirement(path, contents, [], pkg,
                     deps.FileDependencies)
-            self.recipe.DanglingSymlinks(exceptions = path,
+            self.recipe.DanglingSymlinks(exceptions = re.escape(path),
                     allowUnusedFilters = True)
             if trv.getName() not in self.recipe.buildRequires:
                 self.recipe.reportMissingBuildRequires(trv.getName())
@@ -161,7 +162,7 @@ class SymlinkTargetRequires(_basePluggableRequires):
             self.warn("'%s' does not provide '%s', so a requirement on the " \
                     "trove itself was used to satisfy dangling symlink: %s"  %\
                     (trv.getName(), fileDep, path))
-            self.recipe.DanglingSymlinks(exceptions = path,
+            self.recipe.DanglingSymlinks(exceptions = re.escape(path),
                     allowUnusedFilters = True)
             if trv.getName() not in self.recipe.buildRequires:
                 self.recipe.reportMissingBuildRequires(trv.getName())
