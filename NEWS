@@ -1,7 +1,11 @@
 Changes in @NEW@:
   o A bug in SymlinkTargetRequires that caused a traceback when a
     symlink path contained a special regex character, such as +, has
-    been fixed (CNP-169)
+    been fixed. (CNP-169)
+  o The NormalizePythonInterpreterVersion policy has been modified to
+    apply to all python scripts, regardless of whether they are
+    executable, so that it applies to python modules as well as
+    scripts. (CNP-170)
 
 Changes in 1.0.22:
   o A bug causing PHPRequires to fail if buildRequires are not present

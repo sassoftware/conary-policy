@@ -892,9 +892,6 @@ class NormalizePythonInterpreterVersion(policy.DestdirPolicy):
         destdir = self.recipe.macros.destdir
         d = util.joinPaths(destdir, path)
         mode = os.lstat(d)[stat.ST_MODE]
-        if not mode & 0111: 
-            # we care about interpreter paths only in executable scripts
-            return
         m = self.recipe.magic[path]
         if m and m.name == 'script':
             interp = m.contents['interpreter']
