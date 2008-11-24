@@ -136,7 +136,7 @@ class Licenses(_BaseMetadata):
     NAME
     ====
 
-    B{C{r.Licenses()}} - Set the description for the troves built from the
+    B{C{r.Licenses()}} - Set the licenses for the troves built from the
     recipe.
 
     SYNOPSIS
