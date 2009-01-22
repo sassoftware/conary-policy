@@ -12,7 +12,7 @@
 # full details.
 #
 
-import sre
+import re
 import types
 
 from conary.build import policy
@@ -73,15 +73,15 @@ class TagLocale(policy.PackagePolicy):
     processUnmodified = True
     filetree = policy.PACKAGE
     localeExpressions = [
-        sre.compile(r'.*/locale(?:s)?/(?P<locale>[a-z]{2,3}(?:_[a-zA-Z]{2,3})?)(?:(?:\@|\.).*)?/.*/'),
-        sre.compile(r'.*/locale/man/(?P<locale>[a-z]{2,3})'),
-        sre.compile(r'/usr/share/man/(?P<locale>(?!man|cat|whatis|web)[a-zA-Z]{2,3}(?:_[a-z]{2,3})?).*/.*'),
+        re.compile(r'.*/locale(?:s)?/(?P<locale>[a-z]{2,3}(?:_[a-zA-Z]{2,3})?)(?:(?:\@|\.).*)?/.*/'),
+        re.compile(r'.*/locale/man/(?P<locale>[a-z]{2,3})'),
+        re.compile(r'/usr/share/man/(?P<locale>(?!man|cat|whatis|web)[a-zA-Z]{2,3}(?:_[a-z]{2,3})?).*/.*'),
     ]
-    legalLocaleName = sre.compile(r'^[a-zA-Z_]*$')
+    legalLocaleName = re.compile(r'^[a-zA-Z_]*$')
 
     def addLocaleExpression(self, exp):
         if '(?P<locale>' in exp:
-            self.localeExpressions.append(sre.compile(exp))
+            self.localeExpressions.append(re.compile(exp))
         else:
             self.warn('localeExp "%s" missing named group "locale";'
                       ' use "(?P<locale>" to introduce named group', exp)
