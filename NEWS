@@ -6,6 +6,8 @@ Changes in @NEW@:
     apply to all python scripts, regardless of whether they are
     executable, so that it applies to python modules as well as
     scripts. (CNP-170)
+  o When moving info files, specify the full destination path; shutil.move
+    has changed behavior in python 2.6 (CNP-173)
 
 Changes in 1.0.22:
   o A bug causing PHPRequires to fail if buildRequires are not present

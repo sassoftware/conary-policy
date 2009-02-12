@@ -417,17 +417,17 @@ class NormalizeInfoPages(policy.DestdirPolicy):
 
     def _moveToInfoRoot(self, file):
         infofilespath = '%(destdir)s/%(infodir)s' %self.macros
-        fullfile = '/'.join((infofilespath, file))
+        fullfile = util.joinPaths(infofilespath, file)
         if os.path.isdir(fullfile):
             for subfile in os.listdir(fullfile):
-                self._moveToInfoRoot('/'.join((file, subfile)))
+                self._moveToInfoRoot(util.joinPaths(file, subfile))
             shutil.rmtree(fullfile)
         elif os.path.dirname(fullfile) != infofilespath:
-            shutil.move(fullfile, infofilespath)
+            destPath = util.joinPaths(infofilespath,
+                                      os.path.basename(fullfile))
+            shutil.move(fullfile, destPath)
             try:
-                self.recipe.recordMove(fullfile,
-                        util.joinPaths(infofilespath,
-                            os.path.basename(fullfile)))
+                self.recipe.recordMove(fullfile, destPath)
             except AttributeError:
                 pass
 
