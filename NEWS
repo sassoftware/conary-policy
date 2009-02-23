@@ -1,4 +1,4 @@
-Changes in @NEW@:
+Changes in 1.0.23:
   o A bug in SymlinkTargetRequires that caused a traceback when a
     symlink path contained a special regex character, such as +, has
     been fixed. (CNP-169)
