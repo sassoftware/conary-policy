@@ -8,6 +8,9 @@ Changes in @NEW@:
     scripts. (CNP-170)
   o When moving info files, specify the full destination path; shutil.move
     has changed behavior in python 2.6 (CNP-173)
+  o A bug in PHPRequires policy that caused builds to fail or take an
+    extremely long time to complete when both php and php5 were available
+    has been fixed. (CNP-174)
 
 Changes in 1.0.22:
   o A bug causing PHPRequires to fail if buildRequires are not present

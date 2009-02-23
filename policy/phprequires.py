@@ -163,6 +163,10 @@ class PHPRequires(_basePluggableRequires):
         if self.repos is None:
             self.repos = self.recipe.getRepos()
 
+        # No phpTrove has been found, return.
+        if self.phpTrove == False:
+            return
+
         if self.phpTrove is None:
             self._getPHPPathCandidateList()
 
@@ -170,13 +174,13 @@ class PHPRequires(_basePluggableRequires):
                           self._checkBuildRequires,
                           self._checkRepository):
 
-                result = check(path)
-                if result:
-                    self.phpTrove = result
+                self.phpTrove = check(path)
+                if self.phpTrove:
                     break
 
-                # check for errors
-                elif result == False:
+                # Avoid printing an additional warning message if one has
+                # already been printed from the checkRepository method.
+                elif self.phpTrove == False:
                     return
 
         if self.phpTrove:
