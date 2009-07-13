@@ -149,7 +149,7 @@ class SharedLibrary(policy.PackagePolicy):
 
     invariantsubtrees = librarydirs
     invariantinclusions = [
-	(r'..*\.so\..*', None, stat.S_IFDIR),
+	(r'..*\.so.*', None, stat.S_IFDIR),
     ]
     recursive = False
 

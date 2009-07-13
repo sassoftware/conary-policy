@@ -1,3 +1,8 @@
+Changes in @NEW@:
+  o Libraries (ELF files containing DT_SONAME entries, not symbolic links)
+    with file names ending in .so (instead of .so.something) are now tagged
+    as shared libraries. (CNP-175)
+
 Changes in 1.0.23:
   o A bug in SymlinkTargetRequires that caused a traceback when a
     symlink path contained a special regex character, such as +, has
