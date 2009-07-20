@@ -71,6 +71,7 @@ class TagLocale(policy.PackagePolicy):
     # changing (or adding) locale tagging might be *the* reason for a
     # derived package
     processUnmodified = True
+    invariantexceptions = [ '(%(debuglibdir)s|%(debugsrcdir)s)/', ]
     filetree = policy.PACKAGE
     localeExpressions = [
         re.compile(r'.*/locale(?:s)?/(?P<locale>[a-z]{2,3}(?:_[a-zA-Z]{2,3})?)(?:(?:\@|\.).*)?/.*/'),
