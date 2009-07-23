@@ -1,10 +1,10 @@
-Changes in @NEW@:
-  o Libraries (ELF files containing DT_SONAME entries, not symbolic links)
-    with file names ending in .so (instead of .so.something) are now tagged
-    as shared libraries. (CNP-175)
+Changes in 1.0.24:
+  o Libraries (ELF files containing DT_SONAME entries, not symbolic
+    links) with file names ending in .so (instead of .so.something)
+    are now tagged as shared libraries. (CNP-175)
   o TagLocale no longer looks at files in %(debuglibdir)s or
-    %(debugsrcdir)s, since it would only complain about and not use
-    them anyway. (CNP-177)
+    %(debugsrcdir)s, since it would only complain about them and
+    ignore them anyway. (CNP-177)
 
 Changes in 1.0.23:
   o A bug in SymlinkTargetRequires that caused a traceback when a

@@ -12,7 +12,7 @@
 # full details.
 #
 
-VERSION=1.0.23
+VERSION=1.0.24
 NAMEVER=conary-policy-$(VERSION)
 DESTDIR=/
 POLICYDIR=/usr/lib/conary/policy/
@@ -24,6 +24,13 @@ install:
 	install -m 644 policy/*.py $(DESTDIR)$(POLICYDIR)
 
 dist:
+	if ! grep "^Changes in $(VERSION)" NEWS > /dev/null 2>&1; then \
+		echo "no NEWS entry"; \
+		1; \
+	fi
+	$(MAKE) archive
+
+archive:
 	mkdir -p $(NAMEVER)/policy
 	cp Makefile NEWS LICENSE $(NAMEVER)/
 	cp -a doc $(NAMEVER)/
@@ -33,6 +40,9 @@ dist:
 
 tag:
 	hg tag $(NAMEVER)
+
+version:
+	sed -i 's/@NEW@/$(VERSION)/g' NEWS
 
 clean:
 	rm -f policy/*.pyc
