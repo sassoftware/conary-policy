@@ -174,7 +174,7 @@ class Licenses(_BaseMetadata):
     Assuming that the source trove will build two packages, I{prk-client} and
     I{prk-server}, each with I{:runtime} and I{:lib} components:
 
-    C{r.License('GPL', 'LGPL')}
+    C{r.Licenses('GPL', 'LGPL')}
 
     will set the licenses for the I{prk-client} and I{prk-server} troves.
 
