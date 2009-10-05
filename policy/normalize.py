@@ -837,7 +837,7 @@ class NormalizePythonInterpreterVersion(policy.DestdirPolicy):
     SYNOPSIS
     ========
 
-    C{r.NormalizePythonInterpreterVersion([I{filterexp}], I{exceptions=filterexp}, I{versionMap=((from, to), ...)}])}
+    C{r.NormalizePythonInterpreterVersion([I{filterexp}], [I{exceptions=filterexp}i], [I{versionMap=((from, to), ...)}])}
 
     DESCRIPTION
     ===========
