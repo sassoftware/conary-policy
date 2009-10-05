@@ -154,7 +154,7 @@ class NormalizeManPages(policy.DestdirPolicy):
     SYNOPSIS
     ========
 
-    C{r.NormalizeManPages([I{filterexp}] I{exceptions=filterexp}])}
+    C{r.NormalizeManPages([I{filterexp}], [I{exceptions=filterexp}])}
 
     DESCRIPTION
     ===========
