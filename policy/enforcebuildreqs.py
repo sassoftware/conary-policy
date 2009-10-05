@@ -717,7 +717,7 @@ class EnforceConfigLogBuildRequirements(_enforceLogRequirements):
     EXAMPLES
     ========
 
-    C{r.EnforceConfigLogBuildRequirements(exceptions='flex:runtime')
+    C{r.EnforceConfigLogBuildRequirements(exceptions='flex:runtime')}
 
     This disables a requirement for flex:runtime; this would normally
     be because the C{configure} program checked for flex, but does not
@@ -873,7 +873,7 @@ class EnforceCMakeCacheBuildRequirements(_enforceLogRequirements):
     EXAMPLES
     ========
 
-    C{r.EnforceCMakeCacheBuildRequirements(exceptions='flex:runtime')
+    C{r.EnforceCMakeCacheBuildRequirements(exceptions='flex:runtime')}
 
     This disables a requirement for flex:runtime; this would normally
     be because the C{cmake} program checked for flex, but does not
