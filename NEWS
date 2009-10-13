@@ -2,6 +2,10 @@ Changes in @NEW@:
   o Policies have been made capsule-aware and assume that the capsule
     will handle essentially all operations involving files in capsules.
     (PFM-506)
+ o  The RemoveBootstrapTroveDependencies policy removes trove dependencies
+    that are not satisfied within the packages being built as a bootstrap
+    because they may be computed against an incompatibly-named set of
+    host packages. (PFM-506)
 
 Changes in 1.0.24:
   o Libraries (ELF files containing DT_SONAME entries, not symbolic
