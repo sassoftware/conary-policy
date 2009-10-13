@@ -1,3 +1,8 @@
+Changes in @NEW@:
+  o Policies have been made capsule-aware and assume that the capsule
+    will handle essentially all operations involving files in capsules.
+    (PFM-506)
+
 Changes in 1.0.24:
   o Libraries (ELF files containing DT_SONAME entries, not symbolic
     links) with file names ending in .so (instead of .so.something)

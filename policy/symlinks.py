@@ -61,6 +61,10 @@ class FixBuilddirSymlink(policy.DestdirPolicy):
     processUnmodified = False
 
     def doFile(self, path):
+        if hasattr(self.recipe, '_getCapsulePathForFile'):
+            if self.recipe._getCapsulePathForFile(path):
+                return
+
         d = self.macros.destdir
         f = util.joinPaths(d, path)
         if not os.path.islink(f):
@@ -189,7 +193,12 @@ class RelativeSymlinks(policy.DestdirPolicy):
     will create minimal relative symbolic links from them.
     """
     processUnmodified = False
+
     def doFile(self, path):
+        if hasattr(self.recipe, '_getCapsulePathForFile'):
+            if self.recipe._getCapsulePathForFile(path):
+                return
+
         fullpath = self.macros['destdir']+path
         if os.path.islink(fullpath):
             contents = os.readlink(fullpath)
@@ -259,6 +268,10 @@ class DanglingSymlinks(policy.PackagePolicy):
 	policy.PackagePolicy.doProcess(self, recipe)
 
     def doFile(self, path):
+        if hasattr(self.recipe, '_getCapsulePathForFile'):
+            if self.recipe._getCapsulePathForFile(path):
+                return
+
         d = self.macros.destdir
         f = util.joinPaths(d, path)
         if not os.path.islink(f):
@@ -276,13 +289,12 @@ class DanglingSymlinks(policy.PackagePolicy):
         abscontents = os.path.realpath(d+abscontents)[dl:]
         ap = recipe.autopkg
         if abscontents in ap.pathMap:
-	    componentMap = ap.componentMap
-	    if componentMap[abscontents] != componentMap[path] and \
+	    if ap.findComponent(abscontents) != ap.findComponent(path) and \
 	       not path.endswith('.so') and \
-	       not componentMap[path].getName().endswith(':test'):
+	       not ap.findComponent(path).getName().endswith(':test'):
 	        # warn about suspicious cross-component symlink
-                fromPkg = ap.componentMap[path]
-                targetPkg = ap.componentMap[abscontents]
+                fromPkg = ap.findComponent(path)
+                targetPkg = ap.findComponent(abscontents)
 
                 found = False
                 for depClass, dep in fromPkg.requires.iterDeps():
@@ -294,8 +306,8 @@ class DanglingSymlinks(policy.PackagePolicy):
 
                 if not found:
                     self.warn('symlink %s points from package %s to %s',
-                              path, componentMap[path].getName(),
-                              componentMap[abscontents].getName())
+                              path, ap.findComponent(path).getName(),
+                              ap.findComponent(abscontents).getName())
         else:
 	    for targetFilter, requirement in self.targetFilters:
 	        if targetFilter.match(abscontents):
@@ -306,7 +318,7 @@ class DanglingSymlinks(policy.PackagePolicy):
                         self.info('automatically adding requirement'
                                   ' %s for symlink %s', requirement, path)
                         # Requires has already run, touch this up
-                        pkg = ap.componentMap[path]
+                        pkg = ap.findComponent(path)
                         if path not in pkg.requiresMap:
                             pkg.requiresMap[path] = deps.DependencySet()
                         pkg.requiresMap[path].addDep(

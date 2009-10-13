@@ -17,7 +17,7 @@ import re
 import stat
 
 from conary.lib import magic, util
-from conary.build import policy
+from conary.build import policy, recipe
 
 
 class BadFilenames(policy.EnforcementPolicy):
@@ -70,6 +70,9 @@ class NonUTF8Filenames(policy.EnforcementPolicy):
     """
     processUnmodified = True
     def doFile(self, path):
+        if hasattr(self.recipe, '_getCapsulePathForFile'):
+            if self.recipe._getCapsulePathForFile(path):
+                return
         try:
             path.decode('utf-8')
         except UnicodeDecodeError:
@@ -127,6 +130,9 @@ class NonMultilibComponent(policy.EnforcementPolicy):
         return True
 
     def doFile(self, path):
+        if hasattr(self.recipe, '_getCapsulePathForFile'):
+            if self.recipe._getCapsulePathForFile(path):
+                return
         if not False in self.reported.values():
             return
         # we've already matched effectively the same regex, so should match...
@@ -177,6 +183,9 @@ class NonMultilibDirectories(policy.EnforcementPolicy):
         return True
 
     def doFile(self, path):
+        if hasattr(self.recipe, '_getCapsulePathForFile'):
+            if self.recipe._getCapsulePathForFile(path):
+                return
         self.error('path %s has illegal lib64 component on 32-bit platform',
                    path)
 
@@ -206,30 +215,34 @@ class CheckDestDir(policy.EnforcementPolicy):
     does not search inside files.
     """
     processUnmodified = False
-    def doFile(self, file):
+    def doFile(self, filename):
+        if hasattr(self.recipe, '_getCapsulePathForFile'):
+            if self.recipe._getCapsulePathForFile(filename):
+                return
+
 	d = self.macros.destdir
         b = self.macros.builddir
 
-	if file.find(d) != -1:
-            self.error('Path %s contains destdir %s', file, d)
-	fullpath = d+file
+	if filename.find(d) != -1:
+            self.error('Path %s contains destdir %s', filename, d)
+	fullpath = d+filename
 	if os.path.islink(fullpath):
 	    contents = os.readlink(fullpath)
 	    if contents.find(d) != -1:
                 self.error('Symlink %s contains destdir %s in contents %s',
-                           file, d, contents)
+                           filename, d, contents)
 	    if contents.find(b) != -1:
                 self.error('Symlink %s contains builddir %s in contents %s',
-                           file, b, contents)
+                           filename, b, contents)
 
         badRPATHS = (d, b, '/tmp', '/var/tmp')
-        m = self.recipe.magic[file]
+        m = self.recipe.magic[filename]
         if m and m.name == "ELF":
             rpaths = m.contents['RPATH'] or ''
             for rpath in rpaths.split(':'):
                 for badRPATH in badRPATHS:
                     if rpath.startswith(badRPATH):
-                        self.error('file %s has illegal RPATH %s', file, rpath)
+                        self.error('file %s has illegal RPATH %s', filename, rpath)
                         break
 
 
@@ -296,6 +309,9 @@ class FilesForDirectories(policy.EnforcementPolicy):
     def do(self):
 	d = self.recipe.macros.destdir
 	for path in self.candidates:
+            if hasattr(self.recipe, '_getCapsulePathForFile'):
+                if self.recipe._getCapsulePathForFile(path):
+                    break
 	    fullpath = util.joinPaths(d, path)
 	    if os.path.exists(fullpath):
 		if not os.path.isdir(fullpath):
@@ -347,6 +363,11 @@ class FixObsoletePaths(policy.DestdirPolicy, _pathMap):
     }
 
     def do(self):
+        if hasattr(self.recipe, '_getCapsulePathForFile'):
+            if self.recipe.getType() == recipe.RECIPE_TYPE_CAPSULE:
+                # Cannot reasonably separate capsule and non-capsule
+                # paths in this policy, so bail
+                return
         d = self.recipe.macros.destdir
         for path, newPath in self.candidatePaths():
             if os.path.isdir(d + path) and not os.listdir(d + path):
@@ -408,6 +429,9 @@ class NonLSBPaths(policy.EnforcementPolicy, _pathMap):
 
     def doFile(self, path):
         newPath, error, advice = self.candidates[path]
+        if hasattr(self.recipe, '_getCapsulePathForFile'):
+            if self.recipe.getType() == recipe.RECIPE_TYPE_CAPSULE:
+                error = False
         if error:
             talk = self.error
         else:
@@ -443,6 +467,9 @@ class PythonEggs(policy.EnforcementPolicy):
     ]
 
     def doFile(self, path):
+        if hasattr(self.recipe, '_getCapsulePathForFile'):
+            if self.recipe._getCapsulePathForFile(path):
+                return
         fullPath = util.joinPaths(self.recipe.macros.destdir, path)
         m = magic.magic(fullPath)
         if not (m and m.name == 'ZIP'):

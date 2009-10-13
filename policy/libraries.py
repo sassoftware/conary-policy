@@ -16,7 +16,7 @@ import os
 import stat
 
 from conary.lib import util
-from conary.build import policy
+from conary.build import policy, recipe
 from conary.local import database
 
 
@@ -173,6 +173,10 @@ class SharedLibrary(policy.PackagePolicy):
             self.recipe.Requires(**d)
 
     def doFile(self, filename):
+        if hasattr(self.recipe, '_getCapsulePathForFile'):
+            if self.recipe._getCapsulePathForFile(filename):
+                return
+
 	fullpath = self.macros.destdir + filename
 	if os.path.isfile(fullpath) and util.isregular(fullpath):
 	    m = self.recipe.magic[filename]
@@ -234,6 +238,10 @@ class FixupMultilibPaths(policy.DestdirPolicy):
         return True
 
     def doFile(self, path):
+        if hasattr(self.recipe, '_getCapsulePathForFile'):
+            if self.recipe._getCapsulePathForFile(path):
+                return
+
         destdir = self.macros.destdir
         fullpath = util.joinPaths(destdir, path)
         mode = os.lstat(fullpath)[stat.ST_MODE]
@@ -355,6 +363,10 @@ class ExecutableLibraries(policy.DestdirPolicy):
     recursive = False
 
     def doFile(self, path):
+        if hasattr(self.recipe, '_getCapsulePathForFile'):
+            if self.recipe._getCapsulePathForFile(path):
+                return
+
         fullpath = util.joinPaths(self.macros['destdir'], path)
         if not util.isregular(fullpath):
             return
@@ -407,6 +419,10 @@ class CheckSonames(policy.EnforcementPolicy):
     nonSymlinkWarn = set()
 
     def doFile(self, path):
+        if hasattr(self.recipe, '_getCapsulePathForFile'):
+            if self.recipe._getCapsulePathForFile(path):
+                return
+
 	d = self.macros.destdir
 	destlen = len(d)
 	l = util.joinPaths(d, path)
@@ -487,6 +503,9 @@ class NormalizeLibrarySymlinks(policy.DestdirPolicy):
     invariantsubtrees = librarydirs
 
     def do(self):
+        if hasattr(self.recipe, '_getCapsulePathForFile'):
+            if self.recipe.getType() == recipe.RECIPE_TYPE_CAPSULE:
+                return
         macros = self.macros
         subtrees = self.invariantsubtrees
         if self.subtrees:

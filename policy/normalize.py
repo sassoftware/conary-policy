@@ -21,7 +21,7 @@ import shutil
 import zipfile
 
 from conary.lib import magic, util
-from conary.build import policy
+from conary.build import policy, recipe
 from conary.local import database
 
 
@@ -102,6 +102,9 @@ class NormalizeCompression(policy.DestdirPolicy):
     bzip = None
 
     def doFile(self, path):
+        if hasattr(self.recipe, '_getCapsulePathForFile'):
+            if self.recipe._getCapsulePathForFile(path):
+                return
         m = self.recipe.magic[path]
         if not m:
             return
@@ -339,6 +342,10 @@ class NormalizeManPages(policy.DestdirPolicy):
         self.bunzip = None
 
     def do(self):
+        if hasattr(self.recipe, '_getCapsulePathForFile'):
+            if self.recipe.getType() == recipe.RECIPE_TYPE_CAPSULE:
+                return
+
         for manpath in sorted(list(set((
                 self.macros.mandir,
                 os.sep.join((self.macros.x11prefix, 'man')),
@@ -388,6 +395,10 @@ class NormalizeInfoPages(policy.DestdirPolicy):
     )
     # Not safe for derived packages in this form, needs explicit checks
     def do(self):
+        if hasattr(self.recipe, '_getCapsulePathForFile'):
+            if self.recipe.getType() == recipe.RECIPE_TYPE_CAPSULE:
+                return
+
         dir = self.macros['infodir']+'/dir'
         fsdir = self.macros['destdir']+dir
         if os.path.exists(fsdir):
@@ -507,6 +518,10 @@ class NormalizeInitscriptLocation(policy.DestdirPolicy):
         return self.macros['initdir'] != '/etc/rc.d/init.d'
 
     def doFile(self, path):
+        if hasattr(self.recipe, '_getCapsulePathForFile'):
+            if self.recipe._getCapsulePathForFile(path):
+                return
+
         basename = os.path.basename(path)
         target = util.joinPaths(self.macros['initdir'], basename)
         if os.path.exists(self.macros['destdir'] + os.sep + target):
@@ -562,6 +577,10 @@ class NormalizeInitscriptContents(policy.DestdirPolicy):
     invariantinclusions = [ ('.*', 0400, stat.S_IFDIR), ]
 
     def doFile(self, path):
+        if hasattr(self.recipe, '_getCapsulePathForFile'):
+            if self.recipe._getCapsulePathForFile(path):
+                return
+
         m = self.recipe.macros
         fullpath = '/'.join((m.destdir, path))
         if os.path.islink(fullpath):
@@ -614,6 +633,10 @@ class NormalizeAppDefaults(policy.DestdirPolicy):
     """
     # not safe in this form for derived packages
     def do(self):
+        if hasattr(self.recipe, '_getCapsulePathForFile'):
+            if self.recipe.getType() == recipe.RECIPE_TYPE_CAPSULE:
+                return
+
         e = '%(destdir)s/%(sysconfdir)s/X11/app-defaults' % self.macros
         if not os.path.isdir(e):
             return
@@ -669,6 +692,10 @@ class NormalizeInterpreterPaths(policy.DestdirPolicy):
     invariantexceptions = [ '%(thisdocdir.literalRegex)s/', ]
 
     def doFile(self, path):
+        if hasattr(self.recipe, '_getCapsulePathForFile'):
+            if self.recipe._getCapsulePathForFile(path):
+                return
+
         destdir = self.recipe.macros.destdir
         d = util.joinPaths(destdir, path)
         
@@ -803,6 +830,10 @@ class NormalizePamConfig(policy.DestdirPolicy):
     ]
 
     def doFile(self, path):
+        if hasattr(self.recipe, '_getCapsulePathForFile'):
+            if self.recipe._getCapsulePathForFile(path):
+                return
+
         d = util.joinPaths(self.recipe.macros.destdir, path)
         mode = os.lstat(d)[stat.ST_MODE]
         if stat.S_ISLNK(mode):
@@ -889,6 +920,10 @@ class NormalizePythonInterpreterVersion(policy.DestdirPolicy):
         self.versionMap = versionMap
 
     def doFile(self, path):
+        if hasattr(self.recipe, '_getCapsulePathForFile'):
+            if self.recipe._getCapsulePathForFile(path):
+                return
+
         destdir = self.recipe.macros.destdir
         d = util.joinPaths(destdir, path)
         mode = os.lstat(d)[stat.ST_MODE]
@@ -986,6 +1021,10 @@ class NormalizePythonEggs(policy.DestdirPolicy):
     )
 
     def doFile(self, path):
+        if hasattr(self.recipe, '_getCapsulePathForFile'):
+            if self.recipe._getCapsulePathForFile(path):
+                return
+
         dir = self.recipe.macros.destdir
         fullPath = util.joinPaths(dir, path)
         m = magic.magic(fullPath)

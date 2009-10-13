@@ -45,6 +45,10 @@ class ReadableDocs(policy.DestdirPolicy):
     ]
 
     def doFile(self, path):
+        if hasattr(self.recipe, '_getCapsulePathForFile'):
+            if self.recipe._getCapsulePathForFile(path):
+                return
+
         d = self.macros['destdir']
         fullpath = util.joinPaths(d, path)
         mode = os.lstat(fullpath)[stat.ST_MODE]
@@ -89,6 +93,10 @@ class WarnWriteable(policy.EnforcementPolicy):
     processUnmodified = False
 
     def doFile(self, filename):
+        if hasattr(self.recipe, '_getCapsulePathForFile'):
+            if self.recipe._getCapsulePathForFile(filename):
+                return
+
         fullpath = self.macros.destdir + filename
 	if os.path.islink(fullpath):
 	    return
@@ -130,13 +138,18 @@ class WorldWriteableExecutables(policy.EnforcementPolicy):
     # Note that this policy is separate from WarnWriteable because
     # calling r.SetModes should not override this policy automatically.
     invariantexceptions = [ ('.*', stat.S_IFDIR) ]
-    def doFile(self, file):
+
+    def doFile(self, path):
+        if hasattr(self.recipe, '_getCapsulePathForFile'):
+            if self.recipe._getCapsulePathForFile(path):
+                return
+
 	d = self.macros['destdir']
-	mode = os.lstat(util.joinPaths(d, file))[stat.ST_MODE]
+	mode = os.lstat(util.joinPaths(d, path))[stat.ST_MODE]
         if mode & 0111 and mode & 02 and not stat.S_ISLNK(mode):
             self.error(
                 "%s has executable mode 0%o with world-writeable permission",
-                file, mode)
+                path, mode)
 
 
 class IgnoredSetuid(policy.EnforcementPolicy):
@@ -164,7 +177,12 @@ class IgnoredSetuid(policy.EnforcementPolicy):
     C{r.SetModes} command to explicitly set the setuid/setgid bits.
     """
     processUnmodified = False
+
     def doFile(self, path):
+        if hasattr(self.recipe, '_getCapsulePathForFile'):
+            if self.recipe._getCapsulePathForFile(path):
+                return
+
 	fullpath = self.macros.destdir + path
 	mode = os.lstat(fullpath)[stat.ST_MODE]
         pathMap = self.recipe.autopkg.pathMap

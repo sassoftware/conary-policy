@@ -146,7 +146,7 @@ class EggRequires(_basePluggableRequires):
                 fileRequired = util.normpath(os.path.realpath(fileRequired))
                 fileRequired = fileRequired[len(util.normpath(macros.destdir)):]
                 autopkg = self.recipe.autopkg
-                troveName = autopkg.componentMap[fileRequired].name
+                troveName = autopkg.findComponent(fileRequired).getName()
             else:
                 troveName = self._enforceProvidedPath(fileRequired,
                                                       fileType='egg-info',

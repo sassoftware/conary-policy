@@ -65,16 +65,19 @@ class NonBinariesInBindirs(policy.EnforcementPolicy):
 	'%(sysconfdir)s/cron.monthly/',
     ]
 
-    def doFile(self, file):
+    def doFile(self, filename):
+        if hasattr(self.recipe, '_getCapsulePathForFile'):
+            if self.recipe._getCapsulePathForFile(filename):
+                return
 	d = self.macros['destdir']
-	mode = os.lstat(util.joinPaths(d, file))[stat.ST_MODE]
+	mode = os.lstat(util.joinPaths(d, filename))[stat.ST_MODE]
 	if not mode & 0111:
             self.error(
                 "%s has mode 0%o with no executable permission in bindir",
-                file, mode)
-	m = self.recipe.magic[file]
+                filename, mode)
+	m = self.recipe.magic[filename]
 	if m and m.name == 'ltwrapper':
-            self.error("%s is a build-only libtool wrapper script", file)
+            self.error("%s is a build-only libtool wrapper script", filename)
 
 
 class FilesInMandir(policy.EnforcementPolicy):
@@ -113,8 +116,11 @@ class FilesInMandir(policy.EnforcementPolicy):
     ]
     recursive = False
 
-    def doFile(self, file):
-        self.error("%s is non-directory file in mandir", file)
+    def doFile(self, filename):
+        if hasattr(self.recipe, '_getCapsulePathForFile'):
+            if self.recipe._getCapsulePathForFile(filename):
+                return
+        self.error("%s is non-directory file in mandir", filename)
 
 
 class FixupManpagePaths(policy.DestdirPolicy, FilesInMandir):
@@ -159,6 +165,10 @@ class FixupManpagePaths(policy.DestdirPolicy, FilesInMandir):
         self.error('Could not choose correct location for file %s.', path)
 
     def doFile(self, path):
+        if hasattr(self.recipe, '_getCapsulePathForFile'):
+            if self.recipe._getCapsulePathForFile(path):
+                return
+
         # heuristic parsing of a manpage filename to figure out its catagory
         mandir = self.recipe.macros.mandir
         d = self.recipe.macros.destdir
@@ -211,6 +221,10 @@ class BadInterpreterPaths(policy.EnforcementPolicy):
     invariantexceptions = [ '%(thisdocdir.literalRegex)s/', ]
 
     def doFile(self, path):
+        if hasattr(self.recipe, '_getCapsulePathForFile'):
+            if self.recipe._getCapsulePathForFile(path):
+                return
+
 	d = self.macros['destdir']
 	mode = os.lstat(util.joinPaths(d, path))[stat.ST_MODE]
 	if not mode & 0111:
@@ -264,15 +278,18 @@ class ImproperlyShared(policy.EnforcementPolicy):
     processUnmodified = False
     invariantsubtrees = [ '/usr/share/' ]
 
-    def doFile(self, file):
-        m = self.recipe.magic[file]
+    def doFile(self, filename):
+        if hasattr(self.recipe, '_getCapsulePathForFile'):
+            if self.recipe._getCapsulePathForFile(filename):
+                return
+        m = self.recipe.magic[filename]
 	if m:
 	    if m.name == "ELF":
                 self.error(
                     "Architecture-specific file %s in shared data directory",
-                    file)
+                    filename)
 	    if m.name == "ar":
-                self.error("Possibly architecture-specific file %s in shared data directory", file)
+                self.error("Possibly architecture-specific file %s in shared data directory", filename)
 
 
 class CheckDesktopFiles(policy.EnforcementPolicy):
@@ -328,6 +345,9 @@ class CheckDesktopFiles(policy.EnforcementPolicy):
         policy.EnforcementPolicy.updateArgs(self, *args, **keywords)
 
     def doFile(self, filename):
+        if hasattr(self.recipe, '_getCapsulePathForFile'):
+            if self.recipe._getCapsulePathForFile(filename):
+                return
         self.iconDirs = [ x % self.macros for x in self.iconDirs ]
         self.checkIcon(filename)
 
@@ -399,7 +419,12 @@ class RequireChkconfig(policy.EnforcementPolicy):
     """
     processUnmodified = False
     invariantsubtrees = [ '%(initdir)s' ]
+
     def doFile(self, path):
+        if hasattr(self.recipe, '_getCapsulePathForFile'):
+            if self.recipe._getCapsulePathForFile(path):
+                return
+
 	d = self.macros.destdir
         fullpath = util.joinPaths(d, path)
 	if not (os.path.isfile(fullpath) and util.isregular(fullpath)):
