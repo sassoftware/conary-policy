@@ -184,6 +184,8 @@ class PHPRequires(_basePluggableRequires):
                     return
 
         if self.phpTrove:
+            self.info('Adding dependency on %s for file %s',
+                self.phpTrove, path)
             self._addRequirement(path, self.phpTrove, [], pkg,
                                  deps.TroveDependencies)
         else:
