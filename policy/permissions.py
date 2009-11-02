@@ -45,8 +45,8 @@ class ReadableDocs(policy.DestdirPolicy):
     ]
 
     def doFile(self, path):
-        if hasattr(self.recipe, '_getCapsulePathForFile'):
-            if self.recipe._getCapsulePathForFile(path):
+        if hasattr(self.recipe, '_getCapsulePathsForFile'):
+            if self.recipe._getCapsulePathsForFile(path):
                 return
 
         d = self.macros['destdir']
@@ -93,8 +93,8 @@ class WarnWriteable(policy.EnforcementPolicy):
     processUnmodified = False
 
     def doFile(self, filename):
-        if hasattr(self.recipe, '_getCapsulePathForFile'):
-            if self.recipe._getCapsulePathForFile(filename):
+        if hasattr(self.recipe, '_getCapsulePathsForFile'):
+            if self.recipe._getCapsulePathsForFile(filename):
                 return
 
         fullpath = self.macros.destdir + filename
@@ -140,8 +140,8 @@ class WorldWriteableExecutables(policy.EnforcementPolicy):
     invariantexceptions = [ ('.*', stat.S_IFDIR) ]
 
     def doFile(self, path):
-        if hasattr(self.recipe, '_getCapsulePathForFile'):
-            if self.recipe._getCapsulePathForFile(path):
+        if hasattr(self.recipe, '_getCapsulePathsForFile'):
+            if self.recipe._getCapsulePathsForFile(path):
                 return
 
 	d = self.macros['destdir']
@@ -179,8 +179,8 @@ class IgnoredSetuid(policy.EnforcementPolicy):
     processUnmodified = False
 
     def doFile(self, path):
-        if hasattr(self.recipe, '_getCapsulePathForFile'):
-            if self.recipe._getCapsulePathForFile(path):
+        if hasattr(self.recipe, '_getCapsulePathsForFile'):
+            if self.recipe._getCapsulePathsForFile(path):
                 return
 
 	fullpath = self.macros.destdir + path

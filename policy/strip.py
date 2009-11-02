@@ -155,8 +155,8 @@ class Strip(policy.DestdirPolicy):
                                    self.recipe.cfg.dbPath)
 
     def doFile(self, path):
-        if hasattr(self.recipe, '_getCapsulePathForFile'):
-            if self.recipe._getCapsulePathForFile(path):
+        if hasattr(self.recipe, '_getCapsulePathsForFile'):
+            if self.recipe._getCapsulePathsForFile(path):
                 return
 
         m = self.recipe.magic[path]

@@ -66,8 +66,8 @@ class NonBinariesInBindirs(policy.EnforcementPolicy):
     ]
 
     def doFile(self, filename):
-        if hasattr(self.recipe, '_getCapsulePathForFile'):
-            if self.recipe._getCapsulePathForFile(filename):
+        if hasattr(self.recipe, '_getCapsulePathsForFile'):
+            if self.recipe._getCapsulePathsForFile(filename):
                 return
 	d = self.macros['destdir']
 	mode = os.lstat(util.joinPaths(d, filename))[stat.ST_MODE]
@@ -117,8 +117,8 @@ class FilesInMandir(policy.EnforcementPolicy):
     recursive = False
 
     def doFile(self, filename):
-        if hasattr(self.recipe, '_getCapsulePathForFile'):
-            if self.recipe._getCapsulePathForFile(filename):
+        if hasattr(self.recipe, '_getCapsulePathsForFile'):
+            if self.recipe._getCapsulePathsForFile(filename):
                 return
         self.error("%s is non-directory file in mandir", filename)
 
@@ -165,8 +165,8 @@ class FixupManpagePaths(policy.DestdirPolicy, FilesInMandir):
         self.error('Could not choose correct location for file %s.', path)
 
     def doFile(self, path):
-        if hasattr(self.recipe, '_getCapsulePathForFile'):
-            if self.recipe._getCapsulePathForFile(path):
+        if hasattr(self.recipe, '_getCapsulePathsForFile'):
+            if self.recipe._getCapsulePathsForFile(path):
                 return
 
         # heuristic parsing of a manpage filename to figure out its catagory
@@ -221,8 +221,8 @@ class BadInterpreterPaths(policy.EnforcementPolicy):
     invariantexceptions = [ '%(thisdocdir.literalRegex)s/', ]
 
     def doFile(self, path):
-        if hasattr(self.recipe, '_getCapsulePathForFile'):
-            if self.recipe._getCapsulePathForFile(path):
+        if hasattr(self.recipe, '_getCapsulePathsForFile'):
+            if self.recipe._getCapsulePathsForFile(path):
                 return
 
 	d = self.macros['destdir']
@@ -279,8 +279,8 @@ class ImproperlyShared(policy.EnforcementPolicy):
     invariantsubtrees = [ '/usr/share/' ]
 
     def doFile(self, filename):
-        if hasattr(self.recipe, '_getCapsulePathForFile'):
-            if self.recipe._getCapsulePathForFile(filename):
+        if hasattr(self.recipe, '_getCapsulePathsForFile'):
+            if self.recipe._getCapsulePathsForFile(filename):
                 return
         m = self.recipe.magic[filename]
 	if m:
@@ -345,8 +345,8 @@ class CheckDesktopFiles(policy.EnforcementPolicy):
         policy.EnforcementPolicy.updateArgs(self, *args, **keywords)
 
     def doFile(self, filename):
-        if hasattr(self.recipe, '_getCapsulePathForFile'):
-            if self.recipe._getCapsulePathForFile(filename):
+        if hasattr(self.recipe, '_getCapsulePathsForFile'):
+            if self.recipe._getCapsulePathsForFile(filename):
                 return
         self.iconDirs = [ x % self.macros for x in self.iconDirs ]
         self.checkIcon(filename)
@@ -421,8 +421,8 @@ class RequireChkconfig(policy.EnforcementPolicy):
     invariantsubtrees = [ '%(initdir)s' ]
 
     def doFile(self, path):
-        if hasattr(self.recipe, '_getCapsulePathForFile'):
-            if self.recipe._getCapsulePathForFile(path):
+        if hasattr(self.recipe, '_getCapsulePathsForFile'):
+            if self.recipe._getCapsulePathsForFile(path):
                 return
 
 	d = self.macros.destdir

@@ -56,8 +56,8 @@ class NormalizePkgConfig(policy.DestdirPolicy):
     ]
 
     def doFile(self, filename):
-        if hasattr(self.recipe, '_getCapsulePathForFile'):
-            if self.recipe._getCapsulePathForFile(filename):
+        if hasattr(self.recipe, '_getCapsulePathsForFile'):
+            if self.recipe._getCapsulePathsForFile(filename):
                 return
 
         libdir = self.recipe.macros.libdir
@@ -118,8 +118,8 @@ class PkgConfigRequires(_basePluggableRequires):
     invariantinclusions = [ r'(%(libdir)s|%(datadir)s)/pkgconfig/.*\.pc$' ]
 
     def addPluggableRequirements(self, path, fullpath, pkg, macros):
-        if hasattr(self.recipe, '_getCapsulePathForFile'):
-            if self.recipe._getCapsulePathForFile(path):
+        if hasattr(self.recipe, '_getCapsulePathsForFile'):
+            if self.recipe._getCapsulePathsForFile(path):
                 # since capsules do not convert to relative symlinks,
                 # we cannot depend on getting the realpath.  Unless
                 # we resolve that, assume that capsule-provided

@@ -61,8 +61,8 @@ class FixBuilddirSymlink(policy.DestdirPolicy):
     processUnmodified = False
 
     def doFile(self, path):
-        if hasattr(self.recipe, '_getCapsulePathForFile'):
-            if self.recipe._getCapsulePathForFile(path):
+        if hasattr(self.recipe, '_getCapsulePathsForFile'):
+            if self.recipe._getCapsulePathsForFile(path):
                 return
 
         d = self.macros.destdir
@@ -195,8 +195,8 @@ class RelativeSymlinks(policy.DestdirPolicy):
     processUnmodified = False
 
     def doFile(self, path):
-        if hasattr(self.recipe, '_getCapsulePathForFile'):
-            if self.recipe._getCapsulePathForFile(path):
+        if hasattr(self.recipe, '_getCapsulePathsForFile'):
+            if self.recipe._getCapsulePathsForFile(path):
                 return
 
         fullpath = self.macros['destdir']+path
@@ -268,8 +268,8 @@ class DanglingSymlinks(policy.PackagePolicy):
 	policy.PackagePolicy.doProcess(self, recipe)
 
     def doFile(self, path):
-        if hasattr(self.recipe, '_getCapsulePathForFile'):
-            if self.recipe._getCapsulePathForFile(path):
+        if hasattr(self.recipe, '_getCapsulePathsForFile'):
+            if self.recipe._getCapsulePathsForFile(path):
                 return
 
         d = self.macros.destdir

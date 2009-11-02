@@ -70,8 +70,8 @@ class NonUTF8Filenames(policy.EnforcementPolicy):
     """
     processUnmodified = True
     def doFile(self, path):
-        if hasattr(self.recipe, '_getCapsulePathForFile'):
-            if self.recipe._getCapsulePathForFile(path):
+        if hasattr(self.recipe, '_getCapsulePathsForFile'):
+            if self.recipe._getCapsulePathsForFile(path):
                 return
         try:
             path.decode('utf-8')
@@ -130,8 +130,8 @@ class NonMultilibComponent(policy.EnforcementPolicy):
         return True
 
     def doFile(self, path):
-        if hasattr(self.recipe, '_getCapsulePathForFile'):
-            if self.recipe._getCapsulePathForFile(path):
+        if hasattr(self.recipe, '_getCapsulePathsForFile'):
+            if self.recipe._getCapsulePathsForFile(path):
                 return
         if not False in self.reported.values():
             return
@@ -183,8 +183,8 @@ class NonMultilibDirectories(policy.EnforcementPolicy):
         return True
 
     def doFile(self, path):
-        if hasattr(self.recipe, '_getCapsulePathForFile'):
-            if self.recipe._getCapsulePathForFile(path):
+        if hasattr(self.recipe, '_getCapsulePathsForFile'):
+            if self.recipe._getCapsulePathsForFile(path):
                 return
         self.error('path %s has illegal lib64 component on 32-bit platform',
                    path)
@@ -216,8 +216,8 @@ class CheckDestDir(policy.EnforcementPolicy):
     """
     processUnmodified = False
     def doFile(self, filename):
-        if hasattr(self.recipe, '_getCapsulePathForFile'):
-            if self.recipe._getCapsulePathForFile(filename):
+        if hasattr(self.recipe, '_getCapsulePathsForFile'):
+            if self.recipe._getCapsulePathsForFile(filename):
                 return
 
 	d = self.macros.destdir
@@ -309,8 +309,8 @@ class FilesForDirectories(policy.EnforcementPolicy):
     def do(self):
 	d = self.recipe.macros.destdir
 	for path in self.candidates:
-            if hasattr(self.recipe, '_getCapsulePathForFile'):
-                if self.recipe._getCapsulePathForFile(path):
+            if hasattr(self.recipe, '_getCapsulePathsForFile'):
+                if self.recipe._getCapsulePathsForFile(path):
                     break
 	    fullpath = util.joinPaths(d, path)
 	    if os.path.exists(fullpath):
@@ -363,7 +363,7 @@ class FixObsoletePaths(policy.DestdirPolicy, _pathMap):
     }
 
     def do(self):
-        if hasattr(self.recipe, '_getCapsulePathForFile'):
+        if hasattr(self.recipe, '_getCapsulePathsForFile'):
             if self.recipe.getType() == recipe.RECIPE_TYPE_CAPSULE:
                 # Cannot reasonably separate capsule and non-capsule
                 # paths in this policy, so bail
@@ -429,7 +429,7 @@ class NonLSBPaths(policy.EnforcementPolicy, _pathMap):
 
     def doFile(self, path):
         newPath, error, advice = self.candidates[path]
-        if hasattr(self.recipe, '_getCapsulePathForFile'):
+        if hasattr(self.recipe, '_getCapsulePathsForFile'):
             if self.recipe.getType() == recipe.RECIPE_TYPE_CAPSULE:
                 error = False
         if error:
@@ -467,8 +467,8 @@ class PythonEggs(policy.EnforcementPolicy):
     ]
 
     def doFile(self, path):
-        if hasattr(self.recipe, '_getCapsulePathForFile'):
-            if self.recipe._getCapsulePathForFile(path):
+        if hasattr(self.recipe, '_getCapsulePathsForFile'):
+            if self.recipe._getCapsulePathsForFile(path):
                 return
         fullPath = util.joinPaths(self.recipe.macros.destdir, path)
         m = magic.magic(fullPath)

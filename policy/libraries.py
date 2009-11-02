@@ -173,8 +173,8 @@ class SharedLibrary(policy.PackagePolicy):
             self.recipe.Requires(**d)
 
     def doFile(self, filename):
-        if hasattr(self.recipe, '_getCapsulePathForFile'):
-            if self.recipe._getCapsulePathForFile(filename):
+        if hasattr(self.recipe, '_getCapsulePathsForFile'):
+            if self.recipe._getCapsulePathsForFile(filename):
                 return
 
 	fullpath = self.macros.destdir + filename
@@ -238,8 +238,8 @@ class FixupMultilibPaths(policy.DestdirPolicy):
         return True
 
     def doFile(self, path):
-        if hasattr(self.recipe, '_getCapsulePathForFile'):
-            if self.recipe._getCapsulePathForFile(path):
+        if hasattr(self.recipe, '_getCapsulePathsForFile'):
+            if self.recipe._getCapsulePathsForFile(path):
                 return
 
         destdir = self.macros.destdir
@@ -363,8 +363,8 @@ class ExecutableLibraries(policy.DestdirPolicy):
     recursive = False
 
     def doFile(self, path):
-        if hasattr(self.recipe, '_getCapsulePathForFile'):
-            if self.recipe._getCapsulePathForFile(path):
+        if hasattr(self.recipe, '_getCapsulePathsForFile'):
+            if self.recipe._getCapsulePathsForFile(path):
                 return
 
         fullpath = util.joinPaths(self.macros['destdir'], path)
@@ -419,8 +419,8 @@ class CheckSonames(policy.EnforcementPolicy):
     nonSymlinkWarn = set()
 
     def doFile(self, path):
-        if hasattr(self.recipe, '_getCapsulePathForFile'):
-            if self.recipe._getCapsulePathForFile(path):
+        if hasattr(self.recipe, '_getCapsulePathsForFile'):
+            if self.recipe._getCapsulePathsForFile(path):
                 return
 
 	d = self.macros.destdir
@@ -503,7 +503,7 @@ class NormalizeLibrarySymlinks(policy.DestdirPolicy):
     invariantsubtrees = librarydirs
 
     def do(self):
-        if hasattr(self.recipe, '_getCapsulePathForFile'):
+        if hasattr(self.recipe, '_getCapsulePathsForFile'):
             if self.recipe.getType() == recipe.RECIPE_TYPE_CAPSULE:
                 return
         macros = self.macros
