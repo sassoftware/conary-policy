@@ -97,6 +97,12 @@ class TagLocale(policy.PackagePolicy):
         policy.PackagePolicy.updateArgs(self, *args, **keywords)
 
     def doFile(self, filename):
+        if hasattr(self.recipe, '_getCapsulePathsForFile'):
+            if self.recipe._getCapsulePathsForFile(filename):
+                # even if a capsule were called :locale we still could
+                # not do locale filtering on it
+                return
+
         for localeExp in self.localeExpressions:
             m = localeExp.match(filename)
             if m is not None:
