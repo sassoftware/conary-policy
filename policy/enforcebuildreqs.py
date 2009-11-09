@@ -135,6 +135,7 @@ class _enforceBuildRequirements(_warnBuildRequirements):
     enforce buildRequires population from runtime dependencies.
     """
     processUnmodified = False
+    ignoreCapsuleFiles = False
 
     def test(self):
         components = self.recipe.autopkg.components
@@ -199,6 +200,10 @@ class _enforceBuildRequirements(_warnBuildRequirements):
                 and not self.mtimeChanged(path)):
                 # ignore this file
                 continue
+            if self.ignoreCapsuleFiles and hasattr(self.recipe,
+                                              '_getCapsulePathsForFile'):
+                if self.recipe._getCapsulePathsForFile(path):
+                    continue
             pkgfile = pathMap[path]
             if pkgfile.hasContents:
                 m = self.recipe.magic[path]
@@ -257,6 +262,10 @@ class _enforceBuildRequirements(_warnBuildRequirements):
                         and not self.mtimeChanged(path)):
                         # ignore this file
                         continue
+                    if self.ignoreCapsuleFiles and hasattr(self.recipe,
+                                                  '_getCapsulePathsForFile'):
+                        if self.recipe._getCapsulePathsForFile(path):
+                            continue
                     pkgfile = pathMap[path]
                     if pkgfile.hasContents and (pkgfile.requires() & dep):
                         pathList.append(path)
@@ -349,6 +358,7 @@ class EnforceSonameBuildRequirements(_enforceBuildRequirements):
 
     depClassType = deps.DEP_CLASS_SONAME
     depClass = deps.SonameDependencies
+    ignoreCapsuleFiles = True
 
     def reportMissingBuildRequires(self):
         _enforceBuildRequirements.reportMissingBuildRequires(self)
@@ -389,6 +399,7 @@ class EnforcePythonBuildRequirements(_enforceBuildRequirements):
 
     depClassType = deps.DEP_CLASS_PYTHON
     depClass = deps.PythonDependencies
+    ignoreCapsuleFiles = False
 
 
 class EnforceJavaBuildRequirements(_enforceBuildRequirements):
@@ -437,6 +448,7 @@ class EnforceJavaBuildRequirements(_enforceBuildRequirements):
 
     depClassType = deps.DEP_CLASS_JAVA
     depClass = deps.JavaDependencies
+    ignoreCapsuleFiles = True
 
     # FIXME: remove this when we are ready to enforce Java dependencies
     def setTalk(self):
@@ -476,6 +488,7 @@ class EnforceCILBuildRequirements(_enforceBuildRequirements):
 
     depClassType = deps.DEP_CLASS_CIL
     depClass = deps.CILDependencies
+    ignoreCapsuleFiles = True
 
     def test(self):
         CILDeps = _enforceBuildRequirements.test(self)
@@ -513,6 +526,7 @@ class EnforcePerlBuildRequirements(_enforceBuildRequirements):
 
     depClassType = deps.DEP_CLASS_PERL
     depClass = deps.PerlDependencies
+    ignoreCapsuleFiles = False
 
 
 class _enforceLogRequirements(policy.EnforcementPolicy):

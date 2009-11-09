@@ -42,10 +42,18 @@ class BadFilenames(policy.EnforcementPolicy):
     No exceptions are allowed.
     """
     processUnmodified = True
+
     def test(self):
         assert(not self.exceptions)
         return True
+
     def doFile(self, path):
+        # Capsules do not participate in protocols that forbid newlines
+        # in file names, such as tag handlers
+        if hasattr(self.recipe, '_getCapsulePathsForFile'):
+            if self.recipe._getCapsulePathsForFile(path):
+                return
+
         if path.find('\n') != -1:
             self.error("path %s has illegal newline character", path)
 
@@ -180,12 +188,13 @@ class NonMultilibDirectories(policy.EnforcementPolicy):
 	if self.macros.lib == 'lib64':
 	    # no need to do anything
 	    return False
+        if self.recipe.getType() == recipe.RECIPE_TYPE_CAPSULE:
+            # Cannot reasonably separate capsule and non-capsule
+            # paths in this policy, so bail
+            return False
         return True
 
     def doFile(self, path):
-        if hasattr(self.recipe, '_getCapsulePathsForFile'):
-            if self.recipe._getCapsulePathsForFile(path):
-                return
         self.error('path %s has illegal lib64 component on 32-bit platform',
                    path)
 
