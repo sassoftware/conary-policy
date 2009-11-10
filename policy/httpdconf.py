@@ -70,7 +70,7 @@ class HttpdConfigRequires(_basePluggableRequires):
 
     invariantinclusions = [ r'%(sysconfdir)s/httpd/conf.d/.*\.conf' ]
 
-    def addPluggableRequirements(self, path, fullpath, pkg, macros):
+    def addPluggableRequirements(self, path, fullpath, pkgFiles, macros):
         # test stripped lines to ignore all leading and trailing whitespace
         # so that indented comments and lines with only whitespace are
         # not counted as having configuration information in them
@@ -80,5 +80,5 @@ class HttpdConfigRequires(_basePluggableRequires):
             # All lines are blank or commented
             return
 
-        self._addRequirement(path, "/usr/sbin/httpd", [], pkg,
+        self._addRequirement(path, "/usr/sbin/httpd", [], pkgFiles,
                              deps.FileDependencies)

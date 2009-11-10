@@ -120,7 +120,7 @@ class SymlinkTargetRequires(_basePluggableRequires):
             self.db = database.Database(self.recipe.cfg.root,
                                    self.recipe.cfg.dbPath)
 
-    def addPluggableRequirements(self, path, fullpath, pkg, macros):
+    def addPluggableRequirements(self, path, fullpath, pkgFiles, macros):
         d = macros.destdir
         f = util.joinPaths(d, path)
         if not os.path.islink(f):
@@ -152,14 +152,14 @@ class SymlinkTargetRequires(_basePluggableRequires):
 
         provides = trv.getProvides()
         if provides.satisfies(fileDep):
-            self._addRequirement(path, contents, [], pkg,
+            self._addRequirement(path, contents, [], pkgFiles,
                     deps.FileDependencies)
             self.recipe.DanglingSymlinks(exceptions = re.escape(path),
                     allowUnusedFilters = True)
             if trv.getName() not in self.recipe.buildRequires:
                 self.recipe.reportMissingBuildRequires(trv.getName())
         elif provides.satisfies(troveDep):
-            self._addRequirement(path, trv.getName(), [], pkg,
+            self._addRequirement(path, trv.getName(), [], pkgFiles,
                     deps.TroveDependencies)
             # warn that a file dep would be better, but we'll settle for a
             # dep on the trove that contains the file

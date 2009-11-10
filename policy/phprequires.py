@@ -157,7 +157,7 @@ class PHPRequires(_basePluggableRequires):
                             (path, "', '".join(phpPkgList)))
                     return False
 
-    def addPluggableRequirements(self, path, fullpath, pkg, macros):
+    def addPluggableRequirements(self, path, fullpath, pkgFiles, macros):
         if not self._isPHPFile(fullpath):
             return
         if self.repos is None:
@@ -186,7 +186,7 @@ class PHPRequires(_basePluggableRequires):
         if self.phpTrove:
             self.info('Adding dependency on %s for file %s',
                 self.phpTrove, path)
-            self._addRequirement(path, self.phpTrove, [], pkg,
+            self._addRequirement(path, self.phpTrove, [], pkgFiles,
                                  deps.TroveDependencies)
         else:
             self.phpTrove = False

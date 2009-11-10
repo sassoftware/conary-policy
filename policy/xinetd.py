@@ -66,7 +66,7 @@ class XinetdConfigRequires(_basePluggableRequires):
 
     invariantinclusions = [ r'%(sysconfdir)s/xinetd.d/' ]
 
-    def addPluggableRequirements(self, path, fullpath, pkg, macros):
+    def addPluggableRequirements(self, path, fullpath, pkgFiles, macros):
 
         # parse file
         fContents = [x.strip() for x in file(fullpath).readlines()]
@@ -86,5 +86,5 @@ class XinetdConfigRequires(_basePluggableRequires):
 
         if not enabled:
             return
-        self._addRequirement(path, "xinetd:runtime", [], pkg,
+        self._addRequirement(path, "xinetd:runtime", [], pkgFiles,
                              deps.TroveDependencies)

@@ -115,7 +115,7 @@ class EggRequires(_basePluggableRequires):
         optionalReqs = [x for x in allReqs if x not in mandatoryReqs]
         return mandatoryReqs, optionalReqs
 
-    def addPluggableRequirements(self, path, fullpath, pkg, macros):
+    def addPluggableRequirements(self, path, fullpath, pkgFiles, macros):
         mandatoryReqs, optionalReqs = self._parseEggRequires(path, fullpath)
         filesRequired = []
         for req in itertools.chain(mandatoryReqs, optionalReqs):
@@ -152,5 +152,5 @@ class EggRequires(_basePluggableRequires):
                                                       fileType='egg-info',
                                                       unmanagedError=True)
             if troveName:
-                self._addRequirement(path, troveName, [], pkg,
+                self._addRequirement(path, troveName, [], pkgFiles,
                                      deps.TroveDependencies)

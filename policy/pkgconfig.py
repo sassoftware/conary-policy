@@ -117,7 +117,7 @@ class PkgConfigRequires(_basePluggableRequires):
 
     invariantinclusions = [ r'(%(libdir)s|%(datadir)s)/pkgconfig/.*\.pc$' ]
 
-    def addPluggableRequirements(self, path, fullpath, pkg, macros):
+    def addPluggableRequirements(self, path, fullpath, pkgFiles, macros):
         if hasattr(self.recipe, '_getCapsulePathsForFile'):
             if self.recipe._getCapsulePathsForFile(path):
                 # since capsules do not convert to relative symlinks,
@@ -235,12 +235,12 @@ class PkgConfigRequires(_basePluggableRequires):
                             # found a non-empty :devel compoment
                             troveName = develTroveName
                             break
-                self._addRequirement(path, troveName, [], pkg,
+                self._addRequirement(path, troveName, [], pkgFiles,
                                      deps.TroveDependencies)
             else:
                 troveName = self._enforceProvidedPath(fileRequired,
                                                       fileType=fileType,
                                                       unmanagedError=True)
                 if troveName:
-                    self._addRequirement(path, troveName, [], pkg,
+                    self._addRequirement(path, troveName, [], pkgFiles,
                                          deps.TroveDependencies)
