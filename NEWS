@@ -1,4 +1,4 @@
-Changes in @NEW@:
+Changes in 1.0.25:
   o Policies have been made capsule-aware and assume that the capsule
     will handle essentially all operations involving files in capsules.
     (PFM-506)
