@@ -188,10 +188,11 @@ class NonMultilibDirectories(policy.EnforcementPolicy):
 	if self.macros.lib == 'lib64':
 	    # no need to do anything
 	    return False
-        if self.recipe.getType() == recipe.RECIPE_TYPE_CAPSULE:
-            # Cannot reasonably separate capsule and non-capsule
-            # paths in this policy, so bail
-            return False
+        if hasattr(self.recipe, '_getCapsulePathsForFile'):
+            if self.recipe.getType() == recipe.RECIPE_TYPE_CAPSULE:
+                # Cannot reasonably separate capsule and non-capsule
+                # paths in this policy, so bail
+                return False
         return True
 
     def doFile(self, path):

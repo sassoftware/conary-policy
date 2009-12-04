@@ -1,12 +1,14 @@
 Changes in @NEW@:
+
+Changes in 1.0.25:
   o Policies have been made capsule-aware and assume that the capsule
     will handle essentially all operations involving files in capsules.
     (PFM-506)
- o  The RemoveBootstrapTroveDependencies policy removes trove dependencies
+  o The RemoveBootstrapTroveDependencies policy removes trove dependencies
     that are not satisfied within the packages being built as a bootstrap
     because they may be computed against an incompatibly-named set of
     host packages. (PFM-506)
- o  The PHPRequires policy now reports adding dependencies. (CNP-181)
+  o The PHPRequires policy now reports adding dependencies. (CNP-181)
 
 Changes in 1.0.24:
   o Libraries (ELF files containing DT_SONAME entries, not symbolic
