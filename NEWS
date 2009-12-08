@@ -1,4 +1,8 @@
 Changes in @NEW@:
+  o When "file:" requirements are not not explicitly met by
+    "file:" provides but the path exists in a trove, the new
+    ResolveFileDependencies policy replaces the unsatisfied
+    "file:" requirements with "trove:" requirements. (CNP-184)
 
 Changes in 1.0.25:
   o Policies have been made capsule-aware and assume that the capsule

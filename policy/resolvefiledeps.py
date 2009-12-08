@@ -16,9 +16,7 @@ import itertools
 import os
 import re
 
-from conary.build import policy
-from conary.build import packagepolicy
-
+from conary.build import policy, packagepolicy, use
 from conary.deps import deps
 from conary.local import database
 
@@ -74,6 +72,14 @@ class ResolveFileDependencies(policy.PackagePolicy):
         self.cfg = self.recipe.cfg
         self.repos = self.recipe.getRepos()
         self.db = self.recipe._db
+
+        if use.Use.bootstrap._get():
+            return
+
+        if not hasattr(self.recipe, 'RemoveSelfProvidedRequires'):
+            # Compatibility with conary 2.0.50 and earlier
+            for comp in self.recipe.autopkg.getComponents():
+                comp.requires -= comp.provides
 
         for comp in self.recipe.autopkg.getComponents():
             req = comp.requires
