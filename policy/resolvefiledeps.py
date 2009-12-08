@@ -64,7 +64,8 @@ class ResolveFileDependencies(policy.PackagePolicy):
     """
 
     requires = (
-        ('RemoveSelfProvidedRequires', policy.REQUIRED_PRIOR),
+        ('RemoveSelfProvidedRequires', policy.CONDITIONAL_PRIOR),
+        ('Requires', policy.REQUIRED_PRIOR),
     )
 
 
