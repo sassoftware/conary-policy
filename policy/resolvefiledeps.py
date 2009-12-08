@@ -173,10 +173,3 @@ class ResolveFileDependencies(policy.PackagePolicy):
         ds = deps.DependencySet()
         ds.addDep(depClass, dep)
         return ds
-
-    def toDepSets(self, deps, depClass):
-        s = set()
-        for d in deps:
-            s.add(self.toDepSet(d, depClass))
-        return s
-
