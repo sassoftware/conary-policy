@@ -32,8 +32,9 @@ class XinetdConfigRequires(_basePluggableRequires):
     NAME
     ====
 
-    B{C{r.XinetdConfigRequires()}} - Automatically add a requirement of
-    C{xinetd:runtime} for packages containing an xinetd configuration file.
+    B{C{r.XinetdConfigRequires()}} - Automatically add an appropriate
+    requirement on xinetd for packages containing an xinetd configuration
+    file.
 
     SYNOPSIS
     ========
@@ -64,6 +65,9 @@ class XinetdConfigRequires(_basePluggableRequires):
     file.
     """
 
+    requires = (
+        ('ResolveFileDependencies', policy.REQUIRED_PRIOR),
+    )
     invariantinclusions = [ r'%(sysconfdir)s/xinetd.d/' ]
 
     def addPluggableRequirements(self, path, fullpath, pkgFiles, macros):
@@ -86,5 +90,8 @@ class XinetdConfigRequires(_basePluggableRequires):
 
         if not enabled:
             return
-        self._addRequirement(path, "xinetd:runtime", [], pkgFiles,
-                             deps.TroveDependencies)
+
+        # ResolveFileDependencies will convert this to a trove
+        # dependency if the file dependency is not satisfied
+        self._addRequirement(path, "/usr/sbin/xinetd", [], pkgFiles,
+                             deps.FileDependencies)

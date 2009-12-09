@@ -3,6 +3,11 @@ Changes in @NEW@:
     "file:" provides but the path exists in a trove, the new
     ResolveFileDependencies policy replaces the unsatisfied
     "file:" requirements with "trove:" requirements. (CNP-184)
+  o The XinetdConfigRequires policy now creates file: dependencies
+    instead of trove: dependencies by default, depending on the
+    ResolveFileDependencies policy to change to trove: dependencies
+    on platforms for which the /usr/sbin/xinetd path is not 
+    explicitly provided. (CNP-183)
 
 Changes in 1.0.25:
   o Policies have been made capsule-aware and assume that the capsule
