@@ -140,43 +140,53 @@ class ResolveFileDependencies(policy.PackagePolicy):
         if not fileDeps:
             return
 
-        paths = [str(x) for x in fileDeps]
+        resolvedDeps = set()
+        for label in self.cfg.installLabelPath:
+            solMap = self.repos.resolveDependencies(
+                label, self.toDepSets(fileDeps,deps.FileDependencies),
+                leavesOnly=True)
+            for r in solMap:
+                solList = solMap[r]
+                for s in itertools.chain(*solList):
+                    if s[2].satisfies(comp.flavor):
+                        fDep = list(r.iterDeps())[0][1]
+                        resolvedDeps.add(fDep)
+                        break
+        unresolvedDeps = fileDeps - resolvedDeps
+
+        if not unresolvedDeps:
+            return
+
+        paths = [str(x) for x in unresolvedDeps]
         trvMap = {}
-        repoDepSets = set()
+        presolvedDeps = set()
         for label in self.cfg.installLabelPath:
             pathDict = self.repos.getTroveLeavesByPath(paths, label)
             for p in pathDict:
                 if p not in trvMap and pathDict[p]:
                     trvMap[p] = pathDict[p][0]
-                    repoDepSets.add(self.toDepSet(deps.Dependency(p),
-                                                  deps.FileDependencies))
+                    presolvedDeps.add(deps.Dependency(p))
 
-        if not repoDepSets:
+        if not presolvedDeps:
             return
 
-        resolvedDepSets = set()
-        for label in self.cfg.installLabelPath:
-            solMap = self.repos.resolveDependencies(
-                label, repoDepSets, leavesOnly=True)
-            for r in solMap:
-                solList = solMap[r]
-                for s in itertools.chain(*solList):
-                    if s[2].satisfies(comp.flavor):
-                        resolvedDepSets.add(r)
-                        break
-
-        unresolvedDepSets = repoDepSets - resolvedDepSets
-        for ds in unresolvedDepSets:
-            fDep = list(ds.iterDeps())[0][1]
+        for fDep in presolvedDeps:
             f = str(fDep)
             nvf = trvMap[f]
             if nvf[2].satisfies(comp.flavor):
-                    trovName = nvf[0]
-                    addedTroveDeps.append(deps.Dependency(trovName))
-                    removedFileDeps.append(fDep)
-                    fileDeps.remove(fDep)
+                trovName = nvf[0]
+                addedTroveDeps.append(deps.Dependency(trovName))
+                removedFileDeps.append(fDep)
+                fileDeps.remove(fDep)
 
     def toDepSet(self, dep, depClass):
         ds = deps.DependencySet()
         ds.addDep(depClass, dep)
         return ds
+
+    def toDepSets(self, deps, depClass):
+        s = set()
+        for d in deps:
+            ds = self.toDepSet(d,depClass)
+            s.add(ds)
+        return s
