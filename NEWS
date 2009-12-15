@@ -1,4 +1,4 @@
-Changes in @NEW@:
+Changes in 1.0.26:
   o When "file:" requirements are not not explicitly met by
     "file:" provides but the path exists in a trove, the new
     ResolveFileDependencies policy replaces the unsatisfied
