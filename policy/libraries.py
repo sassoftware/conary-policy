@@ -102,6 +102,67 @@ class AutoSharedLibrary(policy.DestdirPolicy):
         for path in self._iterSharedlibList():
             self.recipe.SharedLibrary(subtrees = path)
 
+
+class WarnScriptSharedLibrary(policy.EnforcementPolicy):
+    """
+    NAME
+    ====
+
+    B{C{r.WarnScriptSharedLibrary()}} - Warn about scripts which modify
+    C{ld.so.conf}-related files
+
+    SYNOPSIS
+    ========
+
+    C{r.WarnScriptSharedLibrary([I{filterexp}] I{exceptions=filterexp}])}
+
+    DESCRIPTION
+    ===========
+
+    The C{r.WarnScriptSharedLibrary()} policy inspects capsule scripts
+    for mentions of C{ld.so.conf} and raises an error if any mentions
+    are found that are not explicitly allowed as exceptions.
+
+    EXAMPLES
+    ========
+
+    C{r.WarnScriptSharedLibrary(exceptions='postin')}
+
+    Do not warn about C{ld.so.conf} in any postin scripts.
+
+    C{r.WarnScriptSharedLibrary(exceptions='foo-1.0-1.*/prein')}
+
+    Do not warn about C{ld.so.conf} in any prein scripts for capsules
+    with names starting with C{foo-1.0-1}.
+
+    """
+    try:
+        filetree = policy.CAPSULESCRIPTDIR
+        enabled = True
+    except AttributeError:
+        # Work with conary 2.1.1 and earlier
+        enabled = False
+
+    invariantinclusions = [
+        # look only at files, not directories
+	(r'.*', None, stat.S_IFDIR),
+    ]
+
+    def test(self):
+        return self.enabled
+
+    def doFile(self, path):
+	fullpath = self.rootdir + path
+        relpath = path[1:]
+        if 'ld.so.conf' in file(fullpath, 'r').read():
+            self.error('Capsule script %s mentions ld.so.conf\n'
+                       'Directories containing shared libraries:'
+                       " r.SharedLibrary(subtrees='/path/to/directory')\n"
+                       'After investigating this script:'
+                       " r.WarnScriptSharedLibrary(exceptions='%s')"
+                       %(fullpath, relpath))
+
+
 class SharedLibrary(policy.PackagePolicy):
     """
     NAME

@@ -2,6 +2,9 @@ Changes in @NEW@:
   o All destdir policies have been audited, and modified as necessary,
     to correctly handle capsules, in preparation for enabling destdir
     policies for capsules. (CNY-3320)
+  o The new WarnScriptSharedLibrary policy looks at capsule scripts
+    for possible instances of modifying the ld.so.conf, when used
+    with Conary 2.1.2 or later. (CNP-185)
 
 Changes in 1.0.26:
   o When "file:" requirements are not not explicitly met by
