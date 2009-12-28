@@ -16,7 +16,7 @@ import os
 import stat
 
 from conary.lib import util
-from conary.build import policy
+from conary.build import policy, recipe
 
 
 class NonBinariesInBindirs(policy.EnforcementPolicy):
@@ -163,6 +163,12 @@ class FixupManpagePaths(policy.DestdirPolicy, FilesInMandir):
     
     def logError(self, path):
         self.error('Could not choose correct location for file %s.', path)
+
+    def test(self):
+        if hasattr(self.recipe, '_getCapsulePathsForFile'):
+            if self.recipe.getType() == recipe.RECIPE_TYPE_CAPSULE:
+                return False
+        return True
 
     def doFile(self, path):
         if hasattr(self.recipe, '_getCapsulePathsForFile'):

@@ -341,11 +341,13 @@ class NormalizeManPages(policy.DestdirPolicy):
         self.gunzip = None
         self.bunzip = None
 
-    def do(self):
+    def test(self):
         if hasattr(self.recipe, '_getCapsulePathsForFile'):
             if self.recipe.getType() == recipe.RECIPE_TYPE_CAPSULE:
-                return
+                return False
+        return True
 
+    def do(self):
         for manpath in sorted(list(set((
                 self.macros.mandir,
                 os.sep.join((self.macros.x11prefix, 'man')),
@@ -393,12 +395,14 @@ class NormalizeInfoPages(policy.DestdirPolicy):
     requires = (
         ('ReadableDocs', policy.CONDITIONAL_SUBSEQUENT),
     )
-    # Not safe for derived packages in this form, needs explicit checks
-    def do(self):
+    def test(self):
+        # Not safe for derived packages in this form, needs explicit checks
         if hasattr(self.recipe, '_getCapsulePathsForFile'):
             if self.recipe.getType() == recipe.RECIPE_TYPE_CAPSULE:
-                return
+                return False
+        return True
 
+    def do(self):
         dir = self.macros['infodir']+'/dir'
         fsdir = self.macros['destdir']+dir
         if os.path.exists(fsdir):
@@ -515,13 +519,12 @@ class NormalizeInitscriptLocation(policy.DestdirPolicy):
     invariantinclusions = [ '/etc/rc.d/init.d/' ]
 
     def test(self):
+        if hasattr(self.recipe, '_getCapsulePathsForFile'):
+            if self.recipe.getType() == recipe.RECIPE_TYPE_CAPSULE:
+                return False
         return self.macros['initdir'] != '/etc/rc.d/init.d'
 
     def doFile(self, path):
-        if hasattr(self.recipe, '_getCapsulePathsForFile'):
-            if self.recipe._getCapsulePathsForFile(path):
-                return
-
         basename = os.path.basename(path)
         target = util.joinPaths(self.macros['initdir'], basename)
         if os.path.exists(self.macros['destdir'] + os.sep + target):
@@ -631,12 +634,14 @@ class NormalizeAppDefaults(policy.DestdirPolicy):
 
     No exceptions to this policy are honored.
     """
-    # not safe in this form for derived packages
-    def do(self):
+    def test(self):
+        # not safe in this form for derived packages
         if hasattr(self.recipe, '_getCapsulePathsForFile'):
             if self.recipe.getType() == recipe.RECIPE_TYPE_CAPSULE:
-                return
+                return False
+        return True
 
+    def do(self):
         e = '%(destdir)s/%(sysconfdir)s/X11/app-defaults' % self.macros
         if not os.path.isdir(e):
             return

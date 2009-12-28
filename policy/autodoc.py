@@ -16,7 +16,7 @@ import os
 import shutil
 import stat
 
-from conary.build import policy
+from conary.build import policy, recipe
 from conary.lib import util
 
 
@@ -87,6 +87,12 @@ class AutoDoc(policy.DestdirPolicy):
         m = self.recipe.macros
         self.builddir = m.builddir
         self.destdir = util.joinPaths(m.destdir, m.thisdocdir)
+
+    def test(self):
+        if hasattr(self.recipe, '_getCapsulePathsForFile'):
+            if self.recipe.getType() == recipe.RECIPE_TYPE_CAPSULE:
+                return False
+        return True
 
     def doFile(self, filename):
         source = util.joinPaths(self.builddir, filename)

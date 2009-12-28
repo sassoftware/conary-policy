@@ -1,3 +1,8 @@
+Changes in @NEW@:
+  o All destdir policies have been audited, and modified as necessary,
+    to correctly handle capsules, in preparation for enabling destdir
+    policies for capsules. (CNY-3320)
+
 Changes in 1.0.26:
   o When "file:" requirements are not not explicitly met by
     "file:" provides but the path exists in a trove, the new
