@@ -1,4 +1,4 @@
-Changes in @NEW@:
+Changes in 1.0.27:
   o All destdir policies have been audited, and modified as necessary,
     to correctly handle capsules, in preparation for enabling destdir
     policies for capsules. (CNY-3320)
