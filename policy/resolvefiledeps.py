@@ -164,7 +164,7 @@ class ResolveFileDependencies(policy.PackagePolicy):
             pathDict = self.repos.getTroveLeavesByPath(paths, label)
             for p in pathDict:
                 if p not in trvMap and pathDict[p]:
-                    trvMap[p] = pathDict[p][0]
+                    trvMap[p] = pathDict[p]
                     presolvedDeps.add(deps.Dependency(p))
 
         if not presolvedDeps:
@@ -172,12 +172,13 @@ class ResolveFileDependencies(policy.PackagePolicy):
 
         for fDep in presolvedDeps:
             f = str(fDep)
-            nvf = trvMap[f]
-            if nvf[2].satisfies(comp.flavor):
-                trovName = nvf[0]
-                addedTroveDeps.append(deps.Dependency(trovName))
-                removedFileDeps.append(fDep)
-                fileDeps.remove(fDep)
+            for nvf in trvMap[f]:
+                if nvf[2].satisfies(comp.flavor):
+                    trovName = nvf[0]
+                    addedTroveDeps.append(deps.Dependency(trovName))
+                    removedFileDeps.append(fDep)
+                    fileDeps.remove(fDep)
+                    break
 
     def toDepSet(self, dep, depClass):
         ds = deps.DependencySet()
