@@ -1,4 +1,7 @@
 Changes in @NEW@:
+  o Changed to express dependencies on initscripts functions via a file
+    dependency instead of a trove dependency; the ResolveFileDependencies
+    policy changes to the proper trove dependency. (CNP-191)
   o A bug that caused some file dependencies to not be resolved to trove
     dependencies correctly has been fixed. (CNP-190)
 

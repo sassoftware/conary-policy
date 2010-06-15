@@ -608,7 +608,8 @@ class NormalizeInitscriptContents(policy.DestdirPolicy):
             modified = True
 
         if '%(initdir)s/functions' %m in contents:
-            self.recipe.Requires('initscripts:runtime', util.literalRegex(path))
+            self.recipe.Requires('file: %(initdir)s/functions',
+                                 util.literalRegex(path))
 
         if modified:
             file(fullpath, 'w').write(contents)
