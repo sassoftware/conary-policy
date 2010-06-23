@@ -1,348 +1,400 @@
 Changes in 1.0.28:
-  o Changed to express dependencies on initscripts functions via a file
-    dependency instead of a trove dependency; the ResolveFileDependencies
-    policy changes to the proper trove dependency. (CNP-191)
-  o A bug that caused some file dependencies to not be resolved to trove
-    dependencies correctly has been fixed. (CNP-190)
+  o New Features:
+    * Changed to express dependencies on initscripts functions via a file
+      dependency instead of a trove dependency; the ResolveFileDependencies
+      policy changes to the proper trove dependency. (CNP-191)
+
+  o Bug Fixes:
+    * A bug that caused some file dependencies to not be resolved to trove
+      dependencies correctly has been fixed. (CNP-190)
 
 Changes in 1.0.27:
-  o All destdir policies have been audited, and modified as necessary,
-    to correctly handle capsules, in preparation for enabling destdir
-    policies for capsules. (CNY-3320)
-  o The new WarnScriptSharedLibrary policy looks at capsule scripts
-    for possible instances of modifying the ld.so.conf, when used
-    with Conary 2.1.2 or later. (CNP-185)
+  o New Features:
+    * All destdir policies have been audited, and modified as necessary,
+      to correctly handle capsules, in preparation for enabling destdir
+      policies for capsules. (CNY-3320)
+    * The new WarnScriptSharedLibrary policy looks at capsule scripts
+      for possible instances of modifying the ld.so.conf, when used
+      with Conary 2.1.2 or later. (CNP-185)
 
 Changes in 1.0.26:
-  o When "file:" requirements are not not explicitly met by
-    "file:" provides but the path exists in a trove, the new
-    ResolveFileDependencies policy replaces the unsatisfied
-    "file:" requirements with "trove:" requirements. (CNP-184)
-  o The XinetdConfigRequires policy now creates file: dependencies
-    instead of trove: dependencies by default, depending on the
-    ResolveFileDependencies policy to change to trove: dependencies
-    on platforms for which the /usr/sbin/xinetd path is not 
-    explicitly provided. (CNP-183)
+  o New Features:
+    * When "file:" requirements are not not explicitly met by
+      "file:" provides but the path exists in a trove, the new
+      ResolveFileDependencies policy replaces the unsatisfied
+      "file:" requirements with "trove:" requirements. (CNP-184)
+    * The XinetdConfigRequires policy now creates file: dependencies
+      instead of trove: dependencies by default, depending on the
+      ResolveFileDependencies policy to change to trove: dependencies
+      on platforms for which the /usr/sbin/xinetd path is not 
+      explicitly provided. (CNP-183)
 
 Changes in 1.0.25:
-  o Policies have been made capsule-aware and assume that the capsule
-    will handle essentially all operations involving files in capsules.
-    (PFM-506)
-  o The RemoveBootstrapTroveDependencies policy removes trove dependencies
-    that are not satisfied within the packages being built as a bootstrap
-    because they may be computed against an incompatibly-named set of
-    host packages. (PFM-506)
-  o The PHPRequires policy now reports adding dependencies. (CNP-181)
+  o New Features:
+    * Policies have been made capsule-aware and assume that the capsule
+      will handle essentially all operations involving files in capsules.
+      (PFM-506)
+    * The RemoveBootstrapTroveDependencies policy removes trove dependencies
+      that are not satisfied within the packages being built as a bootstrap
+      because they may be computed against an incompatibly-named set of
+      host packages. (PFM-506)
+    * The PHPRequires policy now reports adding dependencies. (CNP-181)
 
 Changes in 1.0.24:
-  o Libraries (ELF files containing DT_SONAME entries, not symbolic
-    links) with file names ending in .so (instead of .so.something)
-    are now tagged as shared libraries. (CNP-175)
-  o TagLocale no longer looks at files in %(debuglibdir)s or
-    %(debugsrcdir)s, since it would only complain about them and
-    ignore them anyway. (CNP-177)
+  o New Features:
+    * Libraries (ELF files containing DT_SONAME entries, not symbolic
+      links) with file names ending in .so (instead of .so.something)
+      are now tagged as shared libraries. (CNP-175)
+    * TagLocale no longer looks at files in %(debuglibdir)s or
+      %(debugsrcdir)s, since it would only complain about them and
+      ignore them anyway. (CNP-177)
 
 Changes in 1.0.23:
-  o A bug in SymlinkTargetRequires that caused a traceback when a
-    symlink path contained a special regex character, such as +, has
-    been fixed. (CNP-169)
-  o The NormalizePythonInterpreterVersion policy has been modified to
-    apply to all python scripts, regardless of whether they are
-    executable, so that it applies to python modules as well as
-    scripts. (CNP-170)
-  o When moving info files, specify the full destination path; shutil.move
-    has changed behavior in python 2.6 (CNP-173)
-  o A bug in PHPRequires policy that caused builds to fail or take an
-    extremely long time to complete when both php and php5 were available
-    has been fixed. (CNP-174)
+  o New Features:
+    * The NormalizePythonInterpreterVersion policy has been modified to
+      apply to all python scripts, regardless of whether they are
+      executable, so that it applies to python modules as well as
+      scripts. (CNP-170)
+    * When moving info files, specify the full destination path; shutil.move
+      has changed behavior in python 2.6 (CNP-173)
+
+  o Bug Fixes:
+    * A bug in SymlinkTargetRequires that caused a traceback when a
+      symlink path contained a special regex character, such as +, has
+      been fixed. (CNP-169)
+    * A bug in PHPRequires policy that caused builds to fail or take an
+      extremely long time to complete when both php and php5 were available
+      has been fixed. (CNP-174)
 
 Changes in 1.0.22:
-  o A bug causing PHPRequires to fail if buildRequires are not present
-    in the repository has been fixed. (CNP-160)
-  o PythonEggs now allows directories that end in .egg to be packaged.
-    (CNP-148)
-  o The NormalizePythonEggs has been added. It automatically unpacks
-    python .egg files that are placed in standard python module locations.
-    The resulting directory is put in place of the .egg file. (CNP-149)
-  o The SymlinkTargetRequires policy has been added. This policy will
-    supress the DanglingSymlinks policy in favor of adding requires when
-    appropriate. (CNP-130)
-  o The PHPRequires policy now caches negative results. (CNP-164)
-  o The PHPRequires policy now looks for binaries named "php5" as well
-    as "php".  Previous PHP5 handling looked only for packages named
-    "php5" but still expected to see binaries named "php". (CNP-165)
-  o The ResetKeyValueMetadata policy has been added. It selectively
-    deletes certain key-value metadata fields. (CNY-2983)
+  o New Features:
+    * PythonEggs now allows directories that end in .egg to be packaged.
+      (CNP-148)
+    * The NormalizePythonEggs has been added. It automatically unpacks
+      python .egg files that are placed in standard python module locations.
+      The resulting directory is put in place of the .egg file. (CNP-149)
+    * The SymlinkTargetRequires policy has been added. This policy will
+      supress the DanglingSymlinks policy in favor of adding requires when
+      appropriate. (CNP-130)
+    * The PHPRequires policy now caches negative results. (CNP-164)
+    * The PHPRequires policy now looks for binaries named "php5" as well
+      as "php".  Previous PHP5 handling looked only for packages named
+      "php5" but still expected to see binaries named "php". (CNP-165)
+    * The ResetKeyValueMetadata policy has been added. It selectively
+      deletes certain key-value metadata fields. (CNY-2983)
+
+  o Bug Fixes:
+    * A bug causing PHPRequires to fail if buildRequires are not present
+      in the repository has been fixed. (CNP-160)
 
 Changes in 1.0.21:
-  o A bug causing PHPRequires to fail in rMake has been fixed. (CNP-154)
+  o Bug Fixes:
+    * A bug causing PHPRequires to fail in rMake has been fixed. (CNP-154)
 
 Changes in 1.0.20:
-  o The PHPRequires policy has been added.  It identifies PHP files and
-    when possible automatically adds an appropriate requirement based
-    on the most appropriate PHP interpreter found on your system,
-    buildRequires, or installLabelPath. (CNY-145)
+  o New Features:
+    * The PHPRequires policy has been added.  It identifies PHP files and
+      when possible automatically adds an appropriate requirement based
+      on the most appropriate PHP interpreter found on your system,
+      buildRequires, or installLabelPath. (CNY-145)
 
 Changes in 1.0.19:
-  o A bug causing NormalizeInitscriptContents to fail if the target of
-    a symlink didn't exist has been fixed. (CNP-129)
-  o A bug causing PkgConfigRequires to fail if the destdir is a symlink
-    has been fixed (CNP-131).
-  o RequireChkconfig has been modified to handle new style init scripts.
-    It now warns instead of errors on failure. (CNP-109)
-  o NormalizeInfoPages handles file magic better to cover corner cases.
-    (CNP-135)
-  o Setting a different prefix will no longer cause the Strip policy
-    and several Normalize policies to traceback. (CNP-141)
-  o The NormalizeLibrarySymlinks policy no longer attemps to run
-    ldconfig from inside the package when cross-compiling. (CNP-140)
-  o The EnforceStaticLibBuildRequirements policy now falls back to
-    looking at shared libraries for cases where configure depends on
-    a library existing, but only a shared library exists and no packaged
-    file is linked against the shared library. (CNP-132)
-  o The Strip policy no longer traces back if an ELF file is found but
-    strip or eu-strip is not installed. (CNP-143)
-  o The TagLocale policy has been added to tag locale files with a
-    special path-derived tag of the form locale(localename). (CNP-138)
+  o New Features:
+    * RequireChkconfig has been modified to handle new style init scripts.
+      It now warns instead of errors on failure. (CNP-109)
+    * The NormalizeLibrarySymlinks policy no longer attemps to run
+      ldconfig from inside the package when cross-compiling. (CNP-140)
+    * The EnforceStaticLibBuildRequirements policy now falls back to
+      looking at shared libraries for cases where configure depends on
+      a library existing, but only a shared library exists and no packaged
+      file is linked against the shared library. (CNP-132)
+    * The TagLocale policy has been added to tag locale files with a
+      special path-derived tag of the form locale(localename). (CNP-138)
+
+  o Bug Fixes:
+    * A bug causing NormalizeInitscriptContents to fail if the target of
+      a symlink didn't exist has been fixed. (CNP-129)
+    * A bug causing PkgConfigRequires to fail if the destdir is a symlink
+      has been fixed (CNP-131).
+    * Setting a different prefix will no longer cause the Strip policy
+      and several Normalize policies to traceback. (CNP-141)
+    * NormalizeInfoPages handles file magic better to cover corner cases.
+      (CNP-135)
+    * The Strip policy no longer traces back if an ELF file is found but
+      strip or eu-strip is not installed. (CNP-143)
 
 Changes in 1.0.18:
-  o ConfigLogBuildRequirements caused builds to fail when encountering
-    a line ending in "result:  " (two or more trailing spaces)
-    while processing a config.log file.  This is corrected. (CNP-128)
+  o Bug Fixes:
+    * ConfigLogBuildRequirements caused builds to fail when encountering
+      a line ending in "result:  " (two or more trailing spaces)
+      while processing a config.log file.  This is corrected. (CNP-128)
 
 Changes in 1.0.17:
-  o Description and Licenses policies can now be used to set
-    metadata information for troves. (CNY-2715)
-  o The RequireChkconfig policy now accepts empty lines in the
-    chkconfig header. (CNP-81)
-  o The new HttpdConfigRequires policy adds dependencies on
-    /usr/sbin/httpd for all /etc/httpd/conf.d/*.conf files. (CNP-110)
-  o The FixObsoletePaths policy has been modified to run before
-    AutoDoc. It will now delete empty Obsolete paths rather than
-    attempting to move them. (CNP-70)
-  o The RemoveNonPackageFiles policy has been modifed to run before
-    most policies designed to Normalize filenames in order to reduce
-    the occurrence of non-package files being masked. (CNP-122)
-  o Moved VersionConflicts to from Conary to conary-policy and removed
-    default exceptions. (CNY-2716)
+  o New Features:
+    * Description and Licenses policies can now be used to set
+      metadata information for troves. (CNY-2715)
+    * The RequireChkconfig policy now accepts empty lines in the
+      chkconfig header. (CNP-81)
+    * The new HttpdConfigRequires policy adds dependencies on
+      /usr/sbin/httpd for all /etc/httpd/conf.d/*.conf files. (CNP-110)
+    * The FixObsoletePaths policy has been modified to run before
+      AutoDoc. It will now delete empty Obsolete paths rather than
+      attempting to move them. (CNP-70)
+    * The RemoveNonPackageFiles policy has been modifed to run before
+      most policies designed to Normalize filenames in order to reduce
+      the occurrence of non-package files being masked. (CNP-122)
+    * Moved VersionConflicts from Conary to conary-policy and removed
+      default exceptions. (CNY-2716)
 
 Changes in 1.0.16:
-  o Policies now work with more recent versions of Conary (2.0.12
-    and later) so that Conary can warn about possibly excessive
-    buildRequires elements. (CNY-2232)
-  o The new EnforceLocalizationBuildRequirements policy warns that
-    gettext:devel and intltool:runtime are required if POTFILES.in
-    exists. (CNP-115)
-  o The EnforceConfigLogBuildRequirements has been expanded to look
-    for header files and static libraries mentioned in config.log
-    files, as well as more binaries. (CNP-35, CNP-123)
+  o New Features:
+    * Policies now work with more recent versions of Conary (2.0.12
+      and later) so that Conary can warn about possibly excessive
+      buildRequires elements. (CNY-2232)
+    * The new EnforceLocalizationBuildRequirements policy warns that
+      gettext:devel and intltool:runtime are required if POTFILES.in
+      exists. (CNP-115)
+    * The EnforceConfigLogBuildRequirements has been expanded to look
+      for header files and static libraries mentioned in config.log
+      files, as well as more binaries. (CNP-35, CNP-123)
 
 
 Changes in 1.0.15:
-  o The AutoSharedLibrary policy finds /etc/ld.so.conf.d/*.conf files
-    and tells the SharedLibrary policy that the directories mentioned in
-    those files contain shared libraries. (CNP-108)
-  o Python *egg-info/requires.txt files are now inspected for suggested
-    buildRequires additions. (CNP-102)
-  o An error causing PkgConfigRequires to traceback when handling
-    requirement paths involving symlinks has been fixed. (CNP-119)
-  o The new EnforceStaticLibBuildRequirements policy examines the output
-    of the build process for linking to libraries that are not included
-    among the shared libraries required by the package but are included
-    on the system, and suggests additional buildRequires for those
-    libraries. (CNP-120)
+  o New Features:
+    * The AutoSharedLibrary policy finds /etc/ld.so.conf.d/*.conf files
+      and tells the SharedLibrary policy that the directories mentioned in
+      those files contain shared libraries. (CNP-108)
+    * Python *egg-info/requires.txt files are now inspected for suggested
+      buildRequires additions. (CNP-102)
+    * The new EnforceStaticLibBuildRequirements policy examines the output
+      of the build process for linking to libraries that are not included
+      among the shared libraries required by the package but are included
+      on the system, and suggests additional buildRequires for those
+      libraries. (CNP-120)
+
+  o Bug Fixes:
+    * An error causing PkgConfigRequires to traceback when handling
+      requirement paths involving symlinks has been fixed. (CNP-119)
 
 Changes in 1.0.14:
-  o Policies that move files in destdir now track path translations
-    so files will end up in the correct package or component. (CNY-1679)
-  o The XinetdConfigRequires policy has been added to enforce a requirement
-    on xinetd when a configuration file with "disabled = no" is deployed
-    in the /etc/xinetd.d/ directory. (CNP-93)
-  o The PkgConfigRequires policy has been added to represent the
-    internal dependencies expressed by pkg-config files. (CNP-93)
+  o New Features:
+    * Policies that move files in destdir now track path translations
+      so files will end up in the correct package or component. (CNY-1679)
+    * The XinetdConfigRequires policy has been added to enforce a requirement
+      on xinetd when a configuration file with "disabled = no" is deployed
+      in the /etc/xinetd.d/ directory. (CNP-93)
+    * The PkgConfigRequires policy has been added to represent the
+      internal dependencies expressed by pkg-config files. (CNP-93)
 
 Changes in 1.0.13:
-  o The EnforceCILBuildRequires policy now ensures that the build
-    requirements include 'mono:devel' if there are any CIL dependencies
-    found.  The mono:devel package is required to discover CIL
-    dependencies. (CNP-91)
-  o When determining build requirements based on dependencies, :devel
-    or :devellib components are preferred to :lib components for all
-    dependency types, not just soname: dependencies.
-  o /usr/bin/gfortran is now accepted as a name for the fortran
-    compiler when guessing about false positives in config.log
-    output. (CNP-58)
-  o Log-based buildRequires policies (for config.log and CMakeCache
-    files) consider :devel, :devellib, and :lib as a set, choosing
-    the best component to recommend in that order. (CNP-105)
-  o The NormalizePythonInterpreterVersion policy now can be told
-    to make specific version mappings that override its heuristics,
-    which is necessary in particular to build multiple python
-    versions which can co-exist on the same system. (CNP-104)
+  o New Features:
+    * The EnforceCILBuildRequires policy now ensures that the build
+      requirements include 'mono:devel' if there are any CIL dependencies
+      found.  The mono:devel package is required to discover CIL
+      dependencies. (CNP-91)
+    * When determining build requirements based on dependencies, :devel
+      or :devellib components are preferred to :lib components for all
+      dependency types, not just soname: dependencies.
+    * /usr/bin/gfortran is now accepted as a name for the fortran
+      compiler when guessing about false positives in config.log
+      output. (CNP-58)
+    * Log-based buildRequires policies (for config.log and CMakeCache
+      files) consider :devel, :devellib, and :lib as a set, choosing
+      the best component to recommend in that order. (CNP-105)
+    * The NormalizePythonInterpreterVersion policy now can be told
+      to make specific version mappings that override its heuristics,
+      which is necessary in particular to build multiple python
+      versions which can co-exist on the same system. (CNP-104)
 
 Changes in 1.0.12:
-  o The _enforceBuildRequirements superclass now handles correctly
-    having multiple packages with different names provide the same
-    dependency required for a build requirement.  Previously, it
-    only handled having multiple components of the same package
-    provide the same dependency. (CNP-97)
-  o The new NormalizePythonInterpreterVersion policy ensures that
-    whenever possible, version-specific python interpreter paths
-    are used. (CNP-99)
-  o The NormalizeInitscriptContents no longer fails when a file in
-    %(initdir)s is a link to a file outside of %(initdir)s. (CNP-101)
-  o NormalizeInterpreterPaths now attempts to normalize more interpreter 
-    paths - including those that look in /local/ for interpreters and 
-    those that point to non-existant paths. (CNP-100)
-  o The new EnforceCMakeCacheBuildRequirements policy recognizes
-    potential buildRequirements based on CMakeCache.txt files as
-    produced by the cmake tool.  Thanks to Pavel Volkovitskiy for
-    implementing this feature. (CNP-67)
+  o New Features:
+    * The _enforceBuildRequirements superclass now handles correctly
+      having multiple packages with different names provide the same
+      dependency required for a build requirement.  Previously, it
+      only handled having multiple components of the same package
+      provide the same dependency. (CNP-97)
+    * The new NormalizePythonInterpreterVersion policy ensures that
+      whenever possible, version-specific python interpreter paths
+      are used. (CNP-99)
+    * The NormalizeInitscriptContents no longer fails when a file in
+      %(initdir)s is a link to a file outside of %(initdir)s. (CNP-101)
+    * NormalizeInterpreterPaths now attempts to normalize more interpreter 
+      paths - including those that look in /local/ for interpreters and 
+      those that point to non-existant paths. (CNP-100)
+    * The new EnforceCMakeCacheBuildRequirements policy recognizes
+      potential buildRequirements based on CMakeCache.txt files as
+      produced by the cmake tool.  Thanks to Pavel Volkovitskiy for
+      implementing this feature. (CNP-67)
 
 Changes in 1.0.11:
-  o Initial support for derived packages (experimental) has been added
-    to appropriate policies. (CNP-73)
+  o New Features:
+    * Initial support for derived packages (experimental) has been added
+      to appropriate policies. (CNP-73)
 
 Changes in 1.0.10:
-  o The WorldWriteableExecutables policy warning message has been
-    changed to be more accurate.
-  o AutoDoc now enforces a mode of 0644 on files it adds to %(thisdocdir)s
-    (CNP-43)
-  o The new FixBuilddirSymlink policy has been added to fix symlinks
-    that include the builddir. (CNP-48)
-  o When multiple components provide a dependency that is discovered
-    to be missing from the buildRequires list, dependencies between
-    those components are investigated to determine which is the
-    best dependency to suggest.  This will cause foo:devel to be
-    suggested instead of providing a choice between foo:devel and
-    foo:devellib. (CNP-60)
-  o Now that Conary records the transitive closure of the buildRequires
-    list, Enforce*BuildRequires inspects that transitive closure,
-    eliminating unnecessary and redundant suggestions. (CNP-61)
-  o The pam_stack module is now deprecated, so the NormalizePamConfig
-    policy now changes to the preferred include mechanism by default.
-    (CNP-42)
-  o If Conary is new enough (1.0.41/1.1.14 or newer), Conary will now
-    report if files that provide use flags are not included in the
-    buildRequires list. (CNP-44)
-  o All pkgconfig files are moved to be multilib-safe. (CNP-55)
-  o Policy now fails on paths of /usr/usr (CNP-46).
-  o Broken symlinks are now removed from the build dir after an error has
-    been logged so that policies which check file contents are not confused
-    by the broken symlink (CNP-59).
-  o Packagers which place things into /usr/local will now recieve a warning
-    stating that /usr/local is intended for non-managed files. (CNP-13)
-  o A new policy, FixObsoletePaths, will now try to move files to the 
-    correct place automatically, and log an error if it is unable to do so.
-    The previous behaviour was for ObsoletePaths to log an error and not
-    try to correct the issue. For compatability, an ObsoletePaths stub
-    has been retained.
-  o Manpages which contain their catagory in their filename will now be
-    moved to the correct location if they exist in %(mandir)s and not
-    %(mandir)s/category/. (CNP-5)
-  o Manpages which were placed in directories such as /usr/share/man/1 will
-    now be moved to their correct location: /usr/share/man/man1 (CNP-4)
-  o Calling SharedLibrary with bad arguments will no longer cause a traceback.
-    (CNP-45)
+  o New Features:
+    * The WorldWriteableExecutables policy warning message has been
+      changed to be more accurate.
+    * AutoDoc now enforces a mode of 0644 on files it adds to %(thisdocdir)s
+      (CNP-43)
+    * The new FixBuilddirSymlink policy has been added to fix symlinks
+      that include the builddir. (CNP-48)
+    * When multiple components provide a dependency that is discovered
+      to be missing from the buildRequires list, dependencies between
+      those components are investigated to determine which is the
+      best dependency to suggest.  This will cause foo:devel to be
+      suggested instead of providing a choice between foo:devel and
+      foo:devellib. (CNP-60)
+    * Now that Conary records the transitive closure of the buildRequires
+      list, Enforce*BuildRequires inspects that transitive closure,
+      eliminating unnecessary and redundant suggestions. (CNP-61)
+    * The pam_stack module is now deprecated, so the NormalizePamConfig
+      policy now changes to the preferred include mechanism by default.
+      (CNP-42)
+    * If Conary is new enough (1.0.41/1.1.14 or newer), Conary will now
+      report if files that provide use flags are not included in the
+      buildRequires list. (CNP-44)
+    * All pkgconfig files are moved to be multilib-safe. (CNP-55)
+    * Policy now fails on paths of /usr/usr (CNP-46).
+    * Broken symlinks are now removed from the build dir after an error has
+      been logged so that policies which check file contents are not confused
+      by the broken symlink (CNP-59).
+    * Packagers which place things into /usr/local will now recieve a warning
+      stating that /usr/local is intended for non-managed files. (CNP-13)
+    * A new policy, FixObsoletePaths, will now try to move files to the 
+      correct place automatically, and log an error if it is unable to do so.
+      The previous behaviour was for ObsoletePaths to log an error and not
+      try to correct the issue. For compatability, an ObsoletePaths stub
+      has been retained.
+    * Manpages which contain their catagory in their filename will now be
+      moved to the correct location if they exist in %(mandir)s and not
+      %(mandir)s/category/. (CNP-5)
+    * Manpages which were placed in directories such as /usr/share/man/1 will
+      now be moved to their correct location: /usr/share/man/man1 (CNP-4)
+
+  o Bug Fixes:
+    * Calling SharedLibrary with bad arguments will no longer cause a traceback.
+      (CNP-45)
 
 Changes in 1.0.9:
-  o The AutoDoc policy now includes LICENSE.txt and NOTICE.txt files,
-    since those names are common in Java packages. (CNP-29)
-  o The NonMultilibComponent policy now considers only files, not
-    directories. (CNP-39)
-  o The NormalizeInitscriptContents policy now ignores directories.
-    (CNP-41)
+  o New Features:
+    * The AutoDoc policy now includes LICENSE.txt and NOTICE.txt files,
+      since those names are common in Java packages. (CNP-29)
+    * The NonMultilibComponent policy now considers only files, not
+      directories. (CNP-39)
+    * The NormalizeInitscriptContents policy now ignores directories.
+      (CNP-41)
 
 Changes in 1.0.8:
-  o Enforce*BuildRequirements now provides some more explanation about
-    what is wrong when dependencies are not resolved in the system
-    database or within a package, and gives specific instructions about
-    how to handle the common case where binaries are built incorrectly.
-    (CNP-15)
-  o The WarnWriteable policy now does not warn about group-writeable
-    files if the group in question is "root". (CNP-24)
-  o A bug that caused a traceback when attempting to make a symlink
-    that points to the directory which contains it a relative symlink
-    has been fixed. (CNP-28)
+  o New Features:
+    * Enforce*BuildRequirements now provides some more explanation about
+      what is wrong when dependencies are not resolved in the system
+      database or within a package, and gives specific instructions about
+      how to handle the common case where binaries are built incorrectly.
+      (CNP-15)
+    * The WarnWriteable policy now does not warn about group-writeable
+      files if the group in question is "root". (CNP-24)
+
+  o Bug Fixes:
+    * A bug that caused a traceback when attempting to make a symlink
+      that points to the directory which contains it a relative symlink
+      has been fixed. (CNP-28)
 
 Changes in 1.0.7:
-  o Enforce*BuildRequirements regular expression exceptions now
-    function with the correct sense. (CNP-14)
-  o A bug in NormalizePamConfig that would change pam files pointed
-    to by symlinks in /etc/pam.d to have permissions 0777.  This would
-    cause conary to fail to build the package.
-  o A bug in Enforce*BuildRequirements that caused it to suggest
-    overly aggressive and unnecessary build requirements, introduced
-    in conary-policy 1.0.5, has been fixed. (CNP-12)
+  o New Features:
+    * Enforce*BuildRequirements regular expression exceptions now
+      function with the correct sense. (CNP-14)
+
+  o Bug Fixes:
+    * A bug in NormalizePamConfig that would change pam files pointed
+      to by symlinks in /etc/pam.d to have permissions 0777.  This would
+      cause conary to fail to build the package.
+    * A bug in Enforce*BuildRequirements that caused it to suggest
+      overly aggressive and unnecessary build requirements, introduced
+      in conary-policy 1.0.5, has been fixed. (CNP-12)
 
 Changes in 1.0.6:
-  o CheckSonames no longer suggests calling r.Ldconfig, because
-    the NormalizeLibrarySymlinks policy will automatically take
-    care of every case where CheckSonames could have suggested
-    calling r.Ldconfig.
-  o CheckSonames will warn about shared libraries that have a
-    SONAME that matches the name of an actual file instead of a
-    symlink only once, and it will print a more helpful message
-    as information rather than as a warning.
-  o A bug that caused the new interpreter checking behavior in
-    EnforceBuildRequirements to traceback in many situations has
-    been fixed.
+  o New Features:
+    * CheckSonames no longer suggests calling r.Ldconfig, because
+      the NormalizeLibrarySymlinks policy will automatically take
+      care of every case where CheckSonames could have suggested
+      calling r.Ldconfig.
+    * CheckSonames will warn about shared libraries that have a
+      SONAME that matches the name of an actual file instead of a
+      symlink only once, and it will print a more helpful message
+      as information rather than as a warning.
+
+  o Bug Fixes:
+    * A bug that caused the new interpreter checking behavior in
+      EnforceBuildRequirements to traceback in many situations has
+      been fixed.
 
 Changes in 1.0.5:
-  o Enforce*BuildRequirements now enforce that interpreters for
-    scripts are listed as build requirements. (CNP-1)
-  o Strip now raises an exception if debuginfo will fail because
-    the buildPath was too short to modify path references in
-    binary files.  Before, it silently disabled debuginfo.
-  o Strip is no longer run for bootstrap builds, in order to ease
-    debugging bootstrap builds.
+  o New Features:
+    * Enforce*BuildRequirements now enforce that interpreters for
+      scripts are listed as build requirements. (CNP-1)
+    * Strip now raises an exception if debuginfo will fail because
+      the buildPath was too short to modify path references in
+      binary files.  Before, it silently disabled debuginfo.
+    * Strip is no longer run for bootstrap builds, in order to ease
+      debugging bootstrap builds.
 
 Changes in 1.0.4:
-  o NormalizePamConfig can now handle read-only /etc/pam.d files.
+  o New Features:
+    * NormalizePamConfig can now handle read-only /etc/pam.d files.
 
 Changes in 1.0.3:
-  o Enforce*BuildRequirements now take regular expressions for
-    exceptions, as well as literal strings.
-  o All suggested additions to buildRequires are coalesced via the
-    reportMissingBuildRequires policy, when run with a Conary new
-    enough to provide that policy (1.0.13 or later) (bz #869).
-  o NormalizeLibrarySymlinks has a clearer message when ldconfig
-    adds files to a directory, and the message is informational
-    rather than a warning, since depending on NormalizeLibrarySymlinks
-    instead of calling r.Ldconfig() explicitly is generally preferred.
-  o DanglingSymlinks no longer reports all symbolic links as dangling
-    symlinks when the buildpath contains a symbolic link (bz #856).
+  o New Features:
+    * Enforce*BuildRequirements now take regular expressions for
+      exceptions, as well as literal strings.
+    * All suggested additions to buildRequires are coalesced via the
+      reportMissingBuildRequires policy, when run with a Conary new
+      enough to provide that policy (1.0.13 or later) (CNY-349).
+    * NormalizeLibrarySymlinks has a clearer message when ldconfig
+      adds files to a directory, and the message is informational
+      rather than a warning, since depending on NormalizeLibrarySymlinks
+      instead of calling r.Ldconfig() explicitly is generally preferred.
+
+  o Bug Fixes:
+    * DanglingSymlinks no longer reports all symbolic links as dangling
+      symlinks when the buildpath contains a symbolic link (RPL-308).
 
 Changes in 1.0.2:
-  o The warning previously generated for "bad RPATH entries" (that is,
-    entries starting with the destdir, the builddir, /tmp, or /var/tmp)
-    has been changed to an error.
+  o New Features:
+    * The warning previously generated for "bad RPATH entries" (that is,
+      entries starting with the destdir, the builddir, /tmp, or /var/tmp)
+      has been changed to an error.
 
 Changes in 1.0.1:
-  o CheckDesktopFiles now merely warns about missing icon files
-    instead of raising an error; raising an error works very poorly
-    because it adds too many false dependencies.
-  o More policies have explicit ordering constraints added.
-  o The documentation has been extensively updated.
+  o New Features:
+    * CheckDesktopFiles now merely warns about missing icon files
+      instead of raising an error; raising an error works very poorly
+      because it adds too many false dependencies.
+    * More policies have explicit ordering constraints added.
+    * The documentation has been extensively updated.
 
 Changes in 1.0:
-  o Added the new PythonEggs policy which prevents packaging python
-    .egg files and explains how to fix the problem.
-  o Sped up EnforceConfigLogBuildRequirements for the case where there
-    are no config.log files.
-  o "Icon=" lines are now ignored in .desktop files.
+  o New Features:
+    * Added the new PythonEggs policy which prevents packaging python
+      .egg files and explains how to fix the problem.
+    * Sped up EnforceConfigLogBuildRequirements for the case where there
+      are no config.log files.
+    * "Icon=" lines are now ignored in .desktop files.
 
 Changes in 0.90.2:
-  o Made the IgnoredSetuid policy work after ExcludeDirectories has
-    been run.
-  o DanglingSymlinks no longer complains if you add a symlink between 
-    components where the source component requires the target
+  o New Features:
+    * Made the IgnoredSetuid policy work after ExcludeDirectories has
+      been run.
+    * DanglingSymlinks no longer complains if you add a symlink between 
+      components where the source component requires the target
 
 Changes in 0.90.1:
-  o Added NormalizeInitscriptContents policy to fix bad paths in
-    initscripts and add necessary dependencies on initscripts:runtime
-  o Changed from debug to info level logging
+  o New Features:
+    * Added NormalizeInitscriptContents policy to fix bad paths in
+      initscripts and add necessary dependencies on initscripts:runtime
+    * Changed from debug to info level logging
 
 Changes in 0.90.0 (initial version):
-  o Split policy out from Conary
-  o Note that conary-policy versions do not necessarily track Conary versions
+  o New Features:
+    * Split policy out from Conary
+    * Note that conary-policy versions do not necessarily track Conary versions
