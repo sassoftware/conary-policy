@@ -1,0 +1,1 @@
+NormalizeInitscriptContents now properly modifies script contents when initdir is /etc/rc.d/init.d
