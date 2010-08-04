@@ -603,8 +603,13 @@ class NormalizeInitscriptContents(policy.DestdirPolicy):
 
         contents = file(fullpath).read()
         modified = False
-        if '/etc/rc.d/init.d' in contents:
+        if ('/etc/rc.d/init.d' != m.initdir and
+            '/etc/rc.d/init.d' in contents):
             contents = contents.replace('/etc/rc.d/init.d', m.initdir)
+            modified = True
+        elif ('/etc/init.d' != m.initdir and
+              '/etc/init.d' in contents):
+            contents = contents.replace('/etc/init.d', m.initdir)
             modified = True
 
         if '%(initdir)s/functions' %m in contents:

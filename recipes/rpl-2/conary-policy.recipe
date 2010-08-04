@@ -1,0 +1,17 @@
+#
+# Copyright (c) 2010 rPath, Inc.
+# This file is distributed under the terms of the MIT License.
+# A copy is available at http://www.rpath.com/permanent/mit-license.html
+#
+
+class ConaryPolicy(BuildPackageRecipe):
+    name = 'conary-policy'
+    version = '1.0'
+
+    def setup(r):
+        # r.addArchive('ftp://download.rpath.com/conary/')
+        r.addMercurialSnapshot('http://hg.rpath.com/conary-policy/')
+
+        r.MakeInstall()
+        # NOT %(libdir)s
+        r.CompilePython('%(prefix)s/lib/conary/policy')
