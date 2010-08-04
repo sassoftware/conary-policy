@@ -918,7 +918,7 @@ class NormalizePythonInterpreterVersion(policy.DestdirPolicy):
         policy.DestdirPolicy.updateArgs(self, *args, **keywords)
 
     def preProcess(self):
-        self.interpreterRe = re.compile(".*python[-0-9.]+")
+        self.interpreterRe = re.compile(".*python[-0-9.]+$")
         self.interpMap = {}
         versionMap = {}
         for item in self.versionMap.items():
