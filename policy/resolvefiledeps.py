@@ -132,6 +132,9 @@ class ResolveFileDependencies(policy.PackagePolicy):
             else:
                 if trv0:
                     trovName = trv0.getName()
+                    self.info("Replacing requirement on file %s with a "
+                            "requirement on trove %s since that file is not "
+                            "directly provided." % (f, trovName))
                     addedTroveDeps.append(deps.Dependency(trovName))
                     removedFileDeps.append(fDep)
                     fileDeps.remove(fDep)
@@ -175,6 +178,9 @@ class ResolveFileDependencies(policy.PackagePolicy):
             for nvf in trvMap[f]:
                 if nvf[2].satisfies(comp.flavor):
                     trovName = nvf[0]
+                    self.info("Replacing requirement on file %s with a "
+                            "requirement on trove %s since that file is not "
+                            "directly provided." % (f, trovName))
                     addedTroveDeps.append(deps.Dependency(trovName))
                     removedFileDeps.append(fDep)
                     fileDeps.remove(fDep)
