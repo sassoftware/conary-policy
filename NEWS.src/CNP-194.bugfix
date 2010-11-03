@@ -1,0 +1,2 @@
+The NormalizePythonInterpreterVersion policy no longer incorrectly
+considers /usr/bin/python-config to be a python interpreter.
