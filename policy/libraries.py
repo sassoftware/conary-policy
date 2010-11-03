@@ -278,6 +278,7 @@ class FixupMultilibPaths(policy.DestdirPolicy):
         ('Strip', policy.CONDITIONAL_SUBSEQUENT),
     )
     processUnmodified = False
+    invariantexceptions = [ '(%(debuglibdir)s|%(debugsrcdir)s)/', ] # CNP-201
     invariantinclusions = [
         '.*\.(so.*|a)$',
     ]
