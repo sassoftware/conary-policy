@@ -1,3 +1,21 @@
+Changes in 1.0.29:
+  o New Features:
+    * The ResolveFileDependencies policy now logs each translated
+      requirement for aid in debugging. (CNP-198)
+
+  o Bug Fixes:
+    * NormalizeInitscriptContents now properly modifies script contents
+      when initdir is /etc/rc.d/init.d (CNP-193)
+    * FixupMultilibPaths now ignores all debuginfo paths.  Previously,
+      if a recipe implemented debuginfo handling instead of leaving it
+      to the Strip policy, the FixupMultilibPaths policy would
+      incorrectly move debuginfo files. (CNP-201)
+    * The NormalizePythonInterpreterVersion policy no longer incorrectly
+      considers /usr/bin/python-config to be a python interpreter.
+      (CNP-194)
+    * ResolveFileDependencies was not being run on derived packages
+      (CNP-202)
+
 Changes in 1.0.28:
   o New Features:
     * Changed to express dependencies on initscripts functions via a file

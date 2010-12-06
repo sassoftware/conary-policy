@@ -1,4 +1,0 @@
-FixupMultilibPaths now ignores all debuginfo paths.  Previously,
-if a recipe implemented debuginfo handling instead of leaving it to
-the Strip policy, the FixupMultilibPaths policy would incorrectly
-move debuginfo files.

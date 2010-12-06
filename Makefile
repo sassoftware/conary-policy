@@ -12,7 +12,7 @@
 # full details.
 #
 
-VERSION=1.0.28
+VERSION=1.0.29
 NAMEVER=conary-policy-$(VERSION)
 DESTDIR=/
 POLICYDIR=/usr/lib/conary/policy/
@@ -43,6 +43,9 @@ tag:
 
 version:
 	sed -i 's/@NEW@/$(VERSION)/g' NEWS
+
+show-version:
+	@echo $(VERSION)
 
 clean:
 	rm -f policy/*.pyc
