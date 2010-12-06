@@ -65,8 +65,7 @@ class ResolveFileDependencies(policy.PackagePolicy):
         ('RemoveSelfProvidedRequires', policy.CONDITIONAL_PRIOR),
         ('Requires', policy.REQUIRED_PRIOR),
     )
-
-
+    processUnmodified = True
 
     def do(self):
         self.cfg = self.recipe.cfg
