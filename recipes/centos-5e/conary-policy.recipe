@@ -1,36 +1,27 @@
 #
-# Copyright (c) 2010 rPath, Inc.
+# Copyright (c) 2006-2010 rPath, Inc.
 # This file is distributed under the terms of the MIT License.
 # A copy is available at http://www.rpath.com/permanent/mit-license.html
 #
 
-class ConaryPolicy(BuildPackageRecipe):
+loadSuperClass('rpathpackage')
+class ConaryPolicy(BuildPackageRecipe, RpathPackageRecipe):
     name = 'conary-policy'
     version = ''
 
     def setup(r):
-        r.addMercurialSnapshot()
-        #r.addArchive('ftp://download.rpath.com/conary/')
+        r.rpathSetup()
+        r.addArchive('ftp://download.rpath.com/conary/')
+        #r.addMercurialSnapshot('http://hg.rpath.com/conary-policy')
 
         r.MakeInstall()
-
-
         r.Replace('xinetd:runtime', 'xinetd:rpm',
             '%(prefix)s/lib/conary/policy/xinetd.py')
         # NOT %(libdir)s
-        # CompilePython needs option to choose which python interpreter
-        # to use.  If it gains this feature and we use CompilePython,
-        # we should remove the .pyo files as we do elsewhere
-        #r.CompilePython('%(prefix)s/lib/conary/policy')
-        r.Run("/usr/conary/bin/python2.6 -c 'from compileall import *;"
-              """ compile_dir("%(destdir)s/%(prefix)s/lib/conary/policy","""
-                          """ 10, "%(prefix)s/lib/conary/policy")'""")
+        r.CompilePython('%(prefix)s/lib/conary/policy',
+                        pythonInterpreter='%(pybin)s')
+        r.Remove('%(prefix)s/lib/conary/policy/*.pyo')
 
-        # Assume that conary-build will have sufficient dependencies
-        # satisfied for conary-policy; we cannot use conary python
-        # dependencies when we are not using general system python
-        r.Requires(exceptions='%(prefix)s/lib/conary/policy/')
-
-        # unnecessary and entirely useless flavoring is causing
-        # inappropriately biarch group flavors (PFM-543)
-        r.Flavor(exceptions='.*')
+        # Need a flavor
+        if Arch.x86_64:
+            pass
