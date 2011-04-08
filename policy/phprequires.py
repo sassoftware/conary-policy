@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2008 rPath, Inc.
+# Copyright (c) 2011 rPath, Inc.
 #
 # This program is distributed under the terms of the Common Public License,
 # version 1.0. A copy of this license should have been distributed with this
@@ -12,6 +12,7 @@
 # full details.
 #
 
+import errno
 import itertools
 import os
 
@@ -77,7 +78,13 @@ class PHPRequires(_basePluggableRequires):
     def _isPHPFile(self, fullPath):
         # confirm identity of a PHP file by the presence of the <?php marker
         marker = '<?php'
-        f = open(fullPath)
+        try:
+            f = open(fullPath)
+        except IOError, err:
+            if err.errno == errno.ENOENT:
+                # No such file, probably because it is a dead symlink.
+                return False
+            raise
         f.seek(0, 2)
         limit = f.tell()
         f.seek(0)
