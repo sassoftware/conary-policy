@@ -1,3 +1,8 @@
+Changes in 1.2:
+  o Bug Fixes:
+    * Fixed a crash involving dead symlinks with names ending in .php
+      (CNP-207)
+
 Changes in 1.0.29:
   o New Features:
     * The ResolveFileDependencies policy now logs each translated
