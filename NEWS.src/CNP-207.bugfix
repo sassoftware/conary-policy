@@ -1,0 +1,1 @@
+Fixed a crash involving dead symlinks with names ending in .php
