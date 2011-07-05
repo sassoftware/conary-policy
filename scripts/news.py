@@ -15,6 +15,7 @@
 
 import codecs
 import os
+import re
 import sys
 import textwrap
 import time
@@ -24,11 +25,15 @@ from mercurial import hg, ui
 PRODUCT_NAME = "Conary Policy"
 HEADINGS = [
         ('feature', 'New Features'),
+        ('api', 'API Changes'),
         ('bugfix', 'Bug Fixes'),
         ('internal', 'Internal Changes'),
         ]
 KINDS = set(x[0] for x in HEADINGS)
 NEWSDIR = 'NEWS.src'
+
+RE_ISSUE = re.compile('^[A-Z0-9]+-\d+')
+
 
 def main():
     rootdir = os.path.realpath(__file__ + '/../..')
@@ -93,7 +98,7 @@ def preview(repo, modifiedOK=True):
                         "committed first." % (path,))
         else:
             files.add(path)
-            modified = _lastModified(repo, path)
+            modified = _firstModified(repo, path)
 
         entries = [x.replace('\n', ' ') for x in
                    codecs.open(path, 'r', 'utf8').read().split('\n\n')]
@@ -104,7 +109,7 @@ def preview(repo, modifiedOK=True):
                     entry))
 
     out = ['Changes in %s:' % _getVersion()]
-    htmlOut = ['<p>%s %s is a maintainence release</p>' % (PRODUCT_NAME,
+    htmlOut = ['<p>%s %s is a maintenance release</p>' % (PRODUCT_NAME,
                                                            _getVersion())]
     for kind, heading in HEADINGS:
         entries = kind_map.get(kind, ())
@@ -115,7 +120,7 @@ def preview(repo, modifiedOK=True):
         htmlOut.append("<ul>")
         for _, issue, _, entry in sorted(entries):
             htmlEntry = '    <li>' + entry
-            if not issue.startswith('misc-'):
+            if RE_ISSUE.match(issue):
                 entry += ' (%s)' % issue
                 htmlEntry += ' (<a href="https://issues.rpath.com/browse/%s">%s</a>)' % (issue,issue)
             lines = textwrap.wrap(entry, 66)
@@ -131,7 +136,7 @@ def preview(repo, modifiedOK=True):
 
 def generate(repo):
     version = _getVersion()
-    old = open('NEWS').read()
+    old = codecs.open('NEWS', 'r', 'utf8').read()
     if '@NEW@' in old:
         sys.exit("error: NEWS contains a @NEW@ section")
     elif ('Changes in %s:' % version) in old:
@@ -142,26 +147,26 @@ def generate(repo):
     newHtml = '\n'.join(htmlLines) + '\n'
 
     doc = new + old
-    open('NEWS', 'w').write(doc)
-    open('NEWS.html', 'w').write(newHtml)
+    codecs.open('NEWS', 'w', 'utf8').write(doc)
+    codecs.open('NEWS.html', 'w', 'utf8').write(newHtml)
 
     sys.stdout.write(new)
     print >> sys.stderr, "Updated NEWS"
     print >> sys.stderr, "Wrote NEWS.html"
 
-    repo.remove(files, unlink=True)
+    wlock = repo.wlock()
+    try:
+        for name in files:
+            os.unlink(name)
+            repo.dirstate.remove(name)
+    finally:
+        wlock.release()
     print >> sys.stderr, "Deleted %s news fragments" % len(files)
 
 
-def _lastModified(repo, path):
-    filenodes = []
-    for cp in repo[None].parents():
-        if not cp:
-            continue
-        filenodes.append(cp.filenode(path))
-    assert len(filenodes) == 1
+def _firstModified(repo, path):
     fl = repo.file(path)
-    ctx = repo[fl.linkrev(fl.rev(filenodes[0]))]
+    ctx = repo[fl.linkrev(0)]
     return ctx.date()[0]
 
 
