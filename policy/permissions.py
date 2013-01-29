@@ -101,18 +101,18 @@ class WarnWriteable(policy.EnforcementPolicy):
                 return
 
         fullpath = self.macros.destdir + filename
-	if os.path.islink(fullpath):
-	    return
+        if os.path.islink(fullpath):
+            return
         if filename not in self.recipe.autopkg.pathMap:
-	    # directory has been deleted
-	    return
-	mode = os.lstat(fullpath)[stat.ST_MODE]
+            # directory has been deleted
+            return
+        mode = os.lstat(fullpath)[stat.ST_MODE]
         group = self.recipe.autopkg.pathMap[filename].inode.group()
         if mode & 02 or (mode & 020 and group != 'root'):
-	    if stat.S_ISDIR(mode):
-		type = "directory"
-	    else:
-		type = "file"
+            if stat.S_ISDIR(mode):
+                type = "directory"
+            else:
+                type = "file"
             self.warn('Possibly inappropriately writeable permission'
                       ' 0%o for %s %s', mode & 0777, type, filename)
 
@@ -147,8 +147,8 @@ class WorldWriteableExecutables(policy.EnforcementPolicy):
             if self.recipe._getCapsulePathsForFile(path):
                 return
 
-	d = self.macros['destdir']
-	mode = os.lstat(util.joinPaths(d, path))[stat.ST_MODE]
+        d = self.macros['destdir']
+        mode = os.lstat(util.joinPaths(d, path))[stat.ST_MODE]
         if mode & 0111 and mode & 02 and not stat.S_ISLNK(mode):
             self.error(
                 "%s has executable mode 0%o with world-writeable permission",
@@ -186,15 +186,15 @@ class IgnoredSetuid(policy.EnforcementPolicy):
             if self.recipe._getCapsulePathsForFile(path):
                 return
 
-	fullpath = self.macros.destdir + path
-	mode = os.lstat(fullpath)[stat.ST_MODE]
+        fullpath = self.macros.destdir + path
+        mode = os.lstat(fullpath)[stat.ST_MODE]
         pathMap = self.recipe.autopkg.pathMap
         if path not in pathMap:
             return
-	if mode & 06000 and not pathMap[path].inode.perms() & 06000:
-	    if stat.S_ISDIR(mode):
-		type = "directory"
-	    else:
-		type = "file"
+        if mode & 06000 and not pathMap[path].inode.perms() & 06000:
+            if stat.S_ISDIR(mode):
+                type = "directory"
+            else:
+                type = "file"
             self.warn('%s %s has unpackaged set{u,g}id mode 0%o in filesystem',
                       type, path, mode&06777)

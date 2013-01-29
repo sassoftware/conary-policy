@@ -53,33 +53,33 @@ class NonBinariesInBindirs(policy.EnforcementPolicy):
     processUnmodified = False
     invariantexceptions = [ ('.*', stat.S_IFDIR) ]
     invariantsubtrees = [
-	'%(bindir)s/',
-	'%(essentialbindir)s/',
-	'%(krbprefix)s/bin/',
-	'%(x11prefix)s/bin/',
-	'%(sbindir)s/',
-	'%(essentialsbindir)s/',
-	'%(initdir)s/',
-	'%(libexecdir)s/',
-	'%(sysconfdir)s/profile.d/',
-	'%(sysconfdir)s/cron.daily/',
-	'%(sysconfdir)s/cron.hourly/',
-	'%(sysconfdir)s/cron.weekly/',
-	'%(sysconfdir)s/cron.monthly/',
+        '%(bindir)s/',
+        '%(essentialbindir)s/',
+        '%(krbprefix)s/bin/',
+        '%(x11prefix)s/bin/',
+        '%(sbindir)s/',
+        '%(essentialsbindir)s/',
+        '%(initdir)s/',
+        '%(libexecdir)s/',
+        '%(sysconfdir)s/profile.d/',
+        '%(sysconfdir)s/cron.daily/',
+        '%(sysconfdir)s/cron.hourly/',
+        '%(sysconfdir)s/cron.weekly/',
+        '%(sysconfdir)s/cron.monthly/',
     ]
 
     def doFile(self, filename):
         if hasattr(self.recipe, '_getCapsulePathsForFile'):
             if self.recipe._getCapsulePathsForFile(filename):
                 return
-	d = self.macros['destdir']
-	mode = os.lstat(util.joinPaths(d, filename))[stat.ST_MODE]
-	if not mode & 0111:
+        d = self.macros['destdir']
+        mode = os.lstat(util.joinPaths(d, filename))[stat.ST_MODE]
+        if not mode & 0111:
             self.error(
                 "%s has mode 0%o with no executable permission in bindir",
                 filename, mode)
-	m = self.recipe.magic[filename]
-	if m and m.name == 'ltwrapper':
+        m = self.recipe.magic[filename]
+        if m and m.name == 'ltwrapper':
             self.error("%s is a build-only libtool wrapper script", filename)
 
 
@@ -115,7 +115,7 @@ class FilesInMandir(policy.EnforcementPolicy):
         '%(krbprefix)s/man',
     ]
     invariantinclusions = [
-	(r'.*', None, stat.S_IFDIR),
+        (r'.*', None, stat.S_IFDIR),
     ]
     recursive = False
 
@@ -234,13 +234,13 @@ class BadInterpreterPaths(policy.EnforcementPolicy):
             if self.recipe._getCapsulePathsForFile(path):
                 return
 
-	d = self.macros['destdir']
-	mode = os.lstat(util.joinPaths(d, path))[stat.ST_MODE]
-	if not mode & 0111:
+        d = self.macros['destdir']
+        mode = os.lstat(util.joinPaths(d, path))[stat.ST_MODE]
+        if not mode & 0111:
             # we care about interpreter paths only in executable scripts
             return
         m = self.recipe.magic[path]
-	if m and m.name == 'script':
+        if m and m.name == 'script':
             interp = m.contents['interpreter']
             if not interp:
                 self.error(
@@ -292,12 +292,12 @@ class ImproperlyShared(policy.EnforcementPolicy):
             if self.recipe._getCapsulePathsForFile(filename):
                 return
         m = self.recipe.magic[filename]
-	if m:
-	    if m.name == "ELF":
+        if m:
+            if m.name == "ELF":
                 self.error(
                     "Architecture-specific file %s in shared data directory",
                     filename)
-	    if m.name == "ar":
+            if m.name == "ar":
                 self.error("Possibly architecture-specific file %s in shared data directory", filename)
 
 
@@ -342,7 +342,7 @@ class CheckDesktopFiles(policy.EnforcementPolicy):
 
     def __init__(self, *args, **keywords):
         self.iconDirs = [ '%(datadir)s/icons/', '%(datadir)s/pixmaps/' ]
-	policy.EnforcementPolicy.__init__(self, *args, **keywords)
+        policy.EnforcementPolicy.__init__(self, *args, **keywords)
 
     def updateArgs(self, *args, **keywords):
         if 'iconDirs' in keywords:
@@ -434,9 +434,9 @@ class RequireChkconfig(policy.EnforcementPolicy):
             if self.recipe._getCapsulePathsForFile(path):
                 return
 
-	d = self.macros.destdir
+        d = self.macros.destdir
         fullpath = util.joinPaths(d, path)
-	if not (os.path.isfile(fullpath) and util.isregular(fullpath)):
+        if not (os.path.isfile(fullpath) and util.isregular(fullpath)):
             return
         f = file(fullpath)
         lines = f.readlines()

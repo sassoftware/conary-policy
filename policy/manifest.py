@@ -65,25 +65,24 @@ class ParseManifest(policy.PackagePolicy):
     processUnmodified = False
 
     def __init__(self, *args, **keywords):
-	self.paths = []
-	policy.PackagePolicy.__init__(self, *args, **keywords)
+        self.paths = []
+        policy.PackagePolicy.__init__(self, *args, **keywords)
 
     def updateArgs(self, *args, **keywords):
-	"""
-	ParseManifest(path(s)...)
-	"""
-	if args:
-	    self.paths.extend(args)
-	policy.PackagePolicy.updateArgs(self, **keywords)
+        """
+        ParseManifest(path(s)...)
+        """
+        if args:
+            self.paths.extend(args)
+        policy.PackagePolicy.updateArgs(self, **keywords)
 
     def do(self):
-	for path in self.paths:
-	    self.processPath(path)
+        for path in self.paths:
+            self.processPath(path)
 
     def processPath(self, path):
-        import epdb; epdb.st()
-	if not path.startswith('/'):
-	    path = self.macros['builddir'] + os.sep + path
+        if not path.startswith('/'):
+            path = self.macros['builddir'] + os.sep + path
         f = open(path)
         for line in f:
             line = line.strip()
@@ -104,15 +103,15 @@ class ParseManifest(policy.PackagePolicy):
                 self.recipe.MakeDevices(target, devtype, int(major), int(minor),
                                         owner, group, int(perms, 0))
             elif fields[1].startswith('%dir '):
-		pass
-		# ignore -- Conary directory handling is too different
-		# to map
+                pass
+                # ignore -- Conary directory handling is too different
+                # to map
             else:
-		# XXX is this right?
+                # XXX is this right?
                 target = fields[1].strip()
-		if int(perms, 0) & 06000:
-		    self.recipe.setModes(int(perms, 0),
+                if int(perms, 0) & 06000:
+                    self.recipe.setModes(int(perms, 0),
                                          util.literalRegex(target))
-		if owner != 'root' or group != 'root':
-		    self.recipe.Ownership(owner, group,
+                if owner != 'root' or group != 'root':
+                    self.recipe.Ownership(owner, group,
                                           util.literalRegex(target))

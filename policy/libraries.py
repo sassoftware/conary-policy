@@ -148,14 +148,14 @@ class WarnScriptSharedLibrary(policy.EnforcementPolicy):
 
     invariantinclusions = [
         # look only at files, not directories
-	(r'.*', None, stat.S_IFDIR),
+        (r'.*', None, stat.S_IFDIR),
     ]
 
     def test(self):
         return self.enabled
 
     def doFile(self, path):
-	fullpath = self.rootdir + path
+        fullpath = self.rootdir + path
         relpath = path[1:]
         if 'ld.so.conf' in file(fullpath, 'r').read():
             self.error('Capsule script %s mentions ld.so.conf\n'
@@ -213,7 +213,7 @@ class SharedLibrary(policy.PackagePolicy):
 
     invariantsubtrees = librarydirs
     invariantinclusions = [
-	(r'..*\.so.*', None, stat.S_IFDIR),
+        (r'..*\.so.*', None, stat.S_IFDIR),
     ]
     recursive = False
 
@@ -224,7 +224,7 @@ class SharedLibrary(policy.PackagePolicy):
         self.recipe.Requires(**d)
 
     def updateArgs(self, *args, **keywords):
-	policy.PackagePolicy.updateArgs(self, *args, **keywords)
+        policy.PackagePolicy.updateArgs(self, *args, **keywords)
         if 'subtrees' in keywords:
             # share with other policies that need to know about shlibs
             d = {'subtrees': keywords['subtrees']}
@@ -241,12 +241,12 @@ class SharedLibrary(policy.PackagePolicy):
             if self.recipe._getCapsulePathsForFile(filename):
                 return
 
-	fullpath = self.macros.destdir + filename
-	if os.path.isfile(fullpath) and util.isregular(fullpath):
-	    m = self.recipe.magic[filename]
-	    if m and m.name == 'ELF' and 'soname' in m.contents:
+        fullpath = self.macros.destdir + filename
+        if os.path.isfile(fullpath) and util.isregular(fullpath):
+            m = self.recipe.magic[filename]
+            if m and m.name == 'ELF' and 'soname' in m.contents:
                 self.info(filename)
-		self.recipe.autopkg.pathMap[filename].tags.set("shlib")
+                self.recipe.autopkg.pathMap[filename].tags.set("shlib")
 
 
 class FixupMultilibPaths(policy.DestdirPolicy):
@@ -478,7 +478,7 @@ class CheckSonames(policy.EnforcementPolicy):
     processUnmodified = False
     invariantsubtrees = librarydirs
     invariantinclusions = [
-	(r'..*\.so', None, stat.S_IFDIR),
+        (r'..*\.so', None, stat.S_IFDIR),
     ]
     recursive = False
     nonSymlinkWarn = set()
@@ -488,44 +488,44 @@ class CheckSonames(policy.EnforcementPolicy):
             if self.recipe._getCapsulePathsForFile(path):
                 return
 
-	d = self.macros.destdir
-	destlen = len(d)
-	l = util.joinPaths(d, path)
-	if not os.path.islink(l):
-	    m = self.recipe.magic[path]
-	    if m and m.name == 'ELF' and 'soname' in m.contents:
-		if os.path.basename(path) == m.contents['soname']:
-		    target = m.contents['soname']+'.something'
-		else:
-		    target = m.contents['soname']
+        d = self.macros.destdir
+        destlen = len(d)
+        l = util.joinPaths(d, path)
+        if not os.path.islink(l):
+            m = self.recipe.magic[path]
+            if m and m.name == 'ELF' and 'soname' in m.contents:
+                if os.path.basename(path) == m.contents['soname']:
+                    target = m.contents['soname']+'.something'
+                else:
+                    target = m.contents['soname']
                 self.warn(
                     '%s is not a symlink but probably should be a link to %s',
                     path, target)
-	    return
+            return
 
-	# store initial contents
-	sopath = util.joinPaths(os.path.dirname(l), os.readlink(l))
-	so = util.normpath(sopath)
-	# find final file
-	while os.path.islink(l):
-	    l = util.normpath(util.joinPaths(os.path.dirname(l),
-					     os.readlink(l)))
+        # store initial contents
+        sopath = util.joinPaths(os.path.dirname(l), os.readlink(l))
+        so = util.normpath(sopath)
+        # find final file
+        while os.path.islink(l):
+            l = util.normpath(util.joinPaths(os.path.dirname(l),
+                                             os.readlink(l)))
 
-	p = util.joinPaths(d, path)
-	linkpath = l[destlen:]
-	m = self.recipe.magic[linkpath]
+        p = util.joinPaths(d, path)
+        linkpath = l[destlen:]
+        m = self.recipe.magic[linkpath]
 
-	if m and m.name == 'ELF' and 'soname' in m.contents:
-	    if so == linkpath:
+        if m and m.name == 'ELF' and 'soname' in m.contents:
+            if so == linkpath:
                 self.info('%s is final path, soname is %s;'
                     ' soname usually is symlink to specific implementation',
                     linkpath, m.contents['soname'])
-	    soname = util.normpath(util.joinPaths(
-			os.path.dirname(sopath), m.contents['soname']))
-	    s = soname[destlen:]
-	    try:
-		os.stat(soname)
-		if not os.path.islink(soname) and s not in self.nonSymlinkWarn:
+            soname = util.normpath(util.joinPaths(
+                        os.path.dirname(sopath), m.contents['soname']))
+            s = soname[destlen:]
+            try:
+                os.stat(soname)
+                if not os.path.islink(soname) and s not in self.nonSymlinkWarn:
                     self.nonSymlinkWarn.add(s)
                     self.info('%s has soname %s; best practice is that the'
                               ' filename that matches the soname is a symlink:'

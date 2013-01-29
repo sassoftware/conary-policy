@@ -132,12 +132,12 @@ class NonMultilibComponent(policy.EnforcementPolicy):
         self.reported = {'python': False, 'perl': False}
         self.productMapRe = re.compile(
             '.*/(python|perl)[^/]*/(site-packages|vendor-perl)/.*')
-	policy.EnforcementPolicy.__init__(self, *args, **keywords)
+        policy.EnforcementPolicy.__init__(self, *args, **keywords)
 
     def test(self):
-	if self.macros.lib == 'lib':
-	    # no need to do anything
-	    return False
+        if self.macros.lib == 'lib':
+            # no need to do anything
+            return False
         return True
 
     def doFile(self, path):
@@ -188,9 +188,9 @@ class NonMultilibDirectories(policy.EnforcementPolicy):
     invariantinclusions = [ ( '.*/lib64', stat.S_IFDIR ), ]
 
     def test(self):
-	if self.macros.lib == 'lib64':
-	    # no need to do anything
-	    return False
+        if self.macros.lib == 'lib64':
+            # no need to do anything
+            return False
         if hasattr(self.recipe, '_getCapsulePathsForFile'):
             if self.recipe.getType() == recipe.RECIPE_TYPE_CAPSULE:
                 # Cannot reasonably separate capsule and non-capsule
@@ -233,18 +233,18 @@ class CheckDestDir(policy.EnforcementPolicy):
             if self.recipe._getCapsulePathsForFile(filename):
                 return
 
-	d = self.macros.destdir
+        d = self.macros.destdir
         b = self.macros.builddir
 
-	if filename.find(d) != -1:
+        if filename.find(d) != -1:
             self.error('Path %s contains destdir %s', filename, d)
-	fullpath = d+filename
-	if os.path.islink(fullpath):
-	    contents = os.readlink(fullpath)
-	    if contents.find(d) != -1:
+        fullpath = d+filename
+        if os.path.islink(fullpath):
+            contents = os.readlink(fullpath)
+            if contents.find(d) != -1:
                 self.error('Symlink %s contains destdir %s in contents %s',
                            filename, d, contents)
-	    if contents.find(b) != -1:
+            if contents.find(b) != -1:
                 self.error('Symlink %s contains builddir %s in contents %s',
                            filename, b, contents)
 
@@ -286,48 +286,48 @@ class FilesForDirectories(policy.EnforcementPolicy):
     # files from multiple packages, with reasonable possibility that they
     # will have files installed by hand rather than by a "make install".
     candidates = (
-	'/bin',
-	'/sbin',
-	'/etc',
-	'/etc/X11',
-	'/etc/init.d',
-	'/etc/sysconfig',
-	'/etc/xinetd.d',
-	'/lib',
-	'/mnt',
-	'/opt',
-	'/usr',
-	'/usr/bin',
-	'/usr/sbin',
-	'/usr/lib',
-	'/usr/libexec',
-	'/usr/include',
-	'/usr/share',
-	'/usr/share/info',
-	'/usr/share/man',
-	'/usr/share/man/man1',
-	'/usr/share/man/man2',
-	'/usr/share/man/man3',
-	'/usr/share/man/man4',
-	'/usr/share/man/man5',
-	'/usr/share/man/man6',
-	'/usr/share/man/man7',
-	'/usr/share/man/man8',
-	'/usr/share/man/man9',
-	'/usr/share/man/mann',
-	'/var/lib',
-	'/var/spool',
+        '/bin',
+        '/sbin',
+        '/etc',
+        '/etc/X11',
+        '/etc/init.d',
+        '/etc/sysconfig',
+        '/etc/xinetd.d',
+        '/lib',
+        '/mnt',
+        '/opt',
+        '/usr',
+        '/usr/bin',
+        '/usr/sbin',
+        '/usr/lib',
+        '/usr/libexec',
+        '/usr/include',
+        '/usr/share',
+        '/usr/share/info',
+        '/usr/share/man',
+        '/usr/share/man/man1',
+        '/usr/share/man/man2',
+        '/usr/share/man/man3',
+        '/usr/share/man/man4',
+        '/usr/share/man/man5',
+        '/usr/share/man/man6',
+        '/usr/share/man/man7',
+        '/usr/share/man/man8',
+        '/usr/share/man/man9',
+        '/usr/share/man/mann',
+        '/var/lib',
+        '/var/spool',
     )
     processUnmodified = False
     def do(self):
-	d = self.recipe.macros.destdir
-	for path in self.candidates:
+        d = self.recipe.macros.destdir
+        for path in self.candidates:
             if hasattr(self.recipe, '_getCapsulePathsForFile'):
                 if self.recipe._getCapsulePathsForFile(path):
                     break
-	    fullpath = util.joinPaths(d, path)
-	    if os.path.exists(fullpath):
-		if not os.path.isdir(fullpath):
+            fullpath = util.joinPaths(d, path)
+            if os.path.exists(fullpath):
+                if not os.path.isdir(fullpath):
                     self.error(
                         'File %s should be a directory; bad r.Install()?', path)
 

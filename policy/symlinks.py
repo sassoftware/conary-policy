@@ -254,20 +254,20 @@ class DanglingSymlinks(policy.PackagePolicy):
     """
     processUnmodified = False
     invariantexceptions = (
-	'%(testdir)s/.*', )
+        '%(testdir)s/.*', )
     targetexceptions = [
         # ('filterexp', 'requirement')
-	('.*consolehelper', 'usermode:runtime'),
-	('/proc(/.*)?', None), # provided by the kernel, no package
+        ('.*consolehelper', 'usermode:runtime'),
+        ('/proc(/.*)?', None), # provided by the kernel, no package
     ]
     def doProcess(self, recipe):
-	self.rootdir = self.rootdir % recipe.macros
-	self.targetFilters = []
-	self.macros = recipe.macros # for filterExpression
-	for targetitem, requirement in self.targetexceptions:
-	    filterargs = self.filterExpression(targetitem)
-	    self.targetFilters.append((filter.Filter(*filterargs), requirement))
-	policy.PackagePolicy.doProcess(self, recipe)
+        self.rootdir = self.rootdir % recipe.macros
+        self.targetFilters = []
+        self.macros = recipe.macros # for filterExpression
+        for targetitem, requirement in self.targetexceptions:
+            filterargs = self.filterExpression(targetitem)
+            self.targetFilters.append((filter.Filter(*filterargs), requirement))
+        policy.PackagePolicy.doProcess(self, recipe)
 
     def doFile(self, path):
         if hasattr(self.recipe, '_getCapsulePathsForFile'):
@@ -284,17 +284,17 @@ class DanglingSymlinks(policy.PackagePolicy):
         if contents[0] == '/':
             self.warn('Absolute symlink %s points to %s,'
                       ' should probably be relative', path, contents)
-	    return
+            return
         abscontents = util.joinPaths(os.path.dirname(path), contents)
         # now resolve any intermediate symlinks
         dl = len(os.path.realpath(d))
         abscontents = os.path.realpath(d+abscontents)[dl:]
         ap = recipe.autopkg
         if abscontents in ap.pathMap:
-	    if ap.findComponent(abscontents) != ap.findComponent(path) and \
-	       not path.endswith('.so') and \
-	       not ap.findComponent(path).getName().endswith(':test'):
-	        # warn about suspicious cross-component symlink
+            if ap.findComponent(abscontents) != ap.findComponent(path) and \
+               not path.endswith('.so') and \
+               not ap.findComponent(path).getName().endswith(':test'):
+                # warn about suspicious cross-component symlink
                 fromPkg = ap.findComponent(path)
                 targetPkg = ap.findComponent(abscontents)
 
@@ -311,9 +311,9 @@ class DanglingSymlinks(policy.PackagePolicy):
                               path, ap.findComponent(path).getName(),
                               ap.findComponent(abscontents).getName())
         else:
-	    for targetFilter, requirement in self.targetFilters:
-	        if targetFilter.match(abscontents):
-		    # contents are an exception
+            for targetFilter, requirement in self.targetFilters:
+                if targetFilter.match(abscontents):
+                    # contents are an exception
                     self.info('allowing special dangling symlink %s -> %s',
                               path, contents)
                     if requirement:
@@ -329,16 +329,16 @@ class DanglingSymlinks(policy.PackagePolicy):
                         f = pkg.getFile(path)
                         f.requires.set(pkg.requiresMap[path])
                         pkg.requires.union(f.requires())
-		    return
+                    return
             for pathName in recipe.autopkg.pathMap:
                 if pathName.startswith(abscontents):
                     # a link to a subdirectory of a file that is
                     # packaged is still OK; this test is expensive
                     # and almost never needed, so put off till last
                     return
-	    self.error(
-	        "Dangling symlink: %s points to non-existant %s (%s)"
-	        %(path, contents, abscontents))
+            self.error(
+                "Dangling symlink: %s points to non-existant %s (%s)"
+                %(path, contents, abscontents))
             # now that an error has been logged, we need to get rid of the file
             # so the rest of policy won't barf trying to access a file which
             # doesn't *really* exist (CNP-59)
