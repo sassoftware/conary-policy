@@ -761,6 +761,9 @@ class NormalizeInterpreterPaths(policy.DestdirPolicy):
                                 break
                         if not found:
                             self.warn('The interpreter path %s in %s does not exist!', interp, path)
+        if os.path.realpath(interp) != interp:
+            found = True
+            normalized = os.path.realpath(interp)
        
         if found:
                 line = m.contents['line']
