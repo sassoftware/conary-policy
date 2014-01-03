@@ -283,7 +283,7 @@ class FixupMultilibPaths(policy.DestdirPolicy):
     processUnmodified = False
     invariantexceptions = [ '(%(debuglibdir)s|%(debugsrcdir)s)/', ] # CNP-201
     invariantinclusions = [
-        '.*\.(so.*|a)$',
+        '.*\.(so\..*|so|a)$',
     ]
 
     def __init__(self, *args, **keywords):
