@@ -730,6 +730,7 @@ class NormalizeInterpreterPaths(policy.DestdirPolicy):
         d = util.joinPaths(destdir, path)
 
         interp = m.contents['interpreter']
+        interpDir = os.path.dirname(interp)
         interpBase = os.path.basename(interp)
 
         found = False
@@ -761,10 +762,14 @@ class NormalizeInterpreterPaths(policy.DestdirPolicy):
                                 break
                         if not found:
                             self.warn('The interpreter path %s in %s does not exist!', interp, path)
-        if os.path.islink(interp):
-            normalized = os.path.realpath(interp)
-            if os.path.exists(normalized):
-                found = True
+
+        # If the interp has symlinks along its dir path, rewrite to the real
+        # path. Do not rewrite the name of the interpreter itself as that might
+        # change the behavior of the program.
+        if (not found and interp.startswith('/')
+                and os.path.realpath(interpDir) != interpDir):
+            normalized = '/'.join((os.path.realpath(interpDir), interpBase))
+            found = True
 
         if found:
                 line = m.contents['line']
