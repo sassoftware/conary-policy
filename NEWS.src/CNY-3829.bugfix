@@ -1,4 +1,4 @@
 Fixed FixupMultilibPaths matching *.socket files.
 
-NormalizeInterpreterPaths will now rewrite interpreters that are symlinks to
-point to their target instead.
+NormalizeInterpreterPaths will now rewrite interpreters whose directory paths
+contain symlinks to point to the real path instead.
