@@ -20,11 +20,13 @@ NAMEVER=conary-policy-$(VERSION)
 DESTDIR=/
 POLICYDIR=/usr/lib/conary/policy/
 
+INSTALL=install
+
 all:
 
 install:
 	mkdir -p $(DESTDIR)$(POLICYDIR)
-	install -m 644 policy/*.py $(DESTDIR)$(POLICYDIR)
+	$(INSTALL) -m 644 policy/*.py $(DESTDIR)$(POLICYDIR)
 
 dist:
 	if ! grep "^Changes in $(VERSION)" NEWS > /dev/null 2>&1; then \
