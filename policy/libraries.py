@@ -593,6 +593,9 @@ class NormalizeLibrarySymlinks(policy.DestdirPolicy):
             if (not os.path.exists(ldConfigPath)) or self.recipe.isCrossCompiling():
                 bootStrapLdConfig = False
                 ldConfigPath = '%(essentialsbindir)s/ldconfig'%macros
+            if not os.path.exists(ldConfigPath):
+                self.warn('ldconfig not found')
+                continue
             util.execute('%s -n %s' %(ldConfigPath, fullpath))
 
             if not bootStrapLdConfig:
