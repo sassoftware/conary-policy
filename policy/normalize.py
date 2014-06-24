@@ -311,13 +311,23 @@ class NormalizeManPages(policy.DestdirPolicy):
     def _compress(self, dirname, names):
         for name in names:
             path = dirname + os.sep + name
+            # Resolve symlinks before comporessing to make sure the target
+            # file gets compressed.
+            if os.path.islink(path):
+                path = os.path.realpath(path)
+            # Assumed already compressed.
+            if path.endswith('.gz'):
+                continue
+            # Already been compressed via symlink lookup or the dangling
+            # symlink policy will catch it.
+            if not os.path.exists(path):
+                continue
             if util.isregular(path):
                 if not self.gzip:
                     self.gzip = self._findProg('gzip')
-                util.execute('gzip -f -n -9 ' + dirname + os.sep + name)
+                util.execute(self.gzip + ' -f -n -9 ' + path)
                 try:
-                    self.recipe.recordMove(dirname + os.sep + name,
-                            dirname + os.sep + name + '.gz')
+                    self.recipe.recordMove(path, path + '.gz')
                 except AttributeError:
                     pass
 
