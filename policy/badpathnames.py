@@ -388,6 +388,11 @@ class FixObsoletePaths(policy.DestdirPolicy, _pathMap):
                         % path)
                 os.rmdir(d + path)
                 continue
+            if (os.path.islink(d + path) and
+                os.path.realpath(d + path) == os.path.normpath(d + newPath)):
+                self.warn('Ignoring symlink %s, which points at the new path %s'
+                        % (path, newPath))
+                continue
             try:
                 try:
                     self.recipe.recordMove(d + path, d + newPath)
