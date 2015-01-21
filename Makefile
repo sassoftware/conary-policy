@@ -44,7 +44,7 @@ archive:
 	rm -rf $(NAMEVER)
 
 tag:
-	hg tag $(NAMEVER)
+	git tag -a -m $(NAMEVER) $(NAMEVER)
 
 version:
 	sed -i 's/@NEW@/$(VERSION)/g' NEWS
