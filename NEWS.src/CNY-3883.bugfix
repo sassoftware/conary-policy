@@ -1,0 +1,1 @@
+Fix ResolveFileDependencies doing an unnecessary network lookup.

@@ -127,7 +127,8 @@ class ResolveFileDependencies(policy.PackagePolicy):
                 if not trv0:
                     trv0 = trv
                 if trv.provides().satisfies(
-                    self.toDepSet(fDep,deps.FileDependencies)):
+                        self.toDepSet(fDep,deps.FileDependencies)):
+                    fileDeps.remove(fDep)
                     break
             else:
                 if trv0:
