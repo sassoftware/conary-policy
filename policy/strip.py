@@ -227,6 +227,8 @@ class Strip(policy.DestdirPolicy):
         if self.debuginfo:
             for filename in sorted(self.debugfiles):
                 builddirpath = '%(topbuilddir)s/' % self.dm +filename
+                if not os.path.isfile(builddirpath):
+                    continue
                 dir = os.path.dirname(filename)
                 util.mkdirChain('%(destdir)s%(debugsrcdir)s/'%self.dm +dir)
                 try:

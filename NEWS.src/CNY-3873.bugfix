@@ -1,0 +1,1 @@
+Fixed compatibility of the Strip policy with newer debuginfo data that contains directories.
