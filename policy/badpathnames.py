@@ -383,11 +383,6 @@ class FixObsoletePaths(policy.DestdirPolicy, _pathMap):
                 return
         d = self.recipe.macros.destdir
         for path, newPath in self.candidatePaths():
-            if os.path.isdir(d + path) and not os.listdir(d + path):
-                self.warn("Path %s should not exist, but is empty. removing." \
-                        % path)
-                os.rmdir(d + path)
-                continue
             if os.path.islink(d + path):
                 target = os.path.realpath(d + path)
                 if not target.startswith(d):
@@ -397,6 +392,11 @@ class FixObsoletePaths(policy.DestdirPolicy, _pathMap):
                     self.warn('Ignoring symlink %s, which points at the new '
                         'path %s' % (path, newPath))
                     continue
+            elif os.path.isdir(d + path) and not os.listdir(d + path):
+                self.warn("Path %s should not exist, but is empty. removing." \
+                        % path)
+                os.rmdir(d + path)
+                continue
             try:
                 try:
                     self.recipe.recordMove(d + path, d + newPath)
