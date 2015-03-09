@@ -1,1 +1,0 @@
-Builds no longer fail if ldconfig does not exist.

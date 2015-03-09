@@ -1,1 +1,0 @@
-Don't fail to build if deprecated paths are symlinks to the new paths.

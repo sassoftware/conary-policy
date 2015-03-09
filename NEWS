@@ -1,3 +1,19 @@
+Changes in 1.4:
+  o Bug Fixes:
+    * Builds no longer fail if ldconfig does not exist. (CNY-3859)
+    * Symlinks in the man path that point outside of the man path are
+      now properly handled. (CNY-3860)
+    * Don't fail to build if deprecated paths are symlinks to the new
+      paths. (CNY-3861)
+    * Fixed compatibility of the Strip policy with newer debuginfo data
+      that contains directories. (CNY-3873)
+    * Fix ResolveFileDependencies doing an unnecessary network lookup.
+      (CNY-3883)
+
+  o Internal Changes:
+    * The makefile now supports specifying an alternate "install"
+      command.
+
 Changes in 1.3:
   o Bug Fixes:
     * Fixed FixupMultilibPaths matching *.socket files. (CNY-3829)

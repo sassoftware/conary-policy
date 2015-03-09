@@ -1,1 +1,0 @@
-Symlinks in the man path that point outside of the man path are now properly handled.
